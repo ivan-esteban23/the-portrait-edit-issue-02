@@ -14,17 +14,31 @@ async function fixture(scenario = {}) {
   const scrolls = [];
   const focuses = [];
   const animations = [];
-  const hintStorage = new Map(scenario.seen ? [['portrait-edit-keys-hint', 'shown']] : []);
+  const hintStorage = scenario.storage || new Map(scenario.seen ? [['portrait-edit-keys-hint', 'shown']] : []);
+  const prefetches = [], copies = [], timers = new Map();
+  let nextTimer = 1, clipboardResolve;
   let observer;
   let context;
 
   function element(id, tagName = 'DIV') {
+    const classes = new Set();
+    let text = '';
     return {
-      id, tagName, value: '1', open: false, disabled: false, textContent: '',
+      id, tagName, value: '1', open: false, disabled: false,
+      get textContent() { return text + this.children.map(child => child.textContent).join(''); },
+      set textContent(value) {
+        text = String(value);
+        for (const child of this.children || []) child.parent = null;
+        this.children = [];
+      },
+      classList: {
+        toggle(name, active) { if (active) classes.add(name); else classes.delete(name); },
+        contains(name) { return classes.has(name); }
+      },
       style: { setProperty(key, value) { this[key] = value; } },
       children: [],
       append(child) { child.parent = this; this.children.push(child); },
-      replaceChildren() { this.children = []; },
+      replaceChildren() { this.textContent = ''; },
       contains(node) {
         for (let current = node; current; current = current.parent) {
           if (current === this) return true;
@@ -55,9 +69,17 @@ async function fixture(scenario = {}) {
   };
   context = {
     localStorage: storage,
+    navigator: scenario.noClipboard ? {} : { clipboard: { writeText: async text => {
+      if (scenario.clipboardReject) throw Error('Clipboard permission denied');
+      copies.push(text);
+      if (scenario.clipboardDeferred) return new Promise(resolve => { clipboardResolve = resolve; });
+    }}},
+    setTimeout(callback, delay) { const id = nextTimer++; timers.set(id, {callback, delay}); return id; },
+    clearTimeout(id) { timers.delete(id); },
     matchMedia: query => ({ matches: query.includes('reduced-motion') ? Boolean(scenario.reduced) : Boolean(scenario.mobile) }),
     document: {
-      activeElement: element('body', 'BODY'),
+      body: el('body'),
+      activeElement: el('body'),
       getElementById: el,
       querySelector: selector => selector === '.toolbar' ? el('toolbar') : selector === '.page-viewport' ? el('page-viewport') : el('holder'),
       createElement: tag => element(undefined, tag.toUpperCase()),
@@ -74,6 +96,15 @@ async function fixture(scenario = {}) {
       json: async () => JSON.parse(fs.readFileSync(`${root}/docs/${path}`))
     })
   };
+  if (!scenario.noPrefetch) context.Image = class {
+    set src(value) {
+      this.source = value;
+      const current = Number(el('page-number').value);
+      assert.equal(el('page-image').src, `pages/${String(current).padStart(3, '0')}.webp`);
+      prefetches.push({source: value, current, priority: this.fetchPriority, decoding: this.decoding});
+    }
+    get src() { return this.source; }
+  };
   if (scenario.observed) context.IntersectionObserver = class {
     constructor(callback) { this.callback = callback; observer = this; }
     observe(target) { this.target = target; }
@@ -81,7 +112,19 @@ async function fixture(scenario = {}) {
   };
   await vm.runInNewContext(source, context);
   await flush();
-  return { el, context, events, windowEvents, location, historyCalls, scrolls, focuses, animations, hintStorage, observer };
+  return { el, context, events, windowEvents, location, historyCalls, scrolls, focuses, animations, hintStorage, observer,
+    prefetches, copies, timers,
+    resolveClipboard() { clipboardResolve(); },
+    runTimers() { const pending = [...timers.values()]; timers.clear(); pending.forEach(timer => timer.callback()); }
+  };
+}
+
+function descendant(node, className) {
+  if (node.className === className) return node;
+  for (const child of node.children) {
+    const found = descendant(child, className);
+    if (found) return found;
+  }
 }
 
 function clickEvent(extra = {}) {
@@ -106,6 +149,11 @@ function clickEvent(extra = {}) {
       assert.equal(card.children[1].children[0].textContent, `${String(study.number).padStart(3, '0')} / ${study.title}`);
       assert.equal(card.children[1].children[1].textContent, study.style);
     });
+    assert.equal(context.document.body.classList.contains('focus-mode'), false);
+    assert.equal(el('focus-toggle').ariaPressed, 'false');
+    assert.equal(el('focus-toggle').textContent, 'Focus');
+    assert.equal(f.prefetches.length, 1);
+    assert.equal(f.prefetches[0].source, 'pages/002.webp');
     assert.equal(el('reading-mode').value, scenario.mobile ? 'text' : 'page');
     assert.equal(el('page-image').src, 'pages/001.webp');
     assert(el('previous').disabled);
@@ -116,7 +164,9 @@ function clickEvent(extra = {}) {
     const chapters = el('chapter-overview').children;
     assert.equal(chapters.length, 9);
     chapters.forEach((button, i) => {
-      assert.equal(button.textContent, issue.chapters[i].title);
+      assert.equal(button.children[0].textContent, issue.chapters[i].title);
+      const end = issue.chapters[i + 1] ? issue.chapters[i + 1].page - 1 : issue.pages;
+      assert.equal(button.children[1].textContent, ` · ${issue.chapters[i].page}–${end}`);
       assert.equal(button.value, issue.chapters[i].page);
       assert.equal(button.ariaCurrent, 'false');
     });
@@ -189,6 +239,18 @@ function clickEvent(extra = {}) {
     const study = JSON.parse(fs.readFileSync(`${root}/docs/pages/060.json`)).study;
     assert(el('reading-text').children.some(node => node.textContent === study.prompt));
     assert(el('reading-text').children.some(node => node.src === study.image));
+    const copy = descendant(el('reading-text'), 'copy-prompt');
+    const feedback = descendant(el('reading-text'), 'copy-feedback');
+    assert(copy); assert.equal(copy.textContent, 'Copy prompt');
+    await copy.onclick();
+    assert.equal(f.copies.at(-1), study.prompt);
+    assert.equal(copy.textContent, 'Copied');
+    assert.equal(feedback.textContent, 'Prompt copied.');
+    assert.equal([...f.timers.values()][0].delay, 1600);
+    f.runTimers();
+    assert.equal(copy.textContent, 'Copy prompt'); assert.equal(feedback.textContent, '');
+    await copy.onclick(); assert.equal(f.timers.size, 1);
+    page(61); assert.equal(f.timers.size, 0); await flush();
     el('text-size').value = '20'; el('text-size').onchange();
     assert.equal(el('reading-text').style['--reading-size'], '20px');
     el('reading-mode').value = 'page'; el('reading-mode').onchange();
@@ -228,6 +290,22 @@ function clickEvent(extra = {}) {
     assert.equal(scrolls.length, 3); assert.equal(f.historyCalls.filter(call => call === 'push').length, pushed);
     el('next').onclick();
     assert.equal(scrolls.length, 3); assert.equal(focuses.length, 3);
+    for (const item of f.prefetches) {
+      const number = Number(item.source.match(/pages\/(\d+)\.webp/)[1]);
+      assert(number >= 1 && number <= 196 && Math.abs(number - item.current) === 1);
+      assert.equal(item.priority, 'low'); assert.equal(item.decoding, 'async');
+    }
+    const unchangedPage = el('page-number').value;
+    el('focus-toggle').onclick();
+    assert(context.document.body.classList.contains('focus-mode'));
+    assert.equal(el('focus-toggle').textContent, 'Exit Focus');
+    assert.equal(el('focus-toggle').ariaPressed, 'true');
+    if (!scenario.blocked) assert.equal(hintStorage.get('portrait-edit-focus-mode'), 'true');
+    el('focus-toggle').onclick();
+    assert(!context.document.body.classList.contains('focus-mode'));
+    assert.equal(el('focus-toggle').textContent, 'Focus');
+    if (!scenario.blocked) assert.equal(hintStorage.get('portrait-edit-focus-mode'), 'false');
+    assert.equal(el('page-number').value, unchangedPage);
     console.log(`PASS ${scenario.mobile ? 'mobile/reduced motion' : scenario.blocked ? 'blocked storage' : 'desktop'}: all existing controls, chapters, fade, hints, loading and deliberate deep-link focus.`);
   }
 
@@ -241,6 +319,43 @@ function clickEvent(extra = {}) {
     f.el('next').onclick();
     assert.equal(f.scrolls.length, 1); assert.equal(f.focuses.length, 1);
   }
+  const focused = await fixture();
+  focused.el('focus-toggle').onclick();
+  const restored = await fixture({storage: focused.hintStorage});
+  assert(restored.context.document.body.classList.contains('focus-mode'));
+  assert.equal(restored.el('focus-toggle').textContent, 'Exit Focus');
+  restored.el('focus-toggle').onclick();
+  const exited = await fixture({storage: focused.hintStorage});
+  assert(!exited.context.document.body.classList.contains('focus-mode'));
+
+  const neighbors = await fixture({hash: '#page=138'});
+  assert.deepEqual(neighbors.prefetches.map(item => item.source), ['pages/137.webp', 'pages/139.webp']);
+  neighbors.el('page-number').value = 138; neighbors.el('page-number').onchange();
+  assert.equal(neighbors.prefetches.length, 2);
+  neighbors.el('page-number').value = 196; neighbors.el('page-number').onchange();
+  assert.equal(neighbors.prefetches.at(-1).source, 'pages/195.webp');
+  const noPrefetch = await fixture({noPrefetch: true});
+  assert.equal(noPrefetch.prefetches.length, 0);
+
+  for (const option of [{clipboardReject: true}, {noClipboard: true}]) {
+    const failed = await fixture({hash: '#page=60', mobile: true, ...option});
+    const copy = descendant(failed.el('reading-text'), 'copy-prompt');
+    await copy.onclick();
+    assert.equal(copy.textContent, 'Copy prompt');
+    assert(descendant(failed.el('reading-text'), 'copy-feedback').textContent.startsWith('Copy unavailable.'));
+    assert.equal(failed.timers.size, 0);
+  }
+  const pending = await fixture({hash: '#page=60', mobile: true, clipboardDeferred: true});
+  const original = descendant(pending.el('reading-text'), 'copy-prompt');
+  const copying = original.onclick();
+  pending.el('page-number').value = 61; pending.el('page-number').onchange(); await flush();
+  pending.resolveClipboard(); await copying;
+  assert.equal(descendant(pending.el('reading-text'), 'copy-prompt').textContent, 'Copy prompt');
+  assert.equal(descendant(pending.el('reading-text'), 'copy-feedback').textContent, '');
+  assert.equal(pending.timers.size, 0);
+  pending.el('page-number').value = 3; pending.el('page-number').onchange(); await flush();
+  assert.equal(descendant(pending.el('reading-text'), 'copy-prompt'), undefined);
+  console.log('PASS Focus restoration/exit, only adjacent low-priority images, chapter ranges, exact prompt copy, timed confirmation, denied/unavailable clipboard and stale-copy isolation.');
   assert(fs.readFileSync(`${root}/docs/style.css`, 'utf8').includes('--reading-size:16px'));
   assert(fs.readFileSync(`${root}/docs/index.html`, 'utf8').includes('<option value="16" selected>16 px</option>'));
   console.log('PASS initial page links: focus visible mode once, reduced-motion/fade fallback, no scrolling on ordinary turns.');

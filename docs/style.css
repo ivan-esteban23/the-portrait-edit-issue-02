@@ -443,6 +443,42 @@ main {
   color: var(--text);
 }
 
+.chapter-range {
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.chapter-button[aria-current="location"] .chapter-range {
+  color: var(--muted);
+}
+
+.focus-toggle {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.focus-toggle[aria-pressed="true"],
+.focus-toggle[aria-pressed="true"]:hover {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--bg);
+}
+
+body.focus-mode .masthead,
+body.focus-mode .intro,
+body.focus-mode .selected,
+body.focus-mode .issue-discovery,
+body.focus-mode footer {
+  display: none;
+}
+
+body.focus-mode .reading {
+  padding-top: 24px;
+  border-top: 0;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -692,6 +728,50 @@ button:disabled {
   letter-spacing: 0.12em;
   line-height: 1.6;
   text-transform: uppercase;
+}
+
+#reading-text .prompt-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 18px;
+  margin: 32px 0 14px;
+}
+
+#reading-text .prompt-heading h3 {
+  margin: 0;
+}
+
+.prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 12px;
+  margin-left: auto;
+}
+
+.copy-feedback {
+  max-width: 34ch;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+#reading-text .copy-prompt {
+  min-height: 32px;
+  padding: 4px 9px;
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+#reading-text .copy-prompt:hover:not(:disabled) {
+  border-color: var(--border-hover);
+  background: var(--surface);
+  color: var(--text);
 }
 
 #reading-text .reference {

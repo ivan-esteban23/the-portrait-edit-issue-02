@@ -1,11 +1,32 @@
 "use strict";
 (async()=>{
-const $=id=>document.getElementById(id);let issue,current=1,request=0,pageData=null,pageFade=null;
+const $=id=>document.getElementById(id);let issue,current=1,request=0,pageData=null,pageFade=null,copyResetTimer=null;
+// Restore Focus mode before the issue metadata request completes.
+const focusStorageKey = 'portrait-edit-focus-mode';
+let focusMode = false;
+try {
+  focusMode = localStorage.getItem(focusStorageKey) === 'true';
+} catch (_) {}
+function setFocusMode(enabled, persist = false) {
+  focusMode = enabled;
+  document.body.classList.toggle('focus-mode', enabled);
+  $('focus-toggle').ariaPressed = String(enabled);
+  $('focus-toggle').textContent = enabled ? 'Exit Focus' : 'Focus';
+  if (persist) {
+    try { localStorage.setItem(focusStorageKey, String(enabled)); } catch (_) {}
+  }
+}
+setFocusMode(focusMode);
+$('focus-toggle').onclick = () => {
+  setFocusMode(!focusMode, true);
+  $('reader').scrollIntoView({behavior: 'instant', block: 'start'});
+};
+
 try{const response=await fetch('issue.json',{cache:'no-cache'});if(!response.ok)throw Error('Issue metadata unavailable');issue=await response.json();}catch(e){$('status').textContent='The reader could not load. Please refresh or use the PDF download.';return;}
 document.title=`The Portrait Edit — ${issue.title}`;$('issue-label').textContent=`Issue ${issue.number}`;$('issue-number').textContent=`ISSUE ${issue.number} / THE PORTRAIT EDIT`;$('title').textContent=issue.title;$('description').textContent=issue.description;$('stats').textContent=`${issue.studies} studies · ${issue.pages} pages · ${issue.navigation_label || `${issue.chapters.length} chapters`}`;
 $('cover').alt=`The Portrait Edit — Issue ${issue.number} — ${issue.title} cover`;$('download').href=issue.download;$('download-note').textContent=`Original PDF · ${(issue.pdf_bytes/1000000).toFixed(1)} MB. The reader loads one page at a time.`;$('other-issue').href=issue.other_url;$('other-issue-card').href=issue.other_url;$('footer-issue-01').href=issue.other_url;$('other-issue').textContent=`Explore Issue ${issue.other_number} ↗`;$('page-total').textContent=`/ ${issue.pages}`;$('page-number').max=issue.pages;
 const chapterButtons = [];
-for (const chapter of issue.chapters) {
+for (const [index, chapter] of issue.chapters.entries()) {
   const option = document.createElement('option');
   option.value = chapter.page;
   option.textContent = chapter.title;
@@ -14,7 +35,14 @@ for (const chapter of issue.chapters) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'chapter-button';
-  button.textContent = chapter.title;
+  const name = document.createElement('span');
+  name.textContent = chapter.title;
+  const range = document.createElement('span');
+  range.className = 'chapter-range';
+  const end = issue.chapters[index + 1] ? issue.chapters[index + 1].page - 1 : issue.pages;
+  range.textContent = ` · ${chapter.page}–${end}`;
+  button.append(name);
+  button.append(range);
   button.value = String(chapter.page);
   button.ariaCurrent = 'false';
   button.onclick = () => show(chapter.page);
@@ -94,6 +122,62 @@ if (!keysHintSeen) {
   }
 }
 
+// Keep references only to the immediate neighbors; low priority lets the
+// visible page request proceed first. The browser reuses its normal cache.
+const adjacentImages = new Map();
+function prefetchAdjacentPages() {
+  if (typeof Image !== 'function') return;
+  const neighbors = [current - 1, current + 1].filter(page => page >= 1 && page <= issue.pages);
+  for (const page of adjacentImages.keys()) {
+    if (!neighbors.includes(page)) adjacentImages.delete(page);
+  }
+  for (const page of neighbors) {
+    if (adjacentImages.has(page)) continue;
+    const image = new Image();
+    image.decoding = 'async';
+    image.fetchPriority = 'low';
+    image.src = `pages/${String(page).padStart(3, '0')}.webp`;
+    adjacentImages.set(page, image);
+  }
+}
+
+function clearCopyConfirmation() {
+  if (copyResetTimer !== null) {
+    clearTimeout(copyResetTimer);
+    copyResetTimer = null;
+  }
+}
+
+async function copyPrompt(prompt, button, feedback) {
+  clearCopyConfirmation();
+  const copyRequest = request;
+  button.disabled = true;
+  button.textContent = 'Copying…';
+  feedback.textContent = '';
+  try {
+    if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
+      throw new Error('Clipboard unavailable');
+    }
+    await navigator.clipboard.writeText(prompt);
+    if (copyRequest !== request || !$('reading-text').contains(button)) return;
+    button.textContent = 'Copied';
+    feedback.textContent = 'Prompt copied.';
+    copyResetTimer = setTimeout(() => {
+      if (copyRequest === request) {
+        button.textContent = 'Copy prompt';
+        feedback.textContent = '';
+      }
+      copyResetTimer = null;
+    }, 1600);
+  } catch (_) {
+    if (copyRequest !== request || !$('reading-text').contains(button)) return;
+    button.textContent = 'Copy prompt';
+    feedback.textContent = 'Copy unavailable. Select the prompt text to copy it.';
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function setPageLoading(loading) {
   $('page-loading').hidden = !loading;
   $('page-viewport').ariaBusy = String(loading);
@@ -139,14 +223,60 @@ function updateChapterProgress() {
     `${title} · pages ${start}–${end} · ${current - start + 1} of ${end - start + 1}`;
 }
 
-function renderReading(){
-const target=$('reading-text');target.replaceChildren();
-if(!pageData)return;
-const add=(tag,content,cls)=>{const node=document.createElement(tag);node.textContent=content;if(cls)node.className=cls;target.append(node);return node;};
-const s=pageData.study;
-if(s){add('p',`STUDY ${String(s.number).padStart(3,'0')} · Page ${current}`,'metadata');add('h2',s.title);add('p',s.flags,'metadata');const image=add('img','','reference');image.src=s.image;image.alt=`Reference for Study ${s.number}: ${s.title}`;add('p','Source: '+s.source,'metadata');add('p',s.style,'style-line');add('h3','Image Prompt');add('p',s.prompt,'copy');add('h3','Working notes');add('p',s.notes,'copy');add('p',s.try_this,'copy');}
-else if(current===1){const cover=add('img','','reference');cover.src='cover.webp';cover.alt='Issue 02 cover';add('pre',pageData.text);}
-else add('pre',pageData.text);
+function renderReading() {
+  clearCopyConfirmation();
+  const target = $('reading-text');
+  target.replaceChildren();
+  if (!pageData) return;
+  const add = (tag, content, cls) => {
+    const node = document.createElement(tag);
+    node.textContent = content;
+    if (cls) node.className = cls;
+    target.append(node);
+    return node;
+  };
+  const study = pageData.study;
+  if (study) {
+    add('p', `STUDY ${String(study.number).padStart(3, '0')} · Page ${current}`, 'metadata');
+    add('h2', study.title);
+    add('p', study.flags, 'metadata');
+    const image = add('img', '', 'reference');
+    image.src = study.image;
+    image.alt = `Reference for Study ${study.number}: ${study.title}`;
+    add('p', 'Source: ' + study.source, 'metadata');
+    add('p', study.style, 'style-line');
+
+    const heading = add('div', '', 'prompt-heading');
+    const title = document.createElement('h3');
+    title.textContent = 'Image Prompt';
+    const actions = document.createElement('div');
+    actions.className = 'prompt-actions';
+    const feedback = document.createElement('span');
+    feedback.className = 'copy-feedback';
+    feedback.role = 'status';
+    feedback.ariaLive = 'polite';
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.className = 'copy-prompt';
+    copy.textContent = 'Copy prompt';
+    copy.ariaLabel = 'Copy full image prompt';
+    copy.onclick = () => copyPrompt(study.prompt, copy, feedback);
+    actions.append(feedback);
+    actions.append(copy);
+    heading.append(title);
+    heading.append(actions);
+    add('p', study.prompt, 'copy');
+    add('h3', 'Working notes');
+    add('p', study.notes, 'copy');
+    add('p', study.try_this, 'copy');
+  } else if (current === 1) {
+    const cover = add('img', '', 'reference');
+    cover.src = 'cover.webp';
+    cover.alt = 'Issue 02 cover';
+    add('pre', pageData.text);
+  } else {
+    add('pre', pageData.text);
+  }
 }
 function readingMode(){const large=$('reading-mode').value==='text';$('reading-text').hidden=!large;document.querySelector('.page-viewport').hidden=large;$('text-size-label').hidden=!large;$('page-zoom-label').hidden=large;if(large&&!pageData)text();}
 $('reading-mode').value=typeof matchMedia==='function'&&matchMedia('(max-width: 700px)').matches?'text':'page';
@@ -156,6 +286,7 @@ async function text(){const id=request,n=current;try{const r=await fetch(`pages/
 function show(n, update = true) {
   current = Math.min(issue.pages, Math.max(1, Number(n) || 1));
   request++;
+  clearCopyConfirmation();
   if (pageFade) {
     pageFade.cancel();
     pageFade = null;
@@ -190,6 +321,7 @@ function show(n, update = true) {
   if (update) history.replaceState(null, '', `#page=${current}`);
   readingMode();
   if ($('text-details').open && $('reading-mode').value !== 'text') text();
+  prefetchAdjacentPages();
 }
 for(const name of ['previous','previous-bottom'])$(name).onclick=()=>show(current-1);for(const name of ['next','next-bottom'])$(name).onclick=()=>show(current+1);$('page-number').onchange=()=>show($('page-number').value);$('chapter').onchange=()=>show($('chapter').value);$('zoom').onchange=()=>{const holder=document.querySelector('.page-holder');holder.style.width=`${$('zoom').value}%`;holder.style.maxWidth=$('zoom').value==='100'?'950px':'none';};$('text-details').ontoggle=()=>{readingMode();if($('text-details').open&&$('reading-mode').value!=='text')text();};document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key==='ArrowRight'){e.preventDefault();show(current+1);}if(e.key==='ArrowLeft'){e.preventDefault();show(current-1);}});window.addEventListener('hashchange', () => {
   if (!/^#page=\d+$/.test(location.hash)) return;
