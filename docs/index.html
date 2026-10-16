@@ -18,8 +18,8 @@
     <meta name="twitter:title" content="The Portrait Edit — The Prompt Issue">
     <meta name="twitter:description" content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download.">
     <meta name="twitter:image" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/cover.webp">
-    <link rel="stylesheet" href="style.css?v=professional-2">
-    <script src="reader.js?v=professional-2" defer></script>
+    <link rel="stylesheet" href="style.css?v=professional-3">
+    <script src="reader.js?v=professional-3" defer></script>
   </head>
   <body>
     <a class="skip" href="#reader">Skip to magazine reader</a>
@@ -68,6 +68,21 @@
         <div id="selected-studies" class="selected-grid"></div>
       </section>
 
+      <aside class="issue-discovery" aria-label="Explore Issue 01">
+        <a
+          id="other-issue-card"
+          class="issue-card"
+          href="https://ivan-esteban23.github.io/the-portrait-edit-issue-01/"
+        >
+          <span class="issue-card-copy">
+            <span class="eyebrow">From the archive</span>
+            <span class="issue-card-title">Explore Issue 01</span>
+            <span class="issue-card-description">The Fashion Issue</span>
+          </span>
+          <span class="issue-card-arrow" aria-hidden="true">↗</span>
+        </a>
+      </aside>
+
       <section class="reading" id="reader" aria-label="Magazine reader">
         <div class="reader-heading">
           <div>
@@ -110,6 +125,12 @@
               <option value="200">200%</option>
             </select>
           </label>
+          <p id="chapter-progress" class="chapter-progress" aria-live="polite" aria-atomic="true"></p>
+        </div>
+
+        <div id="keys-hint" class="keys-hint" role="note" hidden>
+          <span>Use ← → arrow keys to turn pages</span>
+          <button id="dismiss-keys-hint" type="button" aria-label="Dismiss keyboard shortcut hint">×</button>
         </div>
 
         <div class="reading-options">
@@ -135,10 +156,12 @@
         <p id="status" role="status" aria-live="polite"></p>
 
         <div
+          id="page-viewport"
           class="page-viewport"
           tabindex="0"
           aria-label="Magazine page; use left and right arrow keys to turn pages"
         >
+          <div id="page-loading" class="page-loading" aria-hidden="true" hidden></div>
           <div class="page-holder">
             <img id="page-image" width="1224" height="1584" alt="">
           </div>

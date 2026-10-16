@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id);let issue,current=1,request=0,pageData=null;
 try{const response=await fetch('issue.json',{cache:'no-cache'});if(!response.ok)throw Error('Issue metadata unavailable');issue=await response.json();}catch(e){$('status').textContent='The reader could not load. Please refresh or use the PDF download.';return;}
 document.title=`The Portrait Edit — ${issue.title}`;$('issue-label').textContent=`Issue ${issue.number}`;$('issue-number').textContent=`ISSUE ${issue.number} / THE PORTRAIT EDIT`;$('title').textContent=issue.title;$('description').textContent=issue.description;$('stats').textContent=`${issue.studies} studies · ${issue.pages} pages · ${issue.navigation_label || `${issue.chapters.length} chapters`}`;
-$('cover').alt=`The Portrait Edit — Issue ${issue.number} — ${issue.title} cover`;$('download').href=issue.download;$('download-note').textContent=`Original PDF · ${(issue.pdf_bytes/1000000).toFixed(1)} MB. The reader loads one page at a time.`;$('other-issue').href=issue.other_url;$('other-issue').textContent=`Explore Issue ${issue.other_number} ↗`;$('page-total').textContent=`/ ${issue.pages}`;$('page-number').max=issue.pages;
+$('cover').alt=`The Portrait Edit — Issue ${issue.number} — ${issue.title} cover`;$('download').href=issue.download;$('download-note').textContent=`Original PDF · ${(issue.pdf_bytes/1000000).toFixed(1)} MB. The reader loads one page at a time.`;$('other-issue').href=issue.other_url;$('other-issue-card').href=issue.other_url;$('other-issue').textContent=`Explore Issue ${issue.other_number} ↗`;$('page-total').textContent=`/ ${issue.pages}`;$('page-number').max=issue.pages;
 for(const ch of issue.chapters){const option=document.createElement('option');option.value=ch.page;option.textContent=ch.title;$('chapter').append(option);}
 for (const study of issue.featured || []) {
   const link = document.createElement('a');
@@ -32,6 +32,63 @@ for (const study of issue.featured || []) {
   link.append(caption);
   $('selected-studies').append(link);
 }
+// Store the hint only when the reader is actually reached. Storage failures
+// leave the reader usable and limit the hint to this page session.
+const keysHintKey = 'portrait-edit-keys-hint';
+let keysHintSeen = false;
+try {
+  keysHintSeen = Boolean(localStorage.getItem(keysHintKey));
+} catch (_) {}
+$('keys-hint').hidden = true;
+function rememberKeysHint(value) {
+  keysHintSeen = true;
+  try {
+    localStorage.setItem(keysHintKey, value);
+  } catch (_) {}
+}
+function revealKeysHint() {
+  if (keysHintSeen) return;
+  $('keys-hint').hidden = false;
+  rememberKeysHint('shown');
+}
+$('dismiss-keys-hint').onclick = () => {
+  $('keys-hint').hidden = true;
+  rememberKeysHint('dismissed');
+};
+if (!keysHintSeen) {
+  if (typeof IntersectionObserver === 'function') {
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        revealKeysHint();
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.querySelector('.toolbar'));
+  } else {
+    revealKeysHint();
+  }
+}
+
+function setPageLoading(loading) {
+  $('page-loading').hidden = !loading;
+  $('page-viewport').ariaBusy = String(loading);
+}
+
+function updateChapterProgress() {
+  let index = -1;
+  for (let i = 0; i < issue.chapters.length; i++) {
+    if (issue.chapters[i].page <= current) index = i;
+  }
+  const chapter = issue.chapters[index];
+  const start = chapter ? chapter.page : 1;
+  const next = issue.chapters[index + 1];
+  const end = next ? next.page - 1 : issue.pages;
+  const title = chapter ? chapter.title : 'Front matter';
+  $('chapter').value = start;
+  $('chapter-progress').textContent =
+    `${title} · pages ${start}–${end} · ${current - start + 1} of ${end - start + 1}`;
+}
+
 function renderReading(){
 const target=$('reading-text');target.replaceChildren();
 if(!pageData)return;
@@ -46,6 +103,38 @@ $('reading-mode').value=typeof matchMedia==='function'&&matchMedia('(max-width: 
 $('reading-mode').onchange=readingMode;$('text-size').onchange=()=>{$('reading-text').style.setProperty('--reading-size',$('text-size').value+'px');};
 function hashPage(){const match=location.hash.match(/^#page=(\d+)$/);return match?Number(match[1]):current;}
 async function text(){const id=request,n=current;try{const r=await fetch(`pages/${String(n).padStart(3,'0')}.json`,{cache:'no-cache'});if(!r.ok)throw Error();const data=await r.json();if(id===request){pageData=data;$('page-text').textContent=data.text||'No extractable text on this page.';renderReading();}}catch(e){if(id===request){$('page-text').textContent='Page text is unavailable. Please use the original PDF.';$('reading-text').textContent='Text could not load. Choose Original page or download the PDF.';}}}
-function show(n,update=true){current=Math.min(issue.pages,Math.max(1,Number(n)||1));request++;pageData=null;$('reading-text').textContent='Loading page text…';$('page-number').value=current;$('current-label').textContent=`Page ${current} of ${issue.pages}`;$('status').textContent=`Loading page ${current}…`;$('page-text').textContent='Loading page text…';const image=$('page-image');const id=request;image.onload=()=>{if(id===request)$('status').textContent=`Page ${current} · ${issue.title}`;};image.onerror=()=>{if(id===request)$('status').textContent='This page could not load. Refresh or download the PDF.';};image.alt=`Issue ${issue.number}, magazine page ${current}`;image.src=`pages/${String(current).padStart(3,'0')}.webp`;for(const name of ['previous','previous-bottom'])$(name).disabled=current===1;for(const name of ['next','next-bottom'])$(name).disabled=current===issue.pages;let active=1;for(const ch of issue.chapters)if(ch.page<=current)active=ch.page;$('chapter').value=active;if(update)history.replaceState(null,'',`#page=${current}`);readingMode();if($('text-details').open&&$('reading-mode').value!=='text')text();}
+function show(n, update = true) {
+  current = Math.min(issue.pages, Math.max(1, Number(n) || 1));
+  request++;
+  pageData = null;
+  $('reading-text').textContent = 'Loading page text…';
+  $('page-number').value = current;
+  $('current-label').textContent = `Page ${current} of ${issue.pages}`;
+  $('status').textContent = `Loading page ${current}…`;
+  $('page-text').textContent = 'Loading page text…';
+
+  const image = $('page-image');
+  const id = request;
+  setPageLoading(true);
+  image.onload = () => {
+    if (id !== request) return;
+    setPageLoading(false);
+    $('status').textContent = `Page ${current} · ${issue.title}`;
+  };
+  image.onerror = () => {
+    if (id !== request) return;
+    setPageLoading(false);
+    $('status').textContent = 'This page could not load. Refresh or download the PDF.';
+  };
+  image.alt = `Issue ${issue.number}, magazine page ${current}`;
+  image.src = `pages/${String(current).padStart(3, '0')}.webp`;
+
+  for (const name of ['previous', 'previous-bottom']) $(name).disabled = current === 1;
+  for (const name of ['next', 'next-bottom']) $(name).disabled = current === issue.pages;
+  updateChapterProgress();
+  if (update) history.replaceState(null, '', `#page=${current}`);
+  readingMode();
+  if ($('text-details').open && $('reading-mode').value !== 'text') text();
+}
 for(const name of ['previous','previous-bottom'])$(name).onclick=()=>show(current-1);for(const name of ['next','next-bottom'])$(name).onclick=()=>show(current+1);$('page-number').onchange=()=>show($('page-number').value);$('chapter').onchange=()=>show($('chapter').value);$('zoom').onchange=()=>{const holder=document.querySelector('.page-holder');holder.style.width=`${$('zoom').value}%`;holder.style.maxWidth=$('zoom').value==='100'?'950px':'none';};$('text-details').ontoggle=()=>{readingMode();if($('text-details').open&&$('reading-mode').value!=='text')text();};document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key==='ArrowRight'){e.preventDefault();show(current+1);}if(e.key==='ArrowLeft'){e.preventDefault();show(current-1);}});window.addEventListener('hashchange',()=>{if(/^#page=/.test(location.hash))show(hashPage(),false);});show(hashPage(),false);
 })();

@@ -331,6 +331,56 @@ main {
   }
 }
 
+/* A quiet archive invitation between the selected studies and the reader. */
+.issue-discovery {
+  padding: 0 var(--gutter) var(--section-space);
+}
+
+.issue-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  text-decoration: none;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.issue-card:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+}
+
+.issue-card-copy,
+.issue-card-title,
+.issue-card-description {
+  display: block;
+}
+
+.issue-card .eyebrow {
+  display: block;
+  margin-bottom: 9px;
+}
+
+.issue-card-title {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+.issue-card-description {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.issue-card-arrow {
+  color: var(--muted);
+  font-size: 24px;
+}
+
 /* Reader controls. Preserve the script's page sizing and visibility behavior. */
 .reading {
   padding: var(--section-space) var(--gutter) 28px;
@@ -482,6 +532,7 @@ button:disabled {
 }
 
 .page-viewport {
+  position: relative;
   overflow: auto;
   padding: clamp(8px, 2vw, 24px);
   border: 1px solid var(--border);
@@ -516,6 +567,73 @@ button:disabled {
 #current-label {
   color: var(--muted);
   text-align: center;
+}
+
+/* Small reader guidance and state indicators. */
+.chapter-progress {
+  flex: 1 0 100%;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+}
+
+.keys-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 14px;
+  padding: 4px 6px 4px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.keys-hint button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-color: transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.page-loading {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.page-loading::after {
+  display: block;
+  width: 35%;
+  height: 100%;
+  background: var(--muted);
+  content: '';
+  animation: page-loading 1.2s ease-in-out infinite;
+}
+
+@keyframes page-loading {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
 }
 
 /* Flowing reading mode keeps its adjustable body size independent of the UI. */
@@ -750,12 +868,12 @@ footer p {
     gap: 8px;
   }
 
-  .toolbar > label:last-child {
+  .toolbar > #page-zoom-label {
     flex: 1 1 100%;
     justify-content: space-between;
   }
 
-  .toolbar > label:last-child select {
+  .toolbar > #page-zoom-label select {
     flex: 1;
     max-width: 100%;
   }
