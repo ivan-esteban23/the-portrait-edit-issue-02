@@ -73,7 +73,7 @@ summary {
   -webkit-tap-highlight-color: transparent;
 }
 
-:where(a, button, input, select, summary, .page-viewport):focus-visible {
+:where(a, button, input, select, summary, .page-viewport, #reading-text):focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 5px;
 }
@@ -416,6 +416,33 @@ main {
   letter-spacing: 0.12em;
 }
 
+.chapter-overview {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 8px 8px 12px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hover) transparent;
+}
+
+.chapter-button {
+  flex: 0 0 auto;
+  padding: 9px 13px;
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.chapter-button[aria-current="location"] {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -729,25 +756,67 @@ details[open] > summary {
   color: var(--text);
 }
 
-/* Colophon. */
+/* Colophon: publication identity, issue navigation and production notes. */
 footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 18px 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 28px 48px;
   max-width: var(--site-width);
-  margin: 32px auto 0;
-  padding: 30px var(--gutter) 42px;
+  margin: 40px auto 0;
+  padding: 36px var(--gutter) 42px;
   border-top: 1px solid var(--border);
   color: var(--subtle);
   font-size: 11px;
   line-height: 1.8;
 }
 
-footer p {
-  flex-basis: 100%;
+.footer-brand .eyebrow {
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.footer-brand p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 18px 28px;
+}
+
+.footer-links a {
+  display: block;
+  min-height: 44px;
+  padding: 4px 0;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.footer-links a span {
+  display: block;
+  color: var(--subtle);
+  font-size: 10px;
+}
+
+.footer-links a:hover,
+.footer-links a[aria-current="page"] {
+  color: var(--text);
+}
+
+.footer-links a:hover span {
+  color: var(--muted);
+}
+
+.footer-note {
+  grid-column: 1 / -1;
   max-width: 78ch;
   margin: 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
 }
 
 /* The masthead scrolls away; the desktop toolbar stays within the reader. */
@@ -926,11 +995,23 @@ footer p {
   }
 
   footer {
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
     margin-top: 20px;
     padding-bottom: 30px;
+  }
+}
+
+@media (max-width: 699px) {
+  .footer-links {
+    justify-content: flex-start;
+    gap: 16px 24px;
+  }
+
+  .footer-note {
+    padding-top: 18px;
   }
 }
 

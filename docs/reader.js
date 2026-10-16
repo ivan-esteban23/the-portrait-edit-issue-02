@@ -1,13 +1,38 @@
 "use strict";
 (async()=>{
-const $=id=>document.getElementById(id);let issue,current=1,request=0,pageData=null;
+const $=id=>document.getElementById(id);let issue,current=1,request=0,pageData=null,pageFade=null;
 try{const response=await fetch('issue.json',{cache:'no-cache'});if(!response.ok)throw Error('Issue metadata unavailable');issue=await response.json();}catch(e){$('status').textContent='The reader could not load. Please refresh or use the PDF download.';return;}
 document.title=`The Portrait Edit — ${issue.title}`;$('issue-label').textContent=`Issue ${issue.number}`;$('issue-number').textContent=`ISSUE ${issue.number} / THE PORTRAIT EDIT`;$('title').textContent=issue.title;$('description').textContent=issue.description;$('stats').textContent=`${issue.studies} studies · ${issue.pages} pages · ${issue.navigation_label || `${issue.chapters.length} chapters`}`;
-$('cover').alt=`The Portrait Edit — Issue ${issue.number} — ${issue.title} cover`;$('download').href=issue.download;$('download-note').textContent=`Original PDF · ${(issue.pdf_bytes/1000000).toFixed(1)} MB. The reader loads one page at a time.`;$('other-issue').href=issue.other_url;$('other-issue-card').href=issue.other_url;$('other-issue').textContent=`Explore Issue ${issue.other_number} ↗`;$('page-total').textContent=`/ ${issue.pages}`;$('page-number').max=issue.pages;
-for(const ch of issue.chapters){const option=document.createElement('option');option.value=ch.page;option.textContent=ch.title;$('chapter').append(option);}
+$('cover').alt=`The Portrait Edit — Issue ${issue.number} — ${issue.title} cover`;$('download').href=issue.download;$('download-note').textContent=`Original PDF · ${(issue.pdf_bytes/1000000).toFixed(1)} MB. The reader loads one page at a time.`;$('other-issue').href=issue.other_url;$('other-issue-card').href=issue.other_url;$('footer-issue-01').href=issue.other_url;$('other-issue').textContent=`Explore Issue ${issue.other_number} ↗`;$('page-total').textContent=`/ ${issue.pages}`;$('page-number').max=issue.pages;
+const chapterButtons = [];
+for (const chapter of issue.chapters) {
+  const option = document.createElement('option');
+  option.value = chapter.page;
+  option.textContent = chapter.title;
+  $('chapter').append(option);
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'chapter-button';
+  button.textContent = chapter.title;
+  button.value = String(chapter.page);
+  button.ariaCurrent = 'false';
+  button.onclick = () => show(chapter.page);
+  $('chapter-overview').append(button);
+  chapterButtons.push(button);
+}
 for (const study of issue.featured || []) {
   const link = document.createElement('a');
   link.href = `#page=${study.page}`;
+  link.onclick = event => {
+    // Preserve native modified-click/new-tab behavior and the study's URL.
+    if (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const hash = `#page=${study.page}`;
+    if (location.hash !== hash) history.pushState(null, '', hash);
+    show(study.page, false);
+    enterReader();
+  };
 
   const image = document.createElement('img');
   image.src = study.image;
@@ -74,6 +99,28 @@ function setPageLoading(loading) {
   $('page-viewport').ariaBusy = String(loading);
 }
 
+function prefersReducedMotion() {
+  return typeof matchMedia === 'function' &&
+    matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function enterReader() {
+  const target = $('reading-mode').value === 'text' ? $('reading-text') : $('page-viewport');
+  target.focus({preventScroll: true});
+  $('reader').scrollIntoView({
+    behavior: prefersReducedMotion() ? 'instant' : 'smooth',
+    block: 'start'
+  });
+}
+
+function fadePageImage(image) {
+  if (prefersReducedMotion() || typeof image.animate !== 'function') return;
+  pageFade = image.animate([{opacity: 0.65}, {opacity: 1}], {
+    duration: 170,
+    easing: 'ease-out'
+  });
+}
+
 function updateChapterProgress() {
   let index = -1;
   for (let i = 0; i < issue.chapters.length; i++) {
@@ -85,6 +132,9 @@ function updateChapterProgress() {
   const end = next ? next.page - 1 : issue.pages;
   const title = chapter ? chapter.title : 'Front matter';
   $('chapter').value = start;
+  chapterButtons.forEach((button, i) => {
+    button.ariaCurrent = i === index ? 'location' : 'false';
+  });
   $('chapter-progress').textContent =
     `${title} · pages ${start}–${end} · ${current - start + 1} of ${end - start + 1}`;
 }
@@ -106,6 +156,10 @@ async function text(){const id=request,n=current;try{const r=await fetch(`pages/
 function show(n, update = true) {
   current = Math.min(issue.pages, Math.max(1, Number(n) || 1));
   request++;
+  if (pageFade) {
+    pageFade.cancel();
+    pageFade = null;
+  }
   pageData = null;
   $('reading-text').textContent = 'Loading page text…';
   $('page-number').value = current;
@@ -119,6 +173,7 @@ function show(n, update = true) {
   image.onload = () => {
     if (id !== request) return;
     setPageLoading(false);
+    fadePageImage(image);
     $('status').textContent = `Page ${current} · ${issue.title}`;
   };
   image.onerror = () => {
@@ -136,5 +191,13 @@ function show(n, update = true) {
   readingMode();
   if ($('text-details').open && $('reading-mode').value !== 'text') text();
 }
-for(const name of ['previous','previous-bottom'])$(name).onclick=()=>show(current-1);for(const name of ['next','next-bottom'])$(name).onclick=()=>show(current+1);$('page-number').onchange=()=>show($('page-number').value);$('chapter').onchange=()=>show($('chapter').value);$('zoom').onchange=()=>{const holder=document.querySelector('.page-holder');holder.style.width=`${$('zoom').value}%`;holder.style.maxWidth=$('zoom').value==='100'?'950px':'none';};$('text-details').ontoggle=()=>{readingMode();if($('text-details').open&&$('reading-mode').value!=='text')text();};document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key==='ArrowRight'){e.preventDefault();show(current+1);}if(e.key==='ArrowLeft'){e.preventDefault();show(current-1);}});window.addEventListener('hashchange',()=>{if(/^#page=/.test(location.hash))show(hashPage(),false);});show(hashPage(),false);
+for(const name of ['previous','previous-bottom'])$(name).onclick=()=>show(current-1);for(const name of ['next','next-bottom'])$(name).onclick=()=>show(current+1);$('page-number').onchange=()=>show($('page-number').value);$('chapter').onchange=()=>show($('chapter').value);$('zoom').onchange=()=>{const holder=document.querySelector('.page-holder');holder.style.width=`${$('zoom').value}%`;holder.style.maxWidth=$('zoom').value==='100'?'950px':'none';};$('text-details').ontoggle=()=>{readingMode();if($('text-details').open&&$('reading-mode').value!=='text')text();};document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key==='ArrowRight'){e.preventDefault();show(current+1);}if(e.key==='ArrowLeft'){e.preventDefault();show(current-1);}});window.addEventListener('hashchange', () => {
+  if (!/^#page=\d+$/.test(location.hash)) return;
+  const arrivingFromOutside = !$('reader').contains(document.activeElement);
+  show(hashPage(), false);
+  if (arrivingFromOutside) enterReader();
+});
+const arrivingViaPageLink = /^#page=\d+$/.test(location.hash);
+show(hashPage(), false);
+if (arrivingViaPageLink) enterReader();
 })();

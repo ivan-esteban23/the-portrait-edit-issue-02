@@ -18,8 +18,8 @@
     <meta name="twitter:title" content="The Portrait Edit — The Prompt Issue">
     <meta name="twitter:description" content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download.">
     <meta name="twitter:image" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/cover.webp">
-    <link rel="stylesheet" href="style.css?v=professional-3">
-    <script src="reader.js?v=professional-3" defer></script>
+    <link rel="stylesheet" href="style.css?v=professional-4">
+    <script src="reader.js?v=professional-4" defer></script>
   </head>
   <body>
     <a class="skip" href="#reader">Skip to magazine reader</a>
@@ -92,6 +92,8 @@
           <a id="other-issue" href="#">Explore the other issue ↗</a>
         </div>
 
+        <nav id="chapter-overview" class="chapter-overview" aria-label="Chapter overview"></nav>
+
         <div class="toolbar">
           <label>
             Chapter
@@ -152,7 +154,7 @@
           <p>Switch between the magazine layout and flowing study text.</p>
         </div>
 
-        <article id="reading-text" hidden aria-label="Study reading view"></article>
+        <article id="reading-text" tabindex="-1" hidden aria-label="Study reading view"></article>
         <p id="status" role="status" aria-live="polite"></p>
 
         <div
@@ -187,11 +189,22 @@
     </main>
 
     <footer>
-      <span>The Portrait Edit · Independent editorial studies</span>
-      <a id="source" href="https://github.com/ivan-esteban23/the-portrait-edit">
-        Source &amp; production notes ↗
-      </a>
-      <p>
+      <div class="footer-brand">
+        <span class="eyebrow">The Portrait Edit</span>
+        <p>Independent editorial studies</p>
+      </div>
+      <nav class="footer-links" aria-label="Issues and production notes">
+        <a id="footer-issue-01" href="https://ivan-esteban23.github.io/the-portrait-edit-issue-01/">
+          Issue 01 <span>The Fashion Issue</span>
+        </a>
+        <a id="footer-issue-02" href="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/" aria-current="page">
+          Issue 02 <span>The Prompt Issue</span>
+        </a>
+        <a id="source" href="https://github.com/ivan-esteban23/the-portrait-edit">
+          Source &amp; production notes ↗
+        </a>
+      </nav>
+      <p class="footer-note">
         Web pages are optimized reading copies. Download the original PDF for
         the full-quality edition and original navigation.
       </p>
