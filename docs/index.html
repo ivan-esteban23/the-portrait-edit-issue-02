@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
@@ -20,8 +20,8 @@
     <meta name="twitter:title" content="The Portrait Edit — The Prompt Issue">
     <meta name="twitter:description" content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download.">
     <meta name="twitter:image" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/cover.webp">
-    <link rel="stylesheet" href="style.css?v=perfect-1">
-    <script src="reader.js?v=perfect-1" defer></script>
+    <link rel="stylesheet" href="style.css?v=perfect-2">
+    <script src="reader.js?v=perfect-2" defer></script>
     <noscript>
       <style>
         .toolbar, .reader-messages, .bottom-nav-slot, .chapter-overview-shell,
@@ -99,19 +99,22 @@
               </select>
             </label>
 
-            <div class="pagination" id="page-controls">
+            <div class="pagination" id="page-controls" role="group" aria-label="Page navigation">
               <button type="button" id="previous" aria-label="Previous page">←</button>
-              <label>
-                <span class="control-label">Page</span>
-                <input
-                  id="page-number"
-                  type="number"
-                  min="1"
-                  value="1"
-                  aria-label="Page number"
-                >
-              </label>
-              <span id="page-total"></span>
+              <div class="page-position" id="page-position">
+                <label>
+                  <span class="control-label">Page</span>
+                  <input
+                    id="page-number"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    value="1"
+                    aria-label="Page number"
+                  >
+                </label>
+                <span id="page-total"></span>
+              </div>
               <button type="button" id="next" aria-label="Next page">→</button>
             </div>
 
@@ -178,6 +181,8 @@
           </div>
         </div>
 
+        <div id="mobile-focus-options" class="mobile-focus-options" hidden></div>
+
         <div class="bottom-nav-slot">
           <nav id="bottom-controls" class="bottom-controls" aria-label="Page navigation">
             <button type="button" id="previous-bottom">← Previous</button>
@@ -185,8 +190,6 @@
             <button type="button" id="next-bottom">Next →</button>
           </nav>
         </div>
-
-        <div id="mobile-focus-options" class="mobile-focus-options" hidden></div>
 
         <details id="text-details">
           <summary>Read this page as text</summary>

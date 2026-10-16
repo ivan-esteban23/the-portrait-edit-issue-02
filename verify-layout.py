@@ -60,15 +60,21 @@ assert not inside(page.ids['other-issue-card'], page.ids['reader'])
 assert page.nodes.index(page.ids['other-issue-card']) > page.nodes.index(page.ids['bottom-controls'])
 assert inside(page.ids['chapter-control'], toolbar)
 assert inside(page.ids['page-controls'], toolbar)
+assert inside(page.ids['page-position'], page.ids['page-controls'])
+assert inside(page.ids['page-number'], page.ids['page-position'])
+assert inside(page.ids['page-total'], page.ids['page-position'])
+assert page.ids['page-controls']['attrs']['role'] == 'group'
+assert page.ids['page-number']['attrs']['inputmode'] == 'numeric'
+assert 'viewport-fit=cover' in html
 assert inside(page.ids['view-control'], preferences)
 assert inside(page.ids['mobile-focus-progress'], toolbar)
 assert 'hidden' in page.ids['mobile-focus-options']['attrs']
-assert page.nodes.index(page.ids['mobile-focus-options']) > page.nodes.index(page.ids['bottom-controls'])
+assert page.nodes.index(page.ids['page-viewport']) < page.nodes.index(page.ids['mobile-focus-options']) < page.nodes.index(page.ids['bottom-controls'])
 assert inside(page.ids['reader-preferences-summary'], preferences)
 assert page.ids['page-image']['attrs']['fetchpriority'] == 'high'
 assert page.ids['focus-toggle']['attrs']['aria-keyshortcuts'] == 'F'
 assert page.ids['download']['attrs']['href'].endswith('/noir-editorial-1/The_Portrait_Edit_Issue_02.pdf')
-assert all(node['attrs'].get('src', '').startswith('reader.js?v=perfect-1') for node in page.nodes if node['tag'] == 'script')
+assert all(node['attrs'].get('src', '').startswith('reader.js?v=perfect-2') for node in page.nodes if node['tag'] == 'script')
 for node in page.nodes:
     if node['tag'] in {'input', 'select'}:
         assert 'aria-label' in node['attrs'] or any(parent['tag'] == 'label' for parent in node['ancestors']), 'Named form control'

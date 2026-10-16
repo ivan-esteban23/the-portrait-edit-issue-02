@@ -317,7 +317,8 @@ function renderReading() {
   const study = pageData.study;
   if (study) {
     const metadata = add('header', '', 'study-metadata');
-    add('p', `STUDY ${String(study.number).padStart(3, '0')}`, 'metadata', metadata);
+    const label = add('p', `STUDY ${String(study.number).padStart(3, '0')}`, 'metadata', metadata);
+    add('span', ` · Page ${current}`, 'study-page', label);
     add('h2', study.title, '', metadata);
     add('p', study.style, 'style-line', metadata);
     const figure = add('figure', '', 'reference-figure');

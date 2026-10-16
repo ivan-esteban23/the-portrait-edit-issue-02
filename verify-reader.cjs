@@ -78,7 +78,8 @@ async function fixture(scenario = {}) {
   attach('reader-toolbar', 'focus-context', 'toolbar-main', 'toolbar-secondary');
   attach('toolbar-main', 'chapter-control', 'page-controls', 'page-zoom-label', 'focus-toggle');
   attach('chapter-control', 'chapter');
-  attach('page-controls', 'previous', 'page-number', 'page-total', 'next');
+  attach('page-controls', 'previous', 'page-position', 'next');
+  attach('page-position', 'page-number', 'page-total');
   attach('page-zoom-label', 'zoom');
   attach('toolbar-secondary', 'chapter-progress', 'mobile-focus-progress', 'reader-preferences');
   attach('reader-preferences', 'reader-preferences-summary', 'reading-options');
@@ -594,7 +595,8 @@ function clickEvent(extra = {}) {
     assert.equal(descendant(tree, 'reference-caption').textContent, 'Source: ' + study.source);
     const header = descendant(tree, 'study-metadata');
     assert.equal(header.children.length, 3);
-    assert.equal(header.children[0].textContent, `STUDY ${String(study.number).padStart(3, '0')}`);
+    assert.equal(header.children[0].textContent, `STUDY ${String(study.number).padStart(3, '0')} · Page ${number}`);
+    assert.equal(descendant(header, 'study-page').textContent, ` · Page ${number}`);
     assert.equal(header.children[1].textContent, study.title);
     assert.equal(header.children[2].textContent, study.style);
     assert.equal(descendant(tree, 'reference-flags').textContent, study.flags);
