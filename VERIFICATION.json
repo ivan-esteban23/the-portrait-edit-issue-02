@@ -1,0 +1,15 @@
+{
+  "page_assets": 196,
+  "chapters": 9,
+  "dimensions": [
+    1224,
+    1584
+  ],
+  "website_bytes": 18718474,
+  "pdf_sha256": "1dbee4ff29e34585b941352edb588493c420d3a79b8f2e1a4bf188b760f91756",
+  "asset_checks": "PASS",
+  "navigation_checks": "PASS (Node DOM fixture; not real-browser QA)",
+  "cover_asset_visual_check": "PASS",
+  "browser_visual_check": "Not completed: no connected browser",
+  "original_pdf": "Unchanged, separate GitHub release asset"
+}

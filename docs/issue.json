@@ -1,0 +1,50 @@
+{
+  "number": "02",
+  "title": "The Prompt Issue",
+  "pages": 196,
+  "studies": 174,
+  "description": "Reference images, original image prompts and working notes. A practical collection of 174 editorial studies.",
+  "download": "https://github.com/ivan-esteban23/the-portrait-edit-issue-02/releases/download/edition-1/The_Portrait_Edit_Issue_02.pdf",
+  "other_number": "01",
+  "other_url": "https://ivan-esteban23.github.io/the-portrait-edit-issue-01/",
+  "chapters": [
+    {
+      "title": "Portraits & Light",
+      "page": 14
+    },
+    {
+      "title": "Winter",
+      "page": 37
+    },
+    {
+      "title": "Folk & Landscape",
+      "page": 53
+    },
+    {
+      "title": "Fantasy & Period",
+      "page": 58
+    },
+    {
+      "title": "Runway",
+      "page": 72
+    },
+    {
+      "title": "Knitwear & Layers",
+      "page": 90
+    },
+    {
+      "title": "Studio",
+      "page": 127
+    },
+    {
+      "title": "Night & Lifestyle",
+      "page": 150
+    },
+    {
+      "title": "Street & City",
+      "page": 170
+    }
+  ],
+  "sha256": "1dbee4ff29e34585b941352edb588493c420d3a79b8f2e1a4bf188b760f91756",
+  "pdf_bytes": 22331734
+}
