@@ -9,7 +9,7 @@ Served from `main` → `/docs`. The complete original PDF is a release asset, no
 Use Python with PyMuPDF and Pillow installed (the magazine project's existing `.venv` supplies both).
 
 ```sh
-python build.py --pdf '/absolute/path/to/the/original.pdf'
+python build.py --pdf '/absolute/path/to/The_Portrait_Edit_Issue_02_Larger_Type.pdf' --layout '/absolute/path/to/larger-type-layout-checks.json'
 python -m http.server 8000 --directory docs
 ```
 
@@ -20,3 +20,11 @@ To update, rebuild, verify the output, commit/push normally, and update the expl
 ## Verification
 
 `node verify-reader.cjs` checks navigation with a DOM fixture; it does not replace a real-browser test. `VERIFICATION.json` records asset validation and current limitations.
+
+## Larger type update
+
+The current reader uses the separately verified larger-type PDF: prompts 12 pt, notes/glossary 11.5 pt, contents 11 pt. The original page layout remains available. Large-text mode shows exact study text with its original reference, uses 20 px body text with 18/20/24 px choices, and is the narrow-screen default.
+
+`python verify-content.py --layout '/absolute/path/to/larger-type-layout-checks.json'` verifies all 174 structured studies and reference dimensions. `node verify-reader.cjs` checks desktop/mobile navigation and font-size controls using DOM fixtures. No real-browser visual QA is claimed.
+
+Current PDF release: `larger-type-1`. Earlier PDF release: `edition-1`, retained unchanged. No package was added.

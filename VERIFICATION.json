@@ -1,15 +1,19 @@
 {
   "page_assets": 196,
   "chapters": 9,
-  "dimensions": [
-    1224,
-    1584
-  ],
-  "website_bytes": 18718474,
-  "pdf_sha256": "1dbee4ff29e34585b941352edb588493c420d3a79b8f2e1a4bf188b760f91756",
+  "website_bytes": 39280752,
+  "pdf_sha256": "cf47ffbb6a1277f6d90ef9d77a70cab5fcec22e1c93296373006dd1fa6760620",
   "asset_checks": "PASS",
-  "navigation_checks": "PASS (Node DOM fixture; not real-browser QA)",
-  "cover_asset_visual_check": "PASS",
+  "exact_structured_studies": 174,
+  "original_reference_dimensions": 174,
+  "unique_reference_filenames": 170,
+  "navigation_checks": "PASS: desktop/mobile Node DOM fixtures, including large-text view and text sizes",
+  "default_mobile_text_px": 20,
+  "text_size_choices_px": [
+    18,
+    20,
+    24
+  ],
   "browser_visual_check": "Not completed: no connected browser",
-  "original_pdf": "Unchanged, separate GitHub release asset"
+  "original_prior_pdf": "Retained in edition-1 release"
 }
