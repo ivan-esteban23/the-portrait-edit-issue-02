@@ -2,9 +2,13 @@
 
 Independent magazine website: https://ivan-esteban23.github.io/the-portrait-edit-issue-02/
 
-## Current edition: noir editorial
+## Website: cohesive editorial system
 
-Black backgrounds, white/light-gray sans-serif type, a selected-study grid and restrained font sizes, inspired by the user's supplied Canva portfolio screenshots. No Canva template file or licensed assets were imported. Issue 01 remains on its independent website.
+The website automatically follows the visitor's light/dark preference. Warm paper and noir palettes share one sans-serif family, a six-step type scale, a four-pixel spacing rhythm and two-pixel corners. No theme chooser, stored theme preference, font download or client dependency is used.
+
+The reader has one sticky Chapter / Page / Zoom / Focus toolbar. Reading view and text size live in its native **Reading options** disclosure; chapter progress remains visible. On phones, the same toolbar is compact and Previous/Next are consolidated into the existing bottom navigation. Selected Studies use equal cards and quiet captions; Issue 01 discovery follows the reader. Focus keeps chapter navigation, context and preferences while hiding publication/discovery sections. Focus paper warms in Light mode, with normal control and page-mat surfaces.
+
+Reference images, page artwork, issue metadata and `reader.js` are unchanged by this pass. The original noir magazine pages retain their artwork in both website themes. Issue 01 remains on its independent website.
 
 The PDF has 196 Letter pages with 10.5 pt prompts, 10 pt working notes and contents, and 10.5 pt glossary definitions. It preserves all 174 prompts, titles, Source filenames, notes, original references and reviewed Try this lines. The source/build PR lives in `ivan-esteban23/the-portrait-edit`.
 
@@ -18,10 +22,14 @@ Requires Python with PyMuPDF and Pillow, plus Node for fixture checks. The magaz
 python build.py --pdf '/absolute/path/to/The_Portrait_Edit_Issue_02_Noir_Editorial.pdf' --layout '/absolute/path/to/noir-layout-checks.json'
 python verify-content.py --layout '/absolute/path/to/noir-layout-checks.json'
 node verify-reader.cjs
+node verify-theme.cjs
+python3 verify-layout.py
 python -m http.server 8000 --directory docs
 ```
 
-The content verifier checks all 174 study records against the verified layout and checks original image dimensions. The navigation tests use desktop/mobile DOM fixtures, including selected-study links, reading modes and font-size controls. `VERIFICATION.json` records the results. Browser visual QA is not claimed: no connected browser was available.
+The content verifier checks all 174 study records against the verified layout and checks original image dimensions. Reader regression fixtures cover navigation, hashes, reading modes, Focus, swipes, adjacent prefetch, retry, prompt copying and all 174 exact study records at simulated mobile/tablet/desktop sizes (320–1280px). Theme checks cover both palettes, text/focus contrast, theme-independent typography/spacing/shapes and CSS-only preference handling. Layout checks parse the actual HTML to verify semantic nesting, retained reader targets, one toolbar and disclosed secondary controls.
+
+These automated checks do not render a browser layout. Visual browser/device QA, native select styling and screen-reader behavior still need review: no browser is connected in this environment. `VERIFICATION.json` remains the earlier content/PDF verification record; it is not a browser sign-off for this design.
 
 ## Publication
 

@@ -17,18 +17,16 @@ const overrides = declarations(darkQuery[1]);
 assert(Object.keys(overrides).every(key => key.startsWith('--') || key === 'color-scheme'));
 const dark = {...light, ...overrides};
 const expectedDark = {
-  '--bg': '#0a0a0a', '--text': '#f4f4f0', '--muted': '#b1b1aa',
-  '--subtle': '#92928b', '--border': '#30302d', '--border-hover': '#686861',
-  '--surface': '#111110', '--surface-hover': '#1c1c19', '--focus': '#e8e8da',
-  '--cover-shadow': '0 16px 44px rgb(0 0 0 / 24%)',
-  '--toolbar-shadow': '0 10px 22px rgb(0 0 0 / 24%)',
-  '--mobile-nav-shadow': '0 -6px 18px rgb(0 0 0 / 20%)',
-  '--disabled-opacity': '0.45'
+  '--bg': '#0a0a0a', '--surface': '#111111', '--text': '#f4f4f0',
+  '--muted': '#a8a8a4', '--border': '#2a2a2a'
 };
 for (const [token, value] of Object.entries(expectedDark)) assert.equal(dark[token], value, token);
 assert.equal(light['color-scheme'], 'light');
 assert.equal(dark['color-scheme'], 'dark');
-assert.equal(light['--bg'], '#f6f4ef');
+for (const [token, value] of Object.entries({
+  '--bg': '#f6f4ef', '--surface': '#fffdf8', '--text': '#171614',
+  '--muted': '#5d5b55', '--border': '#d9d5cb'
+})) assert.equal(light[token], value, token);
 assert.equal(light['--focus-bg'], '#efece4');
 const resolve = (value, tokens) => value.replace(/var\((--[\w-]+)\)/g, (_, token) => {
   assert(token in tokens, `Undefined token: ${token}`);
@@ -56,17 +54,17 @@ function contrast(a, b) {
 for (const [theme, tokens] of [['Light', light], ['Dark', dark]]) {
   let minimum = Infinity;
   for (const surface of ['--bg', '--surface', '--surface-hover', '--focus-bg']) {
-    for (const foreground of ['--text', '--muted', '--subtle']) {
+    for (const foreground of ['--text', '--muted']) {
       const ratio = contrast(resolve(tokens[foreground], tokens), resolve(tokens[surface], tokens));
       assert(ratio >= 4.5, `${theme} ${foreground} on ${surface}: ${ratio}`);
       minimum = Math.min(minimum, ratio);
     }
-    assert(contrast(tokens['--focus'], resolve(tokens[surface], tokens)) >= 3);
+    assert(contrast(resolve(tokens['--focus'], tokens), resolve(tokens[surface], tokens)) >= 3);
   }
   assert(contrast(tokens['--text'], tokens['--bg']) >= 7, 'Selection and inverted buttons');
   console.log(`PASS ${theme}: body, metadata, captions, Focus, hover surfaces and focus rings; minimum text contrast ${minimum.toFixed(2)}:1.`);
 }
-for (const name of ['cover', 'toolbar', 'mobile-nav']) {
+for (const name of ['image', 'toolbar', 'mobile-nav']) {
   const opacity = tokens => Number(tokens[`--${name}-shadow`].match(/\/ (\d+)%/)[1]);
   assert(opacity(light) < opacity(dark), `${name} Light shadow must be softer`);
 }
@@ -83,6 +81,14 @@ for (const [scheme, color] of [['light', '#f6f4ef'], ['dark', '#0a0a0a']]) {
   assert(html.includes(`<meta name="theme-color" content="${color}" media="(prefers-color-scheme: ${scheme})">`));
 }
 assert(html.includes('<meta name="color-scheme" content="light dark">'));
-assert(html.includes('style.css?v=auto-theme-1'));
-assert(html.includes('reader.js?v=auto-theme-1'));
-console.log('PASS: system-only CSS themes, exact original Dark palette/shadows, warm Focus canvas, adaptive browser colors, softer Light shadows, shared component styles and cache busting.');
+assert(html.includes('style.css?v=cohesive-2'));
+assert(html.includes('reader.js?v=cohesive-2'));
+assert.equal(light['--radius'], '2px');
+assert(!css.includes('--subtle'), 'Use one consistent secondary text role');
+assert(Object.keys(overrides).every(key => !/space|type-|radius|tracking|font|width|gutter/.test(key)), 'Themes must share all geometry and typography');
+for (const [, block] of components.matchAll(/\{([^{}]*)\}/g)) {
+  const props = declarations(block);
+  if (props['font-size']) assert(/var\(--(?:type-|reading-size)/.test(props['font-size']) || props['font-size'] === 'inherit', 'Shared type scale');
+  if (props['border-radius']) assert.equal(props['border-radius'], 'var(--radius)');
+}
+console.log('PASS: exact requested Light/Dark palettes, automatic themes, one type/spacing/shape system, warm Focus canvas, adaptive browser colors and cohesive-2 cache busting.');

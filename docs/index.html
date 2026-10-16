@@ -20,11 +20,11 @@
     <meta name="twitter:title" content="The Portrait Edit — The Prompt Issue">
     <meta name="twitter:description" content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download.">
     <meta name="twitter:image" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/cover.webp">
-    <link rel="stylesheet" href="style.css?v=auto-theme-1">
-    <script src="reader.js?v=auto-theme-1" defer></script>
+    <link rel="stylesheet" href="style.css?v=cohesive-2">
+    <script src="reader.js?v=cohesive-2" defer></script>
     <noscript>
       <style>
-        .toolbar, .reading-options, .bottom-nav-slot, .chapter-overview-shell,
+        .toolbar, .reader-messages, .bottom-nav-slot, .chapter-overview-shell,
         .page-viewport, #text-details { display: none; }
       </style>
     </noscript>
@@ -76,21 +76,6 @@
         <div id="selected-studies" class="selected-grid"></div>
       </section>
 
-      <aside class="issue-discovery" aria-label="Explore Issue 01">
-        <a
-          id="other-issue-card"
-          class="issue-card"
-          href="https://ivan-esteban23.github.io/the-portrait-edit-issue-01/"
-        >
-          <span class="issue-card-copy">
-            <span class="eyebrow">From the archive</span>
-            <span class="issue-card-title">Explore Issue 01</span>
-            <span class="issue-card-description">The Fashion Issue</span>
-          </span>
-          <span class="issue-card-arrow" aria-hidden="true">↗</span>
-        </a>
-      </aside>
-
       <section class="reading" id="reader" aria-label="Magazine reader">
         <div class="reader-heading">
           <div>
@@ -104,74 +89,81 @@
           <nav id="chapter-overview" class="chapter-overview" aria-label="Chapter overview"></nav>
         </div>
 
-        <p id="focus-context" class="focus-context" hidden></p>
-
         <div class="toolbar">
-          <label>
-            Chapter
-            <select id="chapter" aria-label="Jump to chapter">
-              <option value="1">Front matter</option>
-            </select>
-          </label>
-
-          <div class="pagination">
-            <button type="button" id="previous" aria-label="Previous page">←</button>
+          <p id="focus-context" class="focus-context" hidden></p>
+          <div class="toolbar-main">
             <label>
-              Page
-              <input
-                id="page-number"
-                type="number"
-                min="1"
-                value="1"
-                aria-label="Page number"
-              >
+              <span class="control-label">Chapter</span>
+              <select id="chapter" aria-label="Jump to chapter">
+                <option value="1">Front matter</option>
+              </select>
             </label>
-            <span id="page-total"></span>
-            <button type="button" id="next" aria-label="Next page">→</button>
+
+            <div class="pagination">
+              <button type="button" id="previous" aria-label="Previous page">←</button>
+              <label>
+                <span class="control-label">Page</span>
+                <input
+                  id="page-number"
+                  type="number"
+                  min="1"
+                  value="1"
+                  aria-label="Page number"
+                >
+              </label>
+              <span id="page-total"></span>
+              <button type="button" id="next" aria-label="Next page">→</button>
+            </div>
+
+            <label id="page-zoom-label">
+              <span class="control-label">Zoom</span>
+              <select id="zoom">
+                <option value="100">Fit</option>
+                <option value="125">125%</option>
+                <option value="150">150%</option>
+                <option value="200">200%</option>
+              </select>
+            </label>
+            <button id="focus-toggle" class="focus-toggle" type="button" aria-pressed="false" aria-keyshortcuts="F">Focus</button>
           </div>
-
-          <label id="page-zoom-label">
-            Zoom
-            <select id="zoom">
-              <option value="100">Fit</option>
-              <option value="125">125%</option>
-              <option value="150">150%</option>
-              <option value="200">200%</option>
-            </select>
-          </label>
-          <button id="focus-toggle" class="focus-toggle" type="button" aria-pressed="false" aria-keyshortcuts="F">Focus</button>
-          <p id="chapter-progress" class="chapter-progress" aria-live="polite" aria-atomic="true"></p>
+          <div class="toolbar-secondary">
+            <p id="chapter-progress" class="chapter-progress" aria-live="polite" aria-atomic="true"></p>
+            <details class="reader-preferences" id="reader-preferences">
+              <summary>Reading options</summary>
+              <div class="reading-options">
+                <label>
+                  <span class="control-label">View</span>
+                  <select id="reading-mode">
+                    <option value="page">Original page</option>
+                    <option value="text">Reading view</option>
+                  </select>
+                </label>
+                <label id="text-size-label">
+                  <span class="control-label">Text size</span>
+                  <select id="text-size">
+                    <option value="16" selected>16 px</option>
+                    <option value="18">18 px</option>
+                    <option value="20">20 px</option>
+                  </select>
+                </label>
+                <p>Switch between the magazine layout and flowing study text.</p>
+              </div>
+            </details>
+          </div>
         </div>
 
-        <div id="keys-hint" class="keys-hint" role="note" hidden>
-          <span>Use ← → arrow keys to turn pages</span>
-          <button id="dismiss-keys-hint" type="button" aria-label="Dismiss keyboard shortcut hint">×</button>
-        </div>
-
-        <div class="reading-options">
-          <label>
-            Reading view
-            <select id="reading-mode">
-              <option value="page">Original page</option>
-              <option value="text">Reading view</option>
-            </select>
-          </label>
-          <label id="text-size-label">
-            Text size
-            <select id="text-size">
-              <option value="16" selected>16 px</option>
-              <option value="18">18 px</option>
-              <option value="20">20 px</option>
-            </select>
-          </label>
-          <p>Switch between the magazine layout and flowing study text.</p>
+        <div class="reader-messages">
+          <div id="keys-hint" class="keys-hint" role="note" hidden>
+            <span>Use ← → arrow keys to turn pages</span>
+            <button id="dismiss-keys-hint" type="button" aria-label="Dismiss keyboard shortcut hint">×</button>
+          </div>
+          <div class="reader-status">
+            <p id="status" role="status" aria-live="polite"></p>
+            <button id="retry-page" class="retry-page" type="button" hidden>Retry page</button>
+          </div>
         </div>
 
         <article id="reading-text" tabindex="-1" hidden aria-label="Study reading view"></article>
-        <div class="reader-status">
-          <p id="status" role="status" aria-live="polite"></p>
-          <button id="retry-page" class="retry-page" type="button" hidden>Retry page</button>
-        </div>
 
         <div
           id="page-viewport"
@@ -204,6 +196,21 @@
           </p>
         </noscript>
       </section>
+
+      <aside class="issue-discovery" aria-label="Explore Issue 01">
+        <a
+          id="other-issue-card"
+          class="issue-card"
+          href="https://ivan-esteban23.github.io/the-portrait-edit-issue-01/"
+        >
+          <span class="issue-card-copy">
+            <span class="eyebrow">From the archive</span>
+            <span class="issue-card-title">Explore Issue 01</span>
+            <span class="issue-card-description">The Fashion Issue</span>
+          </span>
+          <span class="issue-card-arrow" aria-hidden="true">↗</span>
+        </a>
+      </aside>
     </main>
 
     <footer>
