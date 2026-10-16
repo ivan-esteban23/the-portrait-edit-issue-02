@@ -81,8 +81,8 @@ for (const [scheme, color] of [['light', '#f6f4ef'], ['dark', '#0a0a0a']]) {
   assert(html.includes(`<meta name="theme-color" content="${color}" media="(prefers-color-scheme: ${scheme})">`));
 }
 assert(html.includes('<meta name="color-scheme" content="light dark">'));
-assert(html.includes('style.css?v=perfect-2'));
-assert(html.includes('reader.js?v=perfect-2'));
+assert(html.includes('style.css?v=ux-refinement-1'));
+assert(html.includes('reader.js?v=ux-refinement-1'));
 assert.equal(light['--radius'], '2px');
 assert(!css.includes('--subtle'), 'Use one consistent secondary text role');
 assert(Object.keys(overrides).every(key => !/space|type-|radius|tracking|font|width|gutter/.test(key)), 'Themes must share all geometry and typography');
@@ -95,12 +95,12 @@ assert.match(css, /body\.focus-mode #chapter-overview-shell,[^{}]*\{ display: no
 assert.match(css, /body\.focus-mode #text-details, body\.reading-view #text-details \{ display: none; \}/);
 assert.match(css, /body\.focus-mode \.toolbar-main \.pagination\s*\{[^}]*display: inline-flex/);
 assert.match(css, /body\.focus-mode \.page-position\s*\{[^}]*align-items: center/);
-assert.match(css, /body\.focus-mode \.bottom-controls,[^{}]*\{[^}]*position: static/);
-assert.match(css, /body\.focus-mode \.bottom-nav-slot \{ min-height: 0; \}/);
+assert.match(css, /body\.reader-docked \.bottom-controls\s*\{[^}]*position: fixed/);
+assert(!/body\.focus-mode[^{}]*\.bottom-controls[^{}]*\{[^}]*position: static/.test(css));
 for (const edge of ['top', 'right', 'bottom', 'left']) {
   assert.equal(light[`--safe-${edge}`], `env(safe-area-inset-${edge}, 0px)`);
 }
-assert.match(css, /body\.focus-mode \.reading \{[^}]*padding-bottom: calc\(var\(--space-4\) \+ var\(--safe-bottom\)\)/);
+assert.match(css, /\.bottom-nav-slot \{[^}]*min-height: calc\(var\(--nav-clearance\) \+ var\(--safe-bottom\)\)/);
 assert.match(css, /body\.focus-mode \.toolbar \{[^}]*var\(--safe-top\)[^}]*var\(--safe-right\)[^}]*var\(--safe-left\)/);
 assert.match(css, /padding: var\(--space-1\) max\(var\(--space-3\), var\(--safe-right\)\) calc\(var\(--space-1\) \+ var\(--safe-bottom\)\) max\(var\(--space-3\), var\(--safe-left\)\)/);
-console.log('PASS: exact requested Light/Dark palettes, automatic themes, one type/spacing/shape system, warm Focus canvas, adaptive browser colors and perfect-2 cache busting.');
+console.log('PASS: exact requested Light/Dark palettes, automatic themes, one type/spacing/shape system, warm Focus canvas, adaptive browser colors and ux-refinement-1 cache busting.');

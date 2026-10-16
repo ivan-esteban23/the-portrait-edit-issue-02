@@ -76,20 +76,20 @@ async function fixture(scenario = {}) {
   attach('reader', 'chapter-overview-shell', 'reader-toolbar', 'reading-text', 'reader-status', 'page-viewport', 'bottom-controls', 'mobile-focus-options');
   attach('chapter-overview-shell', 'chapter-overview');
   attach('reader-toolbar', 'focus-context', 'toolbar-main', 'toolbar-secondary');
-  attach('toolbar-main', 'chapter-control', 'page-controls', 'page-zoom-label', 'focus-toggle');
+  attach('toolbar-main', 'chapter-control', 'page-controls', 'focus-toggle');
   attach('chapter-control', 'chapter');
   attach('page-controls', 'previous', 'page-position', 'next');
   attach('page-position', 'page-number', 'page-total');
   attach('page-zoom-label', 'zoom');
   attach('toolbar-secondary', 'chapter-progress', 'mobile-focus-progress', 'reader-preferences');
   attach('reader-preferences', 'reader-preferences-summary', 'reading-options');
-  attach('reading-options', 'view-control', 'text-size-label');
+  attach('reading-options', 'view-control', 'page-zoom-label', 'text-size-label', 'keys-hint');
   attach('view-control', 'reading-mode');
   el('chapter-overview-shell').hidden = false;
   attach('text-size-label', 'text-size');
   attach('reader-status', 'status', 'retry-page');
   el('mobile-focus-options').hidden = true;
-  el('reader-preferences-summary').textContent = 'Reading options';
+  el('reader-preferences-summary').textContent = 'Display';
   const location = { hash: scenario.hash || '' };
   const historyCalls = [];
   const storage = {
@@ -118,6 +118,7 @@ async function fixture(scenario = {}) {
         copies.push(context.selected);
         return !scenario.fallbackReject;
       },
+      querySelectorAll: () => [el('start-reading'), el('cover-link')],
       querySelector: selector => selector === '.toolbar' ? el('reader-toolbar') : selector === '.page-viewport' ? el('page-viewport') : selector === '.reader-status' ? el('reader-status') : el('holder'),
       createElement: tag => element(undefined, tag.toUpperCase()),
       addEventListener: (name, callback) => { events[name] = callback; }
@@ -216,15 +217,13 @@ function clickEvent(extra = {}) {
     assert.equal(scrolls.length, 0);
     assert.equal(focuses.length, 0);
 
-    if (scenario.observed) {
-      assert.equal(el('keys-hint').hidden, true);
-      observer.callback([{ isIntersecting: false }]);
-      assert.equal(el('keys-hint').hidden, true);
-      observer.callback([{ isIntersecting: true }]);
-      assert.equal(el('keys-hint').hidden, false);
-      assert.equal(hintStorage.get('portrait-edit-keys-hint'), 'shown');
-      assert(observer.disconnected);
-    } else assert.equal(el('keys-hint').hidden, Boolean(scenario.seen));
+    assert.equal(el('keys-hint').hidden, true);
+    assert.equal(hintStorage.has('portrait-edit-keys-hint'), Boolean(scenario.seen));
+    el('reader-preferences').open = true;
+    el('reader-preferences').listeners.toggle();
+    assert.equal(el('keys-hint').hidden, Boolean(scenario.seen));
+    if (!scenario.seen && !scenario.blocked) assert.equal(hintStorage.get('portrait-edit-keys-hint'), 'shown');
+    el('reader-preferences').open = false;
     if (!scenario.seen) {
       el('dismiss-keys-hint').onclick();
       assert.equal(el('keys-hint').hidden, true);
@@ -514,7 +513,7 @@ function clickEvent(extra = {}) {
     assert.equal(zoom.parent, el('reading-options'));
     assert(!el('reader-toolbar').contains(preferences));
     assert(!el('reader-toolbar').contains(chapters));
-    assert.equal(el('reader-preferences-summary').textContent, 'Chapters & reading options');
+    assert.equal(el('reader-preferences-summary').textContent, 'Chapters & display');
     assert.equal(el('mobile-focus-progress').textContent, 'Night & Lifestyle · 3 of 20');
     // Reuse the same controls/handlers, without closing on a scroll or toggle.
     preferences.open = true; preferences.listeners.toggle(); f.windowEvents.scroll();
@@ -548,11 +547,11 @@ function clickEvent(extra = {}) {
     assert.equal(chapters.hidden, false);
     assert.equal(el('chapter-control').parent, el('toolbar-main'));
     assert.equal(el('toolbar-main').children[0], el('chapter-control'));
-    assert.equal(zoom.parent, el('toolbar-main'));
+    assert.equal(zoom.parent, el('reading-options'));
     assert(el('reader').children.indexOf(chapters) < el('reader').children.indexOf(el('reader-toolbar')));
-    assert(el('toolbar-main').children.indexOf(zoom) < el('toolbar-main').children.indexOf(el('focus-toggle')));
+    assert(!el('toolbar-main').contains(zoom));
     assert.equal(el('mobile-focus-options').hidden, true);
-    assert.equal(el('reader-preferences-summary').textContent, 'Reading options');
+    assert.equal(el('reader-preferences-summary').textContent, 'Display');
     preferences.open = true; f.windowEvents.scroll(); assert(preferences.open);
     f.resize(width); assert.equal(preferences.open, false);
     assert.equal(preferences.parent, el('mobile-focus-options'));
@@ -562,7 +561,7 @@ function clickEvent(extra = {}) {
     assert.equal(chapters.hidden, false);
     assert.equal(el('chapter-control').parent, el('toolbar-main'));
     assert.equal(el('toolbar-main').children[0], el('chapter-control'));
-    assert.equal(zoom.parent, el('toolbar-main'));
+    assert.equal(zoom.parent, el('reading-options'));
     assert.equal(el('mobile-focus-options').hidden, true);
     assert.equal(el('text-size').value, '20'); assert.equal(el('zoom').value, '125');
     assert.equal(el('chapter-overview').children.length, 9);
@@ -581,6 +580,52 @@ function clickEvent(extra = {}) {
   assert.equal(persistedMobile.el('reader-preferences').parent, persistedMobile.el('mobile-focus-options'));
   assert.equal(persistedMobile.el('reader-preferences').open, false);
   assert.equal(persistedMobile.el('mobile-focus-progress').textContent, 'Night & Lifestyle · 3 of 20');
+
+  // Scrubbing previews never request intermediate pages or alter history.
+  for (const width of [320, 430, 700, 768, 1280]) {
+    const f = await fixture({mobile: width <= 700, width, hash: '#page=60'});
+    const slider = f.el('page-scrubber');
+    slider.tagName = 'INPUT';
+    f.events.keydown({target: slider, key: 'ArrowRight', preventDefault() { throw Error('Range keyboard input must stay native'); }});
+    assert.equal(f.el('page-number').value, 60);
+    assert.equal(slider.max, 196);
+    assert.equal(f.el('chapter-ticks').children.length, 9);
+    for (const [i, tick] of f.el('chapter-ticks').children.entries()) {
+      assert.equal(tick.style.left, `${100 * (issue.chapters[i].page - 1) / 195}%`);
+    }
+    const before = f.prefetches.length, historyBefore = f.historyCalls.length;
+    for (const n of [1, 37, 150, 196]) {
+      slider.value = n; slider.oninput();
+      assert.equal(f.el('scrubber-page').textContent, `Page ${n} of 196`);
+      assert.equal(slider.ariaValueText, `Page ${n} of 196`);
+      assert.equal(f.el('page-number').value, 60);
+    }
+    assert.equal(f.prefetches.length, before);
+    assert.equal(f.historyCalls.length, historyBefore);
+    slider.onchange();
+    assert.equal(f.el('page-number').value, 196);
+    assert.equal(f.location.hash, '#page=196');
+    assert(f.el('next-bottom').disabled);
+    slider.onchange(); assert.equal(f.historyCalls.length, historyBefore + 1);
+    slider.value = 1; slider.oninput(); slider.listeners.pointercancel();
+    assert.equal(slider.value, 196);
+    f.el('previous-bottom').onclick(); assert.equal(slider.value, 195);
+    f.location.hash = '#page=37'; f.windowEvents.hashchange();
+    assert.equal(slider.value, 37);
+    f.el('focus-toggle').onclick();
+    slider.value = 1; slider.oninput(); slider.onchange();
+    assert.equal(f.el('page-number').value, 1); assert(f.el('previous-bottom').disabled);
+    let prevented = false;
+    f.el('start-reading').listeners.click({button: 0, preventDefault() { prevented = true; }});
+    assert(prevented); assert.equal(f.focuses.at(-1).id, width <= 700 ? 'reading-text' : 'page-viewport');
+    const scrollCount = f.scrolls.length;
+    f.el('cover-link').listeners.click({ctrlKey: true}); assert.equal(f.scrolls.length, scrollCount);
+    for (const size of ['16', '18', '20']) {
+      f.el('text-size').value = size; f.el('text-size').onchange();
+      assert.equal(f.el('reading-text').style['--reading-size'], size + 'px');
+    }
+    console.log(`PASS ${width}px: scrub preview/commit/cancel, endpoints, hash synchronization, Start reading focus, all text sizes.`);
+  }
 
   // Every published study retains its prompt, notes, image and source in flowing mode.
   const content = await fixture({mobile: true, noPrefetch: true});

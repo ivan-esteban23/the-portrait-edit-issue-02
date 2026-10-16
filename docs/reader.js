@@ -18,20 +18,17 @@ function syncMobileFocusLayout() {
   mobileFocusLayout = active;
   const preferences = $('reader-preferences');
   const chapters = $('chapter-overview-shell');
-  const zoom = $('page-zoom-label');
   const chapterControl = $('chapter-control');
   chapters.hidden = active;
   if (active) {
     preferences.open = false;
     $('mobile-focus-options').append(preferences);
     $('reading-options').insertBefore(chapterControl, $('view-control'));
-    $('reading-options').append(zoom);
-    $('reader-preferences-summary').textContent = 'Chapters & reading options';
+    $('reader-preferences-summary').textContent = 'Chapters & display';
   } else {
     $('toolbar-main').insertBefore(chapterControl, $('page-controls'));
-    $('toolbar-main').insertBefore(zoom, $('focus-toggle'));
     $('toolbar-secondary').append(preferences);
-    $('reader-preferences-summary').textContent = 'Reading options';
+    $('reader-preferences-summary').textContent = 'Display';
   }
   $('mobile-focus-options').hidden = !active;
 }
@@ -80,6 +77,9 @@ for (const [index, chapter] of issue.chapters.entries()) {
   button.onclick = () => show(chapter.page);
   $('chapter-overview').append(button);
   chapterButtons.push(button);
+  const tick = document.createElement('span');
+  tick.style.left = `${100 * (chapter.page - 1) / (issue.pages - 1)}%`;
+  $('chapter-ticks').append(tick);
 }
 for (const study of issue.featured || []) {
   const link = document.createElement('a');
@@ -117,7 +117,7 @@ for (const study of issue.featured || []) {
   link.append(caption);
   $('selected-studies').append(link);
 }
-// Store the hint only when the reader is actually reached. Storage failures
+// Store the hint only when Display is actually opened. Storage failures
 // leave the reader usable and limit the hint to this page session.
 const keysHintKey = 'portrait-edit-keys-hint';
 let keysHintSeen = false;
@@ -140,18 +140,26 @@ $('dismiss-keys-hint').onclick = () => {
   $('keys-hint').hidden = true;
   rememberKeysHint('dismissed');
 };
-if (!keysHintSeen) {
-  if (typeof IntersectionObserver === 'function') {
-    const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) {
-        revealKeysHint();
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.querySelector('.toolbar'));
-  } else {
-    revealKeysHint();
-  }
+// Preview only while dragging: commit one navigation on release or keyboard change.
+const scrubber = $('page-scrubber');
+scrubber.max = issue.pages;
+function updateScrubber(page) {
+  scrubber.value = page;
+  scrubber.ariaValueText = `Page ${page} of ${issue.pages}`;
+  $('scrubber-page').textContent = `Page ${page} of ${issue.pages}`;
+}
+scrubber.oninput = () => updateScrubber(Number(scrubber.value));
+scrubber.onchange = () => {
+  if (Number(scrubber.value) !== current) show(scrubber.value);
+};
+scrubber.addEventListener('pointercancel', () => updateScrubber(current));
+// Start reading also moves keyboard focus to the active view.
+for (const link of document.querySelectorAll('.intro a[href="#reader"]')) {
+  link.addEventListener('click', event => {
+    if (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    enterReader();
+  });
 }
 
 // Keep references only to the immediate neighbors; low priority lets the
@@ -424,7 +432,10 @@ function updateReaderChrome() {
   updateChapterEdges();
 }
 $('reader-preferences').addEventListener('toggle', () => {
-  if ($('reader-preferences').open) updateChapterProgress();
+  if ($('reader-preferences').open) {
+    revealKeysHint();
+    updateChapterProgress();
+  }
 });
 $('chapter-overview').addEventListener('scroll', updateChapterEdges, {passive: true});
 window.addEventListener('scroll', updateReaderChrome, {passive: true});
@@ -479,6 +490,7 @@ function show(n, update = true) {
   pageData = null;
   $('reading-text').textContent = 'Loading page text…';
   $('page-number').value = current;
+  updateScrubber(current);
   $('current-label').textContent = `Page ${current} of ${issue.pages}`;
   $('status').textContent = `Loading page ${current}…`;
   $('page-text').textContent = 'Loading page text…';

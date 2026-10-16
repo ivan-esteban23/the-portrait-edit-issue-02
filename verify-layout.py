@@ -50,7 +50,7 @@ for target in ['chapter', 'page-number', 'zoom', 'focus-toggle', 'chapter-progre
 preferences = page.ids['reader-preferences']
 assert preferences['tag'] == 'details' and 'open' not in preferences['attrs']
 assert inside(preferences, toolbar)
-for target in ['reading-mode', 'text-size']:
+for target in ['reading-mode', 'text-size', 'zoom', 'keys-hint']:
     assert inside(page.ids[target], preferences), target
 assert any(node['tag'] == 'summary' and inside(node, preferences) for node in page.nodes)
 for target in ['retry-page', 'status', 'keys-hint', 'page-viewport', 'reading-text', 'bottom-controls', 'text-details']:
@@ -74,8 +74,17 @@ assert inside(page.ids['reader-preferences-summary'], preferences)
 assert page.ids['page-image']['attrs']['fetchpriority'] == 'high'
 assert page.ids['focus-toggle']['attrs']['aria-keyshortcuts'] == 'F'
 assert page.ids['download']['attrs']['href'].endswith('/noir-editorial-1/The_Portrait_Edit_Issue_02.pdf')
-assert all(node['attrs'].get('src', '').startswith('reader.js?v=perfect-2') for node in page.nodes if node['tag'] == 'script')
+assert all(node['attrs'].get('src', '').startswith('reader.js?v=ux-refinement-1') for node in page.nodes if node['tag'] == 'script')
 for node in page.nodes:
     if node['tag'] in {'input', 'select'}:
         assert 'aria-label' in node['attrs'] or any(parent['tag'] == 'label' for parent in node['ancestors']), 'Named form control'
 print('PASS: semantic markup, reader targets, one toolbar, native preferences disclosure, retained control labels, status before stage, archive after reader and PDF link.')
+
+assert page.ids['page-scrubber']['attrs']['type'] == 'range'
+assert page.ids['page-scrubber']['attrs']['min'] == '1'
+assert page.ids['page-scrubber']['attrs']['max'] == '196'
+assert page.nodes.index(page.ids['page-viewport']) < page.nodes.index(page.ids['page-scrubber'])
+assert page.nodes.index(page.ids['selected-studies']) > page.nodes.index(page.ids['bottom-controls'])
+assert any(n['tag'] == 'footer' for n in page.ids['download']['ancestors'])
+assert not inside(page.ids['zoom'], page.ids['toolbar-main'])
+print('PASS: reader before selections, footer PDF, consolidated Display controls, and accessible full-issue scrubber.')
