@@ -1,0 +1,289 @@
+import { test, expect, type Page } from "@playwright/test";
+const reader = "issues/the-prompt-issue/pages/60";
+async function settings(page: Page) {
+  await page.getByRole("button", { name: "Display", exact: true }).click();
+}
+async function mode(page: Page, value: string) {
+  await settings(page);
+  await page.getByLabel("Reading mode").selectOption(value);
+  await page.getByRole("button", { name: "Close display settings" }).click();
+}
+async function noOverflow(page: Page) {
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+    ),
+  ).toBe(true);
+}
+test("publication routes, archive filtering, retained PDF, and not-found", async ({
+  page,
+}, info) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("./");
+  await expect(page.getByRole("link", { name: "Start reading" })).toBeVisible();
+  await noOverflow(page);
+  const action = page.getByRole("link", { name: "Start reading" });
+  const colors = await action.evaluate((e) => ({
+    text: getComputedStyle(e).color,
+    bg: getComputedStyle(e).backgroundColor,
+  }));
+  expect(colors.text).not.toBe(colors.bg);
+  await page.screenshot({
+    path: `test-results/${info.project.name}-home.png`,
+    fullPage: true,
+  });
+  await page.getByRole("link", { name: "Inside the issue" }).click();
+  await expect(
+    page.getByRole("navigation", { name: "Issue chapters" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Download PDF ·/ }),
+  ).toHaveAttribute("href", /releases\/download\/noir-editorial-1/);
+  await page.getByRole("link", { name: "Archive", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("174 studies");
+  await page.getByLabel("Search", { exact: true }).fill("Frost Fantasy");
+  await expect(page.getByRole("status")).toHaveText("1 study");
+  await page.locator(".archive-grid a").click();
+  await expect(
+    page.getByRole("heading", { name: "Frost Fantasy Portrait", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Not recorded", { exact: true }).first(),
+  ).toBeVisible();
+  await noOverflow(page);
+  await page.goto("missing-route");
+  await expect(
+    page.getByRole("link", { name: "Back to the reader" }),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+});
+test("reader modes, Focus, exact copy, editable input and responsive layout", async ({
+  page,
+}, info) => {
+  await page.goto(reader);
+  const width = page.viewportSize()!.width;
+  if (width < 768) await expect(page.locator(".study-article")).toBeVisible();
+  else await expect(page.locator(".page-art")).toBeVisible();
+  await mode(page, "text");
+  await expect(
+    page.getByRole("heading", { name: "Frost Fantasy Portrait", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Focus", exact: true }).click();
+  await expect(page.locator(".masthead")).toHaveCount(0);
+  await page.screenshot({
+    path: `test-results/${info.project.name}-focus-reading.png`,
+    fullPage: true,
+  });
+  await noOverflow(page);
+  if (width <= 1100) {
+    await expect(page.locator(".chapter-strip")).toBeHidden();
+    expect(
+      await page
+        .locator(".reader-bottom")
+        .evaluate((e) => getComputedStyle(e).position),
+    ).toBe("fixed");
+  }
+  await settings(page);
+  await page.getByRole("button", { name: "20 px" }).click();
+  for (const control of await page.locator("input,select").all())
+    expect(
+      await control.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)),
+    ).toBeGreaterThanOrEqual(16);
+  await page.getByRole("button", { name: "Close display settings" }).click();
+  expect(
+    await page
+      .locator(".prompt-body")
+      .evaluate((e) => getComputedStyle(e).fontSize),
+  ).toBe("20px");
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => {
+          (window as unknown as { copied: string }).copied = text;
+        },
+      },
+    });
+  });
+  await page.getByRole("button", { name: "Copy prompt", exact: true }).click();
+  await expect(page.locator(".copy-feedback")).toHaveText("Prompt copied.");
+  expect(
+    await page.evaluate(() => (window as unknown as { copied: string }).copied),
+  ).toEqual(await page.locator(".prompt-body").textContent());
+  await page.getByLabel("Page number", { exact: true }).fill("152");
+  await page.getByLabel("Page number", { exact: true }).press("Enter");
+  await expect(page).toHaveURL(/pages\/152/);
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Exit Focus" })).toBeVisible();
+  await page.getByRole("button", { name: "Exit Focus" }).click();
+  await expect(page.locator(".masthead")).toBeVisible();
+});
+test("keyboard, scrubber and legacy hash links", async ({ page }) => {
+  await page.goto("./#page=60");
+  await expect(page).toHaveURL(/pages\/60/);
+  await page.locator(".reader-canvas").focus();
+  await page.keyboard.press("j");
+  await expect(page).toHaveURL(/pages\/61/);
+  await page.keyboard.press("K");
+  await expect(page).toHaveURL(/pages\/60/);
+  await page.keyboard.press("f");
+  await expect(page.getByRole("button", { name: "Exit Focus" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "Focus", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/focus=0/);
+  await page.getByLabel("Page number", { exact: true }).focus();
+  await expect(page.getByLabel("Page number", { exact: true })).toBeFocused();
+  await page.keyboard.press("j");
+  await expect(page).toHaveURL(/pages\/60/);
+  const range = page.getByRole("slider", { name: "Browse pages" });
+  await range.focus();
+  await range.press("End");
+  await expect(page).toHaveURL(/pages\/196/);
+  await expect(range).toHaveAttribute("aria-valuetext", "Page 196 of 196");
+  await page.getByRole("button", { name: "−10 pages" }).click();
+  await expect(page).toHaveURL(/pages\/186/);
+  await page.locator(".reader-canvas").focus();
+  await page.keyboard.press("Home");
+  await expect(page).toHaveURL(/pages\/1(?:\?|$)/);
+  await expect(
+    page.getByRole("button", { name: "← Previous", exact: true }),
+  ).toBeDisabled();
+});
+test("original page loading, image-only retry and zoom", async ({
+  page,
+}, info) => {
+  await page.route("**/pages/060.webp", (route) => route.abort());
+  await page.goto(reader);
+  await mode(page, "page");
+  await expect(page.getByText("This page could not load.")).toBeVisible();
+  await page.unroute("**/pages/060.webp");
+  await page.getByRole("button", { name: "Retry page" }).click();
+  await expect(page.locator(".page-art")).toHaveClass(/loaded/);
+  await settings(page);
+  await page.getByLabel("Zoom", { exact: true }).selectOption("150");
+  await page.getByRole("button", { name: "Close display settings" }).click();
+  await expect(page.locator(".page-holder")).toHaveAttribute("style", /150%/);
+  await noOverflow(page);
+  await settings(page);
+  await page.getByLabel("Zoom", { exact: true }).selectOption("100");
+  await page.getByRole("button", { name: "Close display settings" }).click();
+  await page.screenshot({
+    path: `test-results/${info.project.name}-original.png`,
+    fullPage: true,
+  });
+});
+test("both canvases accept horizontal swipes, ignore vertical and multiple touches", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  async function swipe(dx: number, dy: number, multi = false) {
+    await page.locator(".reader-canvas").evaluate(
+      (node, args) => {
+        const touch = (x: number, y: number, id = 1) =>
+          new Touch({ identifier: id, target: node, clientX: x, clientY: y });
+        node.dispatchEvent(
+          new TouchEvent("touchstart", {
+            bubbles: true,
+            touches: args.multi
+              ? [touch(220, 220), touch(250, 250, 2)]
+              : [touch(220, 220)],
+          }),
+        );
+        node.dispatchEvent(
+          new TouchEvent("touchmove", {
+            bubbles: true,
+            touches: [touch(220 + args.dx, 220 + args.dy)],
+          }),
+        );
+        node.dispatchEvent(
+          new TouchEvent("touchend", {
+            bubbles: true,
+            touches: [],
+            changedTouches: [touch(220 + args.dx, 220 + args.dy)],
+          }),
+        );
+      },
+      { dx, dy, multi },
+    );
+  }
+  for (const view of ["text", "page"]) {
+    await mode(page, view);
+    await swipe(-100, 10);
+    await expect(page).toHaveURL(/pages\/61/);
+    await swipe(100, 10);
+    await expect(page).toHaveURL(/pages\/60/);
+    await swipe(-100, 200);
+    await expect(page).toHaveURL(/pages\/60/);
+    await swipe(-100, 0, true);
+    await expect(page).toHaveURL(/pages\/60/);
+  }
+});
+test("desktop Focus dims chrome and wakes on activity", async ({ page }) => {
+  test.skip(page.viewportSize()!.width <= 1100, "Desktop-only behavior");
+  await page.goto(reader + "?focus=1");
+  await page.locator(".reader-canvas").focus();
+  await page.mouse.move(900, 600);
+  await expect(page.locator(".reader")).toHaveClass(/chrome-idle/, {
+    timeout: 6000,
+  });
+  await page.mouse.move(901, 601);
+  await expect(page.locator(".reader")).not.toHaveClass(/chrome-idle/);
+});
+
+test("system theme changes and form controls retain cross-platform legibility", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  for (const scheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    expect(
+      await page
+        .locator("body")
+        .evaluate((e) => getComputedStyle(e).backgroundColor),
+    ).toBe(scheme === "light" ? "rgb(246, 244, 239)" : "rgb(10, 10, 10)");
+  }
+  await settings(page);
+  for (const control of await page.locator("input,select").all())
+    expect(
+      await control.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)),
+    ).toBeGreaterThanOrEqual(16);
+  await page.getByRole("button", { name: "Close display settings" }).click();
+  await page.goto("issues/the-prompt-issue/pages/1");
+  await mode(page, "text");
+  await expect(page.locator(".reading-cover")).toBeVisible();
+});
+
+test("rapid page and Focus keys use the latest route", async ({ page }) => {
+  await page.goto(reader);
+  await page.locator(".reader-canvas").focus();
+  await page.locator(".reader-canvas").evaluate((node) => {
+    for (const key of ["j", "j", "K", "f", "Escape"])
+      node.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+  });
+  await expect(page).toHaveURL(/pages\/61\?focus=0/);
+  await expect(
+    page.getByRole("button", { name: "Focus", exact: true }),
+  ).toBeVisible();
+  const field = page.getByLabel("Page number", { exact: true });
+  await field.focus();
+  await field.press("j");
+  await expect(page).toHaveURL(/pages\/61\?focus=0/);
+});
+
+test("page turns return long reading views to the beginning", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  await mode(page, "text");
+  const next = page.getByRole("button", { name: "Next →", exact: true });
+  await next.scrollIntoViewIfNeeded();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+  await next.click();
+  await expect(page).toHaveURL(/pages\/61/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(next).toBeFocused();
+});
