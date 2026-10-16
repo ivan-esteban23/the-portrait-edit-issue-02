@@ -33,6 +33,7 @@ chapters=[{'title':title,'page':page} for level,title,page in doc.get_toc() if l
 config['chapters']=chapters
 config['sha256']=hashlib.sha256(source.read_bytes()).hexdigest()
 config['pdf_bytes']=source.stat().st_size
+config['featured']=[dict(json.loads((dist/'pages'/f'{page:03}.json').read_text())['study'],page=page) for page in [20,19,28]]
 (dist/'issue.json').write_text(json.dumps(config,ensure_ascii=False,indent=2)+'\n')
 (dist/'.nojekyll').touch()
 print(f"Built {len(doc)} pages; {sum(f.stat().st_size for f in dist.rglob('*') if f.is_file()):,} website bytes",flush=True)

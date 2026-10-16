@@ -19,6 +19,9 @@ for key,page in m['study_pages'].items():
         assert list(image.size)==im['original_pixels']
         image.verify()
 assert len(sources)==170
-report={'page_assets':196,'chapters':9,'website_bytes':sum(f.stat().st_size for f in docs.rglob('*') if f.is_file()),'pdf_sha256':config['sha256'],'asset_checks':'PASS','exact_structured_studies':174,'original_reference_dimensions':174,'unique_reference_filenames':170,'navigation_checks':'PASS: desktop/mobile Node DOM fixtures, including large-text view and text sizes','default_mobile_text_px':20,'text_size_choices_px':[18,20,24],'browser_visual_check':'Not completed: no connected browser','original_prior_pdf':'Retained in edition-1 release'}
+for featured in config['featured']:
+    data=json.loads((docs/'pages'/f'{featured["page"]:03}.json').read_text())['study']
+    assert all(featured[k]==v for k,v in data.items())
+report={'page_assets':196,'chapters':9,'website_bytes':sum(f.stat().st_size for f in docs.rglob('*') if f.is_file()),'pdf_sha256':config['sha256'],'asset_checks':'PASS','exact_structured_studies':174,'original_reference_dimensions':174,'unique_reference_filenames':170,'navigation_checks':'PASS: desktop/mobile Node DOM fixtures, including large-text view and text sizes','default_mobile_text_px':16,'text_size_choices_px':[16,18,20],'browser_visual_check':'Not completed: no connected browser','prior_pdfs':'Retained in edition-1 and larger-type-1 releases','edition':'noir-editorial'}
 (root/'VERIFICATION.json').write_text(json.dumps(report,indent=2)+'\n')
 print(json.dumps(report,indent=2))

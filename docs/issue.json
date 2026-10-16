@@ -4,7 +4,7 @@
   "pages": 196,
   "studies": 174,
   "description": "Reference images, original image prompts and working notes. A practical collection of 174 editorial studies.",
-  "download": "https://github.com/ivan-esteban23/the-portrait-edit-issue-02/releases/download/larger-type-1/The_Portrait_Edit_Issue_02.pdf",
+  "download": "https://github.com/ivan-esteban23/the-portrait-edit-issue-02/releases/download/noir-editorial-1/The_Portrait_Edit_Issue_02.pdf",
   "other_number": "01",
   "other_url": "https://ivan-esteban23.github.io/the-portrait-edit-issue-01/",
   "chapters": [
@@ -45,6 +45,44 @@
       "page": 170
     }
   ],
-  "sha256": "cf47ffbb6a1277f6d90ef9d77a70cab5fcec22e1c93296373006dd1fa6760620",
-  "pdf_bytes": 22334593
+  "sha256": "882e18ce02fecf40d995e01517357f753e657949e731db18067672d848a5c80a",
+  "pdf_bytes": 22290093,
+  "featured": [
+    {
+      "number": 26,
+      "title": "Black Knit & Dark Studio Gradient",
+      "prompt": "An original young woman with dark hair pulled back at the crown rests one arm across her forehead, with the other arm extended toward the lens. She wears a fitted black long-sleeve knit with a high neck. Her lips are warm coral, and her expression is calm and direct. A deep charcoal backdrop with soft gradient light falls off into shadow. Low-key studio lighting, a palette of charcoal, black, and warm coral. Dramatic and sleek, in the style of a beauty campaign.",
+      "notes": "- The coral lip is the only warm accent against the dark tones.\n- Add 'dramatic side lighting' to sharpen the cheekbones.",
+      "try_this": "Try this: Add dramatic side lighting.",
+      "style": "Dramatic, sleek, moody",
+      "source": "24573.jpg",
+      "image": "references/1e7c97e72c972c91fc22c8e27b96b2c95d9e2c2bd2fecdfac5bd1dda509ee74c.jpeg",
+      "flags": "Rights check",
+      "page": 20
+    },
+    {
+      "number": 16,
+      "title": "Jade Backdrop & Hairpin",
+      "prompt": "A vertical, tightly framed studio portrait of an original young woman with dark hair pulled back into a low, smooth bun, secured with an ornamental hairpin whose carved, pale ornament sits at the side of her head. Her skin is fair and luminous, with defined brows, soft eye makeup, and a deep red lip. She wears a fitted black top with a crisp white V-shaped collar that sits high at the neckline. Her expression is calm, composed, and direct. The background is a deep, muted jade-teal backdrop with soft, even tonal gradation. Soft, low-key studio lighting with a gentle falloff into shadow, a palette of jade, charcoal black, and ivory white with a single red accent at the lips. Subtle film grain and a slightly faded print finish. Quiet, elegant, and moody, in the style of a fine-art editorial portrait.",
+      "notes": "- The jade backdrop and the single red lip are the key color contrast; keep both specific.\n- The hairpin is a strong detail; name the ornament material (for example, carved jade or pearl) to control its look.",
+      "try_this": "Try this: Specify the hairpin material.",
+      "style": "Quiet, elegant, moody",
+      "source": "5089.jpg",
+      "image": "references/fe4c06e603b61b61755d25d492f991b9dacf579db65cfa0aaf9e5bfd19b938b5.jpeg",
+      "flags": "Rights check",
+      "page": 19
+    },
+    {
+      "number": 51,
+      "title": "Blue Satin Halter & Pearls",
+      "prompt": "An original young woman with blonde hair slicked back into a low ponytail, with a pale blue satin ribbon tied around it. She wears a pale blue satin halter top with a printed pattern and a delicate pearl necklace. Gold drop earrings and bright blue eyes. Her expression is calm and composed. A soft blue backdrop with gentle, even lighting. Palette of powder blue, gold, and ivory. Polished and feminine, in the style of a runway beauty close-up.",
+      "notes": "- The satin ribbon and pearl necklace are the defining accents.\n- Use 'extreme close-up' to focus on the hair and earrings.",
+      "try_this": "Try this: Try an extreme close-up of the hair and earrings.",
+      "style": "Polished, feminine, sleek",
+      "source": "24393.jpg",
+      "image": "references/47f312cd193fd4e524c997d078df513b73b031415e1411abaaabaf208035b442.jpeg",
+      "flags": "Rights check",
+      "page": 28
+    }
+  ]
 }

@@ -4,7 +4,7 @@ const root=__dirname,issue=JSON.parse(fs.readFileSync(`${root}/docs/issue.json`)
 const elements=new Map(),events={};function el(id){if(!elements.has(id))elements.set(id,{id,value:'1',open:false,disabled:false,textContent:'',style:{setProperty(k,v){this[k]=v}},children:[],append(o){this.children.push(o)},replaceChildren(){this.children=[]}});return elements.get(id)};
 const windowEvents={},location={hash:''};const context={matchMedia:()=>({matches:mobile}),document:{getElementById:el,querySelector:()=>el('holder'),createElement:()=>({style:{},children:[],append(o){this.children.push(o)}}),addEventListener:(n,f)=>events[n]=f},window:{addEventListener:(n,f)=>windowEvents[n]=f},location,history:{replaceState:(a,b,c)=>location.hash=c},fetch:async path=>({ok:fs.existsSync(`${root}/docs/${path}`),json:async()=>JSON.parse(fs.readFileSync(`${root}/docs/${path}`))})};
 await vm.runInNewContext(fs.readFileSync(`${root}/docs/reader.js`,'utf8'),context);
-assert.equal(el('reading-mode').value,mobile?'text':'page');assert.equal(el('page-image').src,'pages/001.webp');assert(el('previous').disabled);assert.equal(el('chapter').children.length,issue.chapters.length);assert.equal(el('download').href,issue.download);
+assert.equal(el('selected-studies').children.length,3);for(let i=0;i<3;i++)assert.equal(el('selected-studies').children[i].href,`#page=${issue.featured[i].page}`);assert.equal(el('reading-mode').value,mobile?'text':'page');assert.equal(el('page-image').src,'pages/001.webp');assert(el('previous').disabled);assert.equal(el('chapter').children.length,issue.chapters.length);assert.equal(el('download').href,issue.download);
 el('next').onclick();assert.equal(el('page-number').value,2);el('next-bottom').onclick();assert.equal(el('page-number').value,3);
 el('chapter').value=issue.chapters[1].page;el('chapter').onchange();assert.equal(el('page-number').value,issue.chapters[1].page);
 el('page-number').value=999;el('page-number').onchange();assert.equal(el('page-number').value,issue.pages);assert(el('next').disabled);
@@ -19,7 +19,8 @@ assert(el('holder').hidden);assert(!el('reading-text').hidden);
 el('page-number').value=60;el('page-number').onchange();await new Promise(r=>setImmediate(r));
 const study=JSON.parse(fs.readFileSync(`${root}/docs/pages/060.json`)).study;
 assert(study);assert(el('reading-text').children.some(node=>node.textContent===study.prompt));assert(el('reading-text').children.some(node=>node.src===study.image));
-el('text-size').value='24';el('text-size').onchange();assert.equal(el('reading-text').style['--reading-size'],'24px');
+el('text-size').value='20';el('text-size').onchange();assert.equal(el('reading-text').style['--reading-size'],'20px');
 el('reading-mode').value='page';el('reading-mode').onchange();assert(!el('holder').hidden);assert(el('reading-text').hidden);
+assert(fs.readFileSync(`${root}/docs/style.css`,'utf8').includes('--reading-size:16px'));assert(fs.readFileSync(`${root}/docs/index.html`,'utf8').includes('<option value="16" selected>16 px</option>'));
 console.log(`Issue ${n} (${mobile?'mobile':'desktop'}): page controls, bounds, chapters, keyboard, zoom, deep links, text and download URL PASS`);
 }})().catch(e=>{console.error(e);process.exit(1)});

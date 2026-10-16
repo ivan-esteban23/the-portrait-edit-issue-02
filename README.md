@@ -1,30 +1,30 @@
 # The Portrait Edit — Issue 02 — The Prompt Issue
 
-Independent GitHub Pages reader: https://ivan-esteban23.github.io/the-portrait-edit-issue-02/
+Independent magazine website: https://ivan-esteban23.github.io/the-portrait-edit-issue-02/
 
-Served from `main` → `/docs`. The complete original PDF is a release asset, not a Git object. The reader fetches one optimized page image at a time; page text is fetched only when opened. All magazine content remains in the original PDF. WebP pages are reading derivatives, not replacement reference images.
+## Current edition: noir editorial
 
-## Rebuild
+Black backgrounds, white/light-gray sans-serif type, a selected-study grid and restrained font sizes, inspired by the user's supplied Canva portfolio screenshots. No Canva template file or licensed assets were imported. Issue 01 remains on its independent website.
 
-Use Python with PyMuPDF and Pillow installed (the magazine project's existing `.venv` supplies both).
+The PDF has 196 Letter pages with 10.5 pt prompts, 10 pt working notes and contents, and 10.5 pt glossary definitions. It preserves all 174 prompts, titles, Source filenames, notes, original references and reviewed Try this lines. The source/build PR lives in `ivan-esteban23/the-portrait-edit`.
+
+The website provides original-page mode and a flowing study view with 16 px body text (16/18/20 px choices). Narrow screens default to study view. It loads pages on demand and fetches exact prompt/notes data only as needed. The original reference images are extracted unchanged from the verified PDF and displayed without cropping. The front selection links to its exact study pages. Embedded PDF hyperlinks are available in the downloaded PDF; the web reader has its own page/chapter controls.
+
+## Rebuild and verify
+
+Requires Python with PyMuPDF and Pillow, plus Node for fixture checks. The magazine project's existing `.venv` provides the Python dependencies. No package or font was added for this redesign.
 
 ```sh
-python build.py --pdf '/absolute/path/to/The_Portrait_Edit_Issue_02_Larger_Type.pdf' --layout '/absolute/path/to/larger-type-layout-checks.json'
+python build.py --pdf '/absolute/path/to/The_Portrait_Edit_Issue_02_Noir_Editorial.pdf' --layout '/absolute/path/to/noir-layout-checks.json'
+python verify-content.py --layout '/absolute/path/to/noir-layout-checks.json'
+node verify-reader.cjs
 python -m http.server 8000 --directory docs
 ```
 
-Source PDF: the approved final 196-page merged editorial revision. No original PDF, prompt, note or image file is altered. The reader preserves complete page designs, supplies chapter navigation, keyboard page controls, zoom, deep page links and extractable text. It does not reproduce embedded PDF hyperlinks; use the original PDF for those.
+The content verifier checks all 174 study records against the verified layout and checks original image dimensions. The navigation tests use desktop/mobile DOM fixtures, including selected-study links, reading modes and font-size controls. `VERIFICATION.json` records the results. Browser visual QA is not claimed: no connected browser was available.
 
-To update, rebuild, verify the output, commit/push normally, and update the explicitly versioned release download link if publishing a new edition. Never silently replace a historical PDF release. Publication rights and provenance remain the publisher's responsibility.
+## Publication
 
-## Verification
+GitHub Pages serves `main` → `/docs`. Commit and push verified output normally, then verify the Pages build and live assets. The complete unchanged PDF is a GitHub release asset rather than a large Git object. The `noir-editorial-1` release is the current download. Earlier `edition-1` and `larger-type-1` releases are preserved. Use a separate version for future PDF changes and never silently replace a historical download.
 
-`node verify-reader.cjs` checks navigation with a DOM fixture; it does not replace a real-browser test. `VERIFICATION.json` records asset validation and current limitations.
-
-## Larger type update
-
-The current reader uses the separately verified larger-type PDF: prompts 12 pt, notes/glossary 11.5 pt, contents 11 pt. The original page layout remains available. Large-text mode shows exact study text with its original reference, uses 20 px body text with 18/20/24 px choices, and is the narrow-screen default.
-
-`python verify-content.py --layout '/absolute/path/to/larger-type-layout-checks.json'` verifies all 174 structured studies and reference dimensions. `node verify-reader.cjs` checks desktop/mobile navigation and font-size controls using DOM fixtures. No real-browser visual QA is claimed.
-
-Current PDF release: `larger-type-1`. Earlier PDF release: `edition-1`, retained unchanged. No package was added.
+Reference publication rights/provenance and protected source inconsistencies are described in the source magazine's editorial records. No identity or clearance was inferred.

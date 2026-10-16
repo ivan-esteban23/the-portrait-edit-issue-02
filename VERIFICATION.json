@@ -1,19 +1,20 @@
 {
   "page_assets": 196,
   "chapters": 9,
-  "website_bytes": 39280752,
-  "pdf_sha256": "cf47ffbb6a1277f6d90ef9d77a70cab5fcec22e1c93296373006dd1fa6760620",
+  "website_bytes": 37692150,
+  "pdf_sha256": "882e18ce02fecf40d995e01517357f753e657949e731db18067672d848a5c80a",
   "asset_checks": "PASS",
   "exact_structured_studies": 174,
   "original_reference_dimensions": 174,
   "unique_reference_filenames": 170,
   "navigation_checks": "PASS: desktop/mobile Node DOM fixtures, including large-text view and text sizes",
-  "default_mobile_text_px": 20,
+  "default_mobile_text_px": 16,
   "text_size_choices_px": [
+    16,
     18,
-    20,
-    24
+    20
   ],
   "browser_visual_check": "Not completed: no connected browser",
-  "original_prior_pdf": "Retained in edition-1 release"
+  "prior_pdfs": "Retained in edition-1 and larger-type-1 releases",
+  "edition": "noir-editorial"
 }
