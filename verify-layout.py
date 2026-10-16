@@ -61,7 +61,7 @@ assert page.nodes.index(page.ids['other-issue-card']) > page.nodes.index(page.id
 assert page.ids['page-image']['attrs']['fetchpriority'] == 'high'
 assert page.ids['focus-toggle']['attrs']['aria-keyshortcuts'] == 'F'
 assert page.ids['download']['attrs']['href'].endswith('/noir-editorial-1/The_Portrait_Edit_Issue_02.pdf')
-assert all(node['attrs'].get('src', '').startswith('reader.js?v=cohesive-2') for node in page.nodes if node['tag'] == 'script')
+assert all(node['attrs'].get('src', '').startswith('reader.js?v=type-1') for node in page.nodes if node['tag'] == 'script')
 for node in page.nodes:
     if node['tag'] in {'input', 'select'}:
         assert 'aria-label' in node['attrs'] or any(parent['tag'] == 'label' for parent in node['ancestors']), 'Named form control'

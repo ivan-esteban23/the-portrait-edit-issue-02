@@ -6,6 +6,8 @@ Independent magazine website: https://ivan-esteban23.github.io/the-portrait-edit
 
 The website automatically follows the visitor's light/dark preference. Warm paper and noir palettes share one sans-serif family, a six-step type scale, a four-pixel spacing rhythm and two-pixel corners. No theme chooser, stored theme preference, font download or client dependency is used.
 
+Typography uses 12px captions, 13px secondary text and 16px body text at the default browser size. Section, study and display titles use fluid clamp scales (1.35–1.6rem, 1.6–2rem and 2.25–3.5rem). Shared tracking tokens distinguish balanced display titles, tracked labels, compact controls and normal prompt text. Kerning and common/contextual ligatures follow the system font's support; page, statistic and study figures use tabular numerals. Reading view uses a 40ch measure with 1.8 leading, a 38ch mobile target and inset phone text, while keeping the 16/18/20px choices. Light and Dark inherit the same typography tokens.
+
 The reader has one sticky Chapter / Page / Zoom / Focus toolbar. Reading view and text size live in its native **Reading options** disclosure; chapter progress remains visible. On phones, the same toolbar is compact and Previous/Next are consolidated into the existing bottom navigation. Selected Studies use equal cards and quiet captions; Issue 01 discovery follows the reader. Focus keeps chapter navigation, context and preferences while hiding publication/discovery sections. Focus paper warms in Light mode, with normal control and page-mat surfaces.
 
 Reference images, page artwork, issue metadata and `reader.js` are unchanged by this pass. The original noir magazine pages retain their artwork in both website themes. Issue 01 remains on its independent website.
