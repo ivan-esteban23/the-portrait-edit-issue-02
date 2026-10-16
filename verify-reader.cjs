@@ -45,7 +45,13 @@ async function fixture(scenario = {}) {
       },
       style: { setProperty(key, value) { this[key] = value; } },
       children: [],
-      append(child) { child.parent = this; this.children.push(child); },
+      append(child) { if (child.parent) child.remove(); child.parent = this; this.children.push(child); },
+      insertBefore(child, before) {
+        if (child.parent) child.remove();
+        child.parent = this;
+        const index = this.children.indexOf(before);
+        if (index < 0) this.children.push(child); else this.children.splice(index, 0, child);
+      },
       replaceChildren() { this.textContent = ''; },
       contains(node) {
         for (let current = node; current; current = current.parent) {
@@ -66,9 +72,21 @@ async function fixture(scenario = {}) {
     if (!elements.has(id)) elements.set(id, element(id));
     return elements.get(id);
   }
-  for (const id of ['page-viewport', 'reading-text', 'page-number', 'chapter', 'chapter-overview']) {
-    el(id).parent = el('reader');
-  }
+  const attach = (parent, ...children) => children.forEach(child => el(parent).append(el(child)));
+  attach('reader', 'chapter-overview-shell', 'reader-toolbar', 'reading-text', 'reader-status', 'page-viewport', 'bottom-controls', 'mobile-focus-options');
+  attach('chapter-overview-shell', 'chapter-overview');
+  attach('reader-toolbar', 'focus-context', 'toolbar-main', 'toolbar-secondary');
+  attach('toolbar-main', 'chapter-label', 'pagination', 'page-zoom-label', 'focus-toggle');
+  attach('chapter-label', 'chapter');
+  attach('pagination', 'previous', 'page-number', 'page-total', 'next');
+  attach('page-zoom-label', 'zoom');
+  attach('toolbar-secondary', 'chapter-progress', 'mobile-focus-progress', 'reader-preferences');
+  attach('reader-preferences', 'reader-preferences-summary', 'reading-options');
+  attach('reading-options', 'reading-mode', 'text-size-label');
+  attach('text-size-label', 'text-size');
+  attach('reader-status', 'status', 'retry-page');
+  el('mobile-focus-options').hidden = true;
+  el('reader-preferences-summary').textContent = 'Reading options';
   const location = { hash: scenario.hash || '' };
   const historyCalls = [];
   const storage = {
@@ -97,7 +115,7 @@ async function fixture(scenario = {}) {
         copies.push(context.selected);
         return !scenario.fallbackReject;
       },
-      querySelector: selector => selector === '.toolbar' ? el('toolbar') : selector === '.page-viewport' ? el('page-viewport') : el('holder'),
+      querySelector: selector => selector === '.toolbar' ? el('reader-toolbar') : selector === '.page-viewport' ? el('page-viewport') : selector === '.reader-status' ? el('reader-status') : el('holder'),
       createElement: tag => element(undefined, tag.toUpperCase()),
       addEventListener: (name, callback) => { events[name] = callback; }
     },
@@ -135,6 +153,7 @@ async function fixture(scenario = {}) {
   return { el, context, events, windowEvents, location, historyCalls, scrolls, focuses, animations, hintStorage, observer,
     prefetches, copies, timers,
     selectText(text) { selectedText = text; },
+    resize(width) { scenario.mobile = width <= 700; context.window.innerWidth = width; windowEvents.resize(); },
     resolveClipboard() { clipboardResolve(); },
     runTimers() { const pending = [...timers.values()]; timers.clear(); pending.forEach(timer => timer.callback()); }
   };
@@ -472,6 +491,72 @@ function clickEvent(extra = {}) {
   assert.equal(legacy.context.document.activeElement, legacyCopy);
   assert.equal(legacy.el('body').children.length, 0);
   legacy.runTimers(); assert.equal(legacyCopy.textContent, 'Copy prompt');
+
+  for (const width of [320, 390, 700]) {
+    const f = await fixture({mobile: true, width, hash: '#page=152'});
+    const {el} = f;
+    const preferences = el('reader-preferences'), chapters = el('chapter-overview-shell'), zoom = el('page-zoom-label');
+    const originalChapter = el('chapter-overview').children[7];
+    preferences.open = true;
+    el('focus-toggle').onclick();
+    assert.equal(el('focus-toggle').textContent, 'Exit Focus');
+    assert.equal(preferences.open, false);
+    assert.equal(preferences.parent, el('mobile-focus-options'));
+    assert.equal(el('mobile-focus-options').hidden, false);
+    assert.equal(chapters.parent, preferences);
+    assert.equal(zoom.parent, el('reading-options'));
+    assert(!el('reader-toolbar').contains(preferences));
+    assert(!el('reader-toolbar').contains(chapters));
+    assert.equal(el('reader-preferences-summary').textContent, 'Chapters & reading options');
+    assert.equal(el('mobile-focus-progress').textContent, 'Night & Lifestyle · 3 of 20');
+    // Reuse the same controls/handlers, without closing on a scroll or toggle.
+    preferences.open = true; preferences.listeners.toggle(); f.windowEvents.scroll();
+    assert(preferences.open);
+    el('reading-mode').value = 'page'; el('reading-mode').onchange();
+    assert.equal(el('page-viewport').hidden, false); assert.equal(zoom.hidden, false);
+    el('zoom').value = '125'; el('zoom').onchange(); assert.equal(el('holder').style.width, '125%');
+    el('reading-mode').value = 'text'; el('reading-mode').onchange(); await flush();
+    assert.equal(el('reading-text').hidden, false); assert(zoom.hidden);
+    el('text-size').value = '20'; el('text-size').onchange();
+    assert.equal(el('reading-text').style['--reading-size'], '20px');
+    const copy = descendant(el('reading-text'), 'copy-prompt');
+    await copy.onclick(); assert.equal(copy.textContent, 'Copied');
+    el('next').onclick(); await flush();
+    assert.equal(el('page-number').value, 153); assert.equal(preferences.open, false);
+    assert.equal(el('mobile-focus-progress').textContent, 'Night & Lifestyle · 4 of 20');
+    preferences.open = true; originalChapter.focus({preventScroll: true}); originalChapter.onclick();
+    assert.equal(f.context.document.activeElement, el('reading-text'));
+    assert.equal(el('page-number').value, 150); assert.equal(preferences.open, false);
+    assert.equal(el('chapter-overview').children[7], originalChapter);
+    el('page-image').onerror(); assert(el('reader-status').classList.contains('has-error'));
+    assert(!el('retry-page').hidden);
+    el('retry-page').onclick(); assert(!el('reader-status').classList.contains('has-error'));
+    el('page-image').onload();
+    // Desktop regains the original hierarchy; returning to mobile closes it.
+    f.resize(768);
+    assert.equal(preferences.parent, el('toolbar-secondary'));
+    assert.equal(chapters.parent, el('reader'));
+    assert.equal(zoom.parent, el('toolbar-main'));
+    assert(el('reader').children.indexOf(chapters) < el('reader').children.indexOf(el('reader-toolbar')));
+    assert(el('toolbar-main').children.indexOf(zoom) < el('toolbar-main').children.indexOf(el('focus-toggle')));
+    assert.equal(el('mobile-focus-options').hidden, true);
+    assert.equal(el('reader-preferences-summary').textContent, 'Reading options');
+    preferences.open = true; f.windowEvents.scroll(); assert(preferences.open);
+    f.resize(width); assert.equal(preferences.open, false);
+    assert.equal(preferences.parent, el('mobile-focus-options'));
+    el('focus-toggle').onclick();
+    assert.equal(preferences.parent, el('toolbar-secondary'));
+    assert.equal(chapters.parent, el('reader'));
+    assert.equal(zoom.parent, el('toolbar-main'));
+    assert.equal(el('mobile-focus-options').hidden, true);
+    assert.equal(el('text-size').value, '20'); assert.equal(el('zoom').value, '125');
+    assert.equal(el('chapter-overview').children.length, 9);
+    console.log(`PASS ${width}px Focus: short progress, collapsed relocated settings, reused navigation/copy/zoom, visible errors, and desktop/exit restoration.`);
+  }
+  const persistedMobile = await fixture({mobile: true, hash: '#page=152', storage: new Map([['portrait-edit-focus-mode', 'true']])});
+  assert.equal(persistedMobile.el('reader-preferences').parent, persistedMobile.el('mobile-focus-options'));
+  assert.equal(persistedMobile.el('reader-preferences').open, false);
+  assert.equal(persistedMobile.el('mobile-focus-progress').textContent, 'Night & Lifestyle · 3 of 20');
 
   // Every published study retains its prompt, notes, image and source in flowing mode.
   const content = await fixture({mobile: true, noPrefetch: true});

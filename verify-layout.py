@@ -58,10 +58,14 @@ for target in ['retry-page', 'status', 'keys-hint', 'page-viewport', 'reading-te
 assert page.nodes.index(page.ids['status']) < page.nodes.index(page.ids['reading-text'])
 assert not inside(page.ids['other-issue-card'], page.ids['reader'])
 assert page.nodes.index(page.ids['other-issue-card']) > page.nodes.index(page.ids['bottom-controls'])
+assert inside(page.ids['mobile-focus-progress'], toolbar)
+assert 'hidden' in page.ids['mobile-focus-options']['attrs']
+assert page.nodes.index(page.ids['mobile-focus-options']) > page.nodes.index(page.ids['bottom-controls'])
+assert inside(page.ids['reader-preferences-summary'], preferences)
 assert page.ids['page-image']['attrs']['fetchpriority'] == 'high'
 assert page.ids['focus-toggle']['attrs']['aria-keyshortcuts'] == 'F'
 assert page.ids['download']['attrs']['href'].endswith('/noir-editorial-1/The_Portrait_Edit_Issue_02.pdf')
-assert all(node['attrs'].get('src', '').startswith('reader.js?v=type-1') for node in page.nodes if node['tag'] == 'script')
+assert all(node['attrs'].get('src', '').startswith('reader.js?v=mobile-focus-1') for node in page.nodes if node['tag'] == 'script')
 for node in page.nodes:
     if node['tag'] in {'input', 'select'}:
         assert 'aria-label' in node['attrs'] or any(parent['tag'] == 'label' for parent in node['ancestors']), 'Named form control'

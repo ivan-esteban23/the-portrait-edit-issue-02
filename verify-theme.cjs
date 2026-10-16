@@ -81,8 +81,8 @@ for (const [scheme, color] of [['light', '#f6f4ef'], ['dark', '#0a0a0a']]) {
   assert(html.includes(`<meta name="theme-color" content="${color}" media="(prefers-color-scheme: ${scheme})">`));
 }
 assert(html.includes('<meta name="color-scheme" content="light dark">'));
-assert(html.includes('style.css?v=type-1'));
-assert(html.includes('reader.js?v=type-1'));
+assert(html.includes('style.css?v=mobile-focus-1'));
+assert(html.includes('reader.js?v=mobile-focus-1'));
 assert.equal(light['--radius'], '2px');
 assert(!css.includes('--subtle'), 'Use one consistent secondary text role');
 assert(Object.keys(overrides).every(key => !/space|type-|radius|tracking|font|width|gutter/.test(key)), 'Themes must share all geometry and typography');
@@ -91,4 +91,4 @@ for (const [, block] of components.matchAll(/\{([^{}]*)\}/g)) {
   if (props['font-size']) assert(/var\(--(?:type-|reading-size)/.test(props['font-size']) || props['font-size'] === 'inherit', 'Shared type scale');
   if (props['border-radius']) assert.equal(props['border-radius'], 'var(--radius)');
 }
-console.log('PASS: exact requested Light/Dark palettes, automatic themes, one type/spacing/shape system, warm Focus canvas, adaptive browser colors and type-1 cache busting.');
+console.log('PASS: exact requested Light/Dark palettes, automatic themes, one type/spacing/shape system, warm Focus canvas, adaptive browser colors and mobile-focus-1 cache busting.');

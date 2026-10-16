@@ -4,15 +4,42 @@ const $=id=>document.getElementById(id);let issue,current=1,request=0,pageData=n
 // Restore Focus mode before the issue metadata request completes.
 const focusStorageKey = 'portrait-edit-focus-mode';
 let focusMode = false;
+let mobileFocusLayout = false;
 try {
   focusMode = localStorage.getItem(focusStorageKey) === 'true';
 } catch (_) {}
+// Reuse the existing controls rather than creating a second mobile settings UI.
+// Only transition the layout on entry/exit or a breakpoint change, so scrolling
+// never closes options that the reader deliberately opened.
+function syncMobileFocusLayout() {
+  const active = focusMode && typeof matchMedia === 'function' &&
+    matchMedia('(max-width: 700px)').matches;
+  if (active === mobileFocusLayout) return;
+  mobileFocusLayout = active;
+  const preferences = $('reader-preferences');
+  const chapters = $('chapter-overview-shell');
+  const zoom = $('page-zoom-label');
+  if (active) {
+    preferences.open = false;
+    $('mobile-focus-options').append(preferences);
+    preferences.insertBefore(chapters, $('reading-options'));
+    $('reading-options').append(zoom);
+    $('reader-preferences-summary').textContent = 'Chapters & reading options';
+  } else {
+    $('reader').insertBefore(chapters, $('reader-toolbar'));
+    $('toolbar-main').insertBefore(zoom, $('focus-toggle'));
+    $('toolbar-secondary').append(preferences);
+    $('reader-preferences-summary').textContent = 'Reading options';
+  }
+  $('mobile-focus-options').hidden = !active;
+}
 function setFocusMode(enabled, persist = false) {
   focusMode = enabled;
   document.body.classList.toggle('focus-mode', enabled);
   $('focus-toggle').ariaPressed = String(enabled);
   $('focus-toggle').textContent = enabled ? 'Exit Focus' : 'Focus';
   $('focus-context').hidden = !enabled;
+  syncMobileFocusLayout();
   if (persist) {
     try { localStorage.setItem(focusStorageKey, String(enabled)); } catch (_) {}
   }
@@ -24,7 +51,7 @@ $('focus-toggle').onclick = () => {
   updateReaderChrome();
 };
 
-try{const response=await fetch('issue.json',{cache:'no-cache'});if(!response.ok)throw Error('Issue metadata unavailable');issue=await response.json();}catch(e){$('status').textContent='The reader could not load. Please refresh or use the PDF download.';return;}
+try{const response=await fetch('issue.json',{cache:'no-cache'});if(!response.ok)throw Error('Issue metadata unavailable');issue=await response.json();}catch(e){$('status').textContent='The reader could not load. Please refresh or use the PDF download.';document.querySelector('.reader-status').classList.toggle('has-error', true);return;}
 document.title=`The Portrait Edit — ${issue.title}`;$('issue-label').textContent=`Issue ${issue.number}`;$('issue-number').textContent=`ISSUE ${issue.number} / THE PORTRAIT EDIT`;$('title').textContent=issue.title;$('description').textContent=issue.description;$('stats').textContent=`${issue.studies} studies · ${issue.pages} pages · ${issue.navigation_label || `${issue.chapters.length} chapters`}`;
 $('cover').alt=`The Portrait Edit — Issue ${issue.number} — ${issue.title} cover`;$('download').href=issue.download;$('download-note').textContent=`Original PDF · ${(issue.pdf_bytes/1000000).toFixed(1)} MB. The reader loads one page at a time.`;$('other-issue').href=issue.other_url;$('other-issue-card').href=issue.other_url;$('footer-issue-01').href=issue.other_url;$('other-issue').textContent=`Explore Issue ${issue.other_number} ↗`;$('page-total').textContent=`/ ${issue.pages}`;$('page-number').max=issue.pages;
 const chapterButtons = [];
@@ -215,6 +242,7 @@ async function copyPrompt(prompt, button, feedback) {
 }
 
 function setPageLoading(loading) {
+  if (loading) document.querySelector('.reader-status').classList.toggle('has-error', false);
   $('page-loading').hidden = !loading;
   $('page-viewport').ariaBusy = String(loading);
 }
@@ -268,6 +296,7 @@ function updateChapterProgress() {
   updateChapterEdges();
   $('chapter-progress').textContent =
     `${title} · pages ${start}–${end} · ${current - start + 1} of ${end - start + 1}`;
+  $('mobile-focus-progress').textContent = `${title} · ${current - start + 1} of ${end - start + 1}`;
 }
 
 function renderReading() {
@@ -358,6 +387,7 @@ function loadCurrentPageImage(retry = false) {
     setPageLoading(false);
     $('status').textContent = 'This page could not load. Refresh or download the PDF.';
     $('retry-page').hidden = false;
+    document.querySelector('.reader-status').classList.toggle('has-error', true);
   };
   image.alt = `Issue ${issue.number}, magazine page ${current}`;
   image.src = `pages/${String(current).padStart(3, '0')}.webp${retry ? `?retry=${attempt}` : ''}`;
@@ -370,12 +400,16 @@ function updateChapterEdges() {
   $('chapter-overview-shell').classList.toggle('more-right', strip.scrollWidth - strip.clientWidth - strip.scrollLeft > 2);
 }
 function updateReaderChrome() {
+  syncMobileFocusLayout();
   const rect = $('reader').getBoundingClientRect();
   const visible = rect.top < window.innerHeight && rect.bottom > 0;
   const mobile = matchMedia('(max-width: 700px)').matches;
   document.body.classList.toggle('reader-docked', mobile && visible);
   updateChapterEdges();
 }
+$('reader-preferences').addEventListener('toggle', () => {
+  if ($('reader-preferences').open) updateChapterProgress();
+});
 $('chapter-overview').addEventListener('scroll', updateChapterEdges, {passive: true});
 window.addEventListener('scroll', updateReaderChrome, {passive: true});
 window.addEventListener('resize', () => { updateChapterProgress(); updateReaderChrome(); });
@@ -419,6 +453,8 @@ viewport.addEventListener('touchcancel', () => { swipe = null; }, {passive: true
 function show(n, update = true) {
   current = Math.min(issue.pages, Math.max(1, Number(n) || 1));
   request++;
+  const leavingOptions = mobileFocusLayout && $('reader-preferences').contains(document.activeElement);
+  if (mobileFocusLayout) $('reader-preferences').open = false;
   clearCopyConfirmation();
   if (pageFade) {
     pageFade.cancel();
@@ -440,6 +476,10 @@ function show(n, update = true) {
   updateReaderChrome();
   if (update) history.replaceState(null, '', `#page=${current}`);
   readingMode();
+  if (leavingOptions) {
+    const target = $('reading-mode').value === 'text' ? $('reading-text') : $('page-viewport');
+    target.focus({preventScroll: true});
+  }
   if ($('text-details').open && $('reading-mode').value !== 'text') text();
   prefetchAdjacentPages();
 }

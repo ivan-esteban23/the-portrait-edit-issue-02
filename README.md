@@ -10,7 +10,9 @@ Typography uses 12px captions, 13px secondary text and 16px body text at the def
 
 The reader has one sticky Chapter / Page / Zoom / Focus toolbar. Reading view and text size live in its native **Reading options** disclosure; chapter progress remains visible. On phones, the same toolbar is compact and Previous/Next are consolidated into the existing bottom navigation. Selected Studies use equal cards and quiet captions; Issue 01 discovery follows the reader. Focus keeps chapter navigation, context and preferences while hiding publication/discovery sections. Focus paper warms in Light mode, with normal control and page-mat surfaces.
 
-Reference images, page artwork, issue metadata and `reader.js` are unchanged by this pass. The original noir magazine pages retain their artwork in both website themes. Issue 01 remains on its independent website.
+Reference images, page artwork and issue metadata are unchanged. Existing reader features are preserved. The original noir magazine pages retain their artwork in both website themes. Issue 01 remains on its independent website.
+
+At 700px and below, Focus shows only previous / current-total / next and Exit Focus, followed by a short chapter-progress line. Chapter navigation, reading mode, text size and zoom reuse their existing controls inside a closed **Chapters & reading options** disclosure after the study. Entering mobile Focus (including a restored session or breakpoint transition) and page navigation close the disclosure; deliberate opening and scrolling do not fight each other. Exiting Focus or returning to desktop restores the richer toolbar. Normal status/hint chrome is quiet in mobile Focus, while image errors and Retry page remain visible. Bottom controls retain 44px targets with a shorter bar and safe-area padding.
 
 The PDF has 196 Letter pages with 10.5 pt prompts, 10 pt working notes and contents, and 10.5 pt glossary definitions. It preserves all 174 prompts, titles, Source filenames, notes, original references and reviewed Try this lines. The source/build PR lives in `ivan-esteban23/the-portrait-edit`.
 

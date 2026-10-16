@@ -20,8 +20,8 @@
     <meta name="twitter:title" content="The Portrait Edit — The Prompt Issue">
     <meta name="twitter:description" content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download.">
     <meta name="twitter:image" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/cover.webp">
-    <link rel="stylesheet" href="style.css?v=type-1">
-    <script src="reader.js?v=type-1" defer></script>
+    <link rel="stylesheet" href="style.css?v=mobile-focus-1">
+    <script src="reader.js?v=mobile-focus-1" defer></script>
     <noscript>
       <style>
         .toolbar, .reader-messages, .bottom-nav-slot, .chapter-overview-shell,
@@ -89,9 +89,9 @@
           <nav id="chapter-overview" class="chapter-overview" aria-label="Chapter overview"></nav>
         </div>
 
-        <div class="toolbar">
+        <div class="toolbar" id="reader-toolbar">
           <p id="focus-context" class="focus-context" hidden></p>
-          <div class="toolbar-main">
+          <div class="toolbar-main" id="toolbar-main">
             <label>
               <span class="control-label">Chapter</span>
               <select id="chapter" aria-label="Jump to chapter">
@@ -126,11 +126,12 @@
             </label>
             <button id="focus-toggle" class="focus-toggle" type="button" aria-pressed="false" aria-keyshortcuts="F">Focus</button>
           </div>
-          <div class="toolbar-secondary">
+          <div class="toolbar-secondary" id="toolbar-secondary">
             <p id="chapter-progress" class="chapter-progress" aria-live="polite" aria-atomic="true"></p>
+            <p id="mobile-focus-progress" class="mobile-focus-progress" aria-live="polite" aria-atomic="true"></p>
             <details class="reader-preferences" id="reader-preferences">
-              <summary>Reading options</summary>
-              <div class="reading-options">
+              <summary id="reader-preferences-summary">Reading options</summary>
+              <div class="reading-options" id="reading-options">
                 <label>
                   <span class="control-label">View</span>
                   <select id="reading-mode">
@@ -184,6 +185,8 @@
             <button type="button" id="next-bottom">Next →</button>
           </nav>
         </div>
+
+        <div id="mobile-focus-options" class="mobile-focus-options" hidden></div>
 
         <details id="text-details">
           <summary>Read this page as text</summary>

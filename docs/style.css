@@ -1,4 +1,4 @@
-/* The Portrait Edit / type-1
+/* The Portrait Edit / mobile-focus-1
    One type scale, spacing rhythm and component system; automatic theme tokens. */
 :root {
   color-scheme: light;
@@ -344,6 +344,7 @@ select { max-width: 100%; }
 .focus-toggle[aria-pressed="true"] { border-color: var(--text); background: var(--text); color: var(--bg); }
 .focus-toggle[aria-pressed="true"]:hover { background: var(--text); color: var(--bg); }
 .toolbar-secondary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-4); }
+.mobile-focus-progress { display: none; }
 .chapter-progress { color: var(--muted); font-size: var(--type-caption); }
 .reader-preferences { margin-left: auto; }
 .reader-preferences > summary { min-height: 44px; font-size: var(--type-caption); }
@@ -387,7 +388,7 @@ select { max-width: 100%; }
 
 /* Stable editorial figures for mixed study titles, metadata and reader controls. */
 .stats, .study-title, #issue-label, #issue-number, .chapter-range, .toolbar,
-.metadata, .focus-context, .reader-status, .bottom-controls {
+.metadata, .focus-context, .reader-status, .reading-options, .bottom-controls {
   font-variant-numeric: lining-nums tabular-nums;
 }
 
@@ -494,6 +495,54 @@ footer { display: grid; grid-template-columns: 1fr 2fr; gap: var(--space-8); mar
   #reading-text { max-width: calc(var(--measure-mobile) + 2 * var(--space-2)); padding: var(--space-8) var(--space-2); }
   footer { grid-template-columns: 1fr; gap: var(--space-6); margin-top: var(--space-8); }
   .footer-links { justify-content: flex-start; gap: var(--space-6); }
+}
+/* Mobile Focus: one 44px navigation row, one secondary line, then the study.
+   Existing settings and chapters move below the study into a closed disclosure. */
+@media (max-width: 700px) {
+  body.focus-mode .reading { padding-top: 0; padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+  body.focus-mode .toolbar { padding: var(--space-2) var(--space-3); border-top: 0; }
+  body.focus-mode .toolbar-main { flex-wrap: nowrap; justify-content: space-between; }
+  body.focus-mode .toolbar-main > label:first-child,
+  body.focus-mode #focus-context,
+  body.focus-mode #chapter-progress,
+  body.focus-mode .keys-hint { display: none; }
+  body.focus-mode .toolbar-main .pagination { flex: 0 0 auto; gap: 0; align-items: center; }
+  body.focus-mode .toolbar-main .pagination > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-color: var(--transparent);
+    background: var(--transparent);
+  }
+  body.focus-mode #page-number { border-color: var(--transparent); background: var(--transparent); }
+  body.focus-mode #page-total { display: block; padding: 0 var(--space-1) 0 0; font-size: var(--type-small); }
+  body.focus-mode .focus-toggle { margin-left: auto; }
+  body.focus-mode .toolbar-secondary { display: block; margin-top: var(--space-1); }
+  body.focus-mode .mobile-focus-progress {
+    display: block;
+    color: var(--muted);
+    font-size: var(--type-caption);
+    line-height: 1.5;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  body.focus-mode .reader-messages { margin: 0; }
+  body.focus-mode .reader-status:not(.has-error) { display: none; }
+  body.focus-mode .reader-status.has-error { margin-block: var(--space-2); }
+  body.focus-mode #reading-text { padding-top: var(--space-3); }
+  body.focus-mode #reading-text .style-line { margin-top: var(--space-3); }
+  body.focus-mode #reading-text .reference-figure { margin-block: var(--space-6); }
+  body.focus-mode #reading-text .study-section { margin-top: var(--space-6); padding-top: var(--space-6); }
+  body.focus-mode .bottom-nav-slot { min-height: calc(68px + env(safe-area-inset-bottom, 0px)); }
+  body.focus-mode .bottom-controls { padding-block: var(--space-3); }
+  body.focus-mode .bottom-controls button { min-height: 44px; }
+  body.focus-mode.reader-docked .bottom-controls {
+    padding-top: var(--space-1);
+    padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+  }
+  .mobile-focus-options { padding-block: var(--space-2); border-top: 1px solid var(--border); }
+  .mobile-focus-options .reader-preferences { margin: 0; }
+  .mobile-focus-options .chapter-overview-shell { margin-block: var(--space-2); }
+  .mobile-focus-options .reading-options p { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
