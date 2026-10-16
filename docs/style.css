@@ -294,7 +294,7 @@ main {
   object-fit: contain;
 }
 
-.selected-grid span {
+.selected-grid .study-caption {
   display: block;
   margin-top: auto;
   padding: 16px 4px 5px;
@@ -305,6 +305,20 @@ main {
   transition: color var(--transition);
 }
 
+.selected-grid .study-title {
+  display: block;
+  color: var(--text);
+}
+
+.selected-grid .study-style {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.95em;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .selected-grid a:hover {
     border-color: var(--border-hover);
@@ -312,7 +326,7 @@ main {
     transform: translateY(-3px);
   }
 
-  .selected-grid a:hover span {
+  .selected-grid a:hover .study-caption {
     color: var(--text);
   }
 }
@@ -618,6 +632,18 @@ footer p {
   margin: 0;
 }
 
+/* The masthead scrolls away; the desktop toolbar stays within the reader. */
+@media (min-width: 700px) {
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom-color: var(--border-hover);
+    background: var(--bg);
+    box-shadow: 0 10px 22px rgb(0 0 0 / 24%);
+  }
+}
+
 /* Narrow screens use one readable card per row and full-width controls. */
 @media (max-width: 699px) {
   :root {
@@ -683,7 +709,7 @@ footer p {
     object-fit: contain;
   }
 
-  .selected-grid span {
+  .selected-grid .study-caption {
     padding-top: 18px;
     font-size: 12px;
   }

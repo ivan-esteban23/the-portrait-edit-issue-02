@@ -5,7 +5,33 @@ try{const response=await fetch('issue.json',{cache:'no-cache'});if(!response.ok)
 document.title=`The Portrait Edit — ${issue.title}`;$('issue-label').textContent=`Issue ${issue.number}`;$('issue-number').textContent=`ISSUE ${issue.number} / THE PORTRAIT EDIT`;$('title').textContent=issue.title;$('description').textContent=issue.description;$('stats').textContent=`${issue.studies} studies · ${issue.pages} pages · ${issue.navigation_label || `${issue.chapters.length} chapters`}`;
 $('cover').alt=`The Portrait Edit — Issue ${issue.number} — ${issue.title} cover`;$('download').href=issue.download;$('download-note').textContent=`Original PDF · ${(issue.pdf_bytes/1000000).toFixed(1)} MB. The reader loads one page at a time.`;$('other-issue').href=issue.other_url;$('other-issue').textContent=`Explore Issue ${issue.other_number} ↗`;$('page-total').textContent=`/ ${issue.pages}`;$('page-number').max=issue.pages;
 for(const ch of issue.chapters){const option=document.createElement('option');option.value=ch.page;option.textContent=ch.title;$('chapter').append(option);}
-for(const study of issue.featured||[]){const link=document.createElement('a');link.href=`#page=${study.page}`;const image=document.createElement('img');image.src=study.image;image.alt=study.title;image.loading='lazy';const caption=document.createElement('span');caption.textContent=`${String(study.number).padStart(3,'0')} / ${study.title}`;link.append(image);link.append(caption);$('selected-studies').append(link);}
+for (const study of issue.featured || []) {
+  const link = document.createElement('a');
+  link.href = `#page=${study.page}`;
+
+  const image = document.createElement('img');
+  image.src = study.image;
+  image.alt = study.title;
+  image.loading = 'lazy';
+
+  const caption = document.createElement('span');
+  caption.className = 'study-caption';
+  const title = document.createElement('span');
+  title.className = 'study-title';
+  title.textContent = `${String(study.number).padStart(3, '0')} / ${study.title}`;
+  caption.append(title);
+
+  if (study.style) {
+    const style = document.createElement('span');
+    style.className = 'study-style';
+    style.textContent = study.style;
+    caption.append(style);
+  }
+
+  link.append(image);
+  link.append(caption);
+  $('selected-studies').append(link);
+}
 function renderReading(){
 const target=$('reading-text');target.replaceChildren();
 if(!pageData)return;
