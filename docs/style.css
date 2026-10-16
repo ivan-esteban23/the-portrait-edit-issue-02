@@ -836,6 +836,89 @@ details[open] > summary {
   color: var(--text);
 }
 
+/* Quiet hierarchy and navigation refinements. */
+.chapter-overview-shell {
+  position: relative;
+  margin-bottom: 18px;
+  min-width: 0;
+}
+.chapter-overview-shell .chapter-overview { margin-bottom: 0; }
+.chapter-overview-shell::before,
+.chapter-overview-shell::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 24px;
+  pointer-events: none;
+  content: '';
+  opacity: 0;
+}
+.chapter-overview-shell::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg), transparent);
+}
+.chapter-overview-shell::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg), transparent);
+}
+.chapter-overview-shell.more-left::before,
+.chapter-overview-shell.more-right::after { opacity: 1; }
+.chapter-button { position: relative; overflow: hidden; }
+.chapter-button[aria-current="location"]::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--chapter-progress, 0%);
+  height: 2px;
+  background: var(--muted);
+  content: '';
+}
+.focus-context {
+  margin: -10px 0 18px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+}
+.reader-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.retry-page { margin: 8px 0; background: transparent; font-size: 12px; }
+#reading-text .reference-figure { margin: 30px 0; text-align: center; }
+#reading-text .reference-figure .reference { margin: 0 auto 14px; }
+.reference-caption {
+  color: var(--subtle);
+  font-size: 11px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+#reading-text .study-section { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
+#reading-text .study-section h3,
+#reading-text .study-section .prompt-heading { margin-top: 0; }
+#reading-text .study-section > .copy:last-child { margin-bottom: 0; }
+.bottom-controls button { min-width: 88px; min-height: 48px; }
+
+@media (max-width: 700px) {
+  .bottom-nav-slot { min-height: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  .reading { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
+  body.reader-docked .bottom-controls {
+    position: fixed;
+    z-index: 30;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: minmax(88px, 1fr) auto minmax(88px, 1fr);
+    gap: 8px;
+    padding: 10px max(12px, env(safe-area-inset-left, 0px)) calc(10px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    box-shadow: 0 -6px 18px rgb(0 0 0 / 20%);
+  }
+  .bottom-controls button { font-size: 12px; padding: 10px; }
+  #current-label { font-size: 10px; white-space: nowrap; }
+  #reading-text .copy-prompt { min-height: 44px; }
+}
+
 /* Colophon: publication identity, issue navigation and production notes. */
 footer {
   display: grid;

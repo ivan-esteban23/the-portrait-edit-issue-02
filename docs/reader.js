@@ -12,6 +12,7 @@ function setFocusMode(enabled, persist = false) {
   document.body.classList.toggle('focus-mode', enabled);
   $('focus-toggle').ariaPressed = String(enabled);
   $('focus-toggle').textContent = enabled ? 'Exit Focus' : 'Focus';
+  $('focus-context').hidden = !enabled;
   if (persist) {
     try { localStorage.setItem(focusStorageKey, String(enabled)); } catch (_) {}
   }
@@ -20,6 +21,7 @@ setFocusMode(focusMode);
 $('focus-toggle').onclick = () => {
   setFocusMode(!focusMode, true);
   $('reader').scrollIntoView({behavior: 'instant', block: 'start'});
+  updateReaderChrome();
 };
 
 try{const response=await fetch('issue.json',{cache:'no-cache'});if(!response.ok)throw Error('Issue metadata unavailable');issue=await response.json();}catch(e){$('status').textContent='The reader could not load. Please refresh or use the PDF download.';return;}
@@ -148,17 +150,48 @@ function clearCopyConfirmation() {
   }
 }
 
+// Legacy copying is synchronous and leaves neither an element nor a focus jump.
+function copyWithTextarea(prompt) {
+  const previousFocus = document.activeElement;
+  const selection = window.getSelection?.();
+  const ranges = [];
+  if (selection) {
+    for (let i = 0; i < selection.rangeCount; i++) ranges.push(selection.getRangeAt(i).cloneRange());
+  }
+  const textarea = document.createElement('textarea');
+  textarea.value = prompt;
+  textarea.readOnly = true;
+  textarea.tabIndex = -1;
+  textarea.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
+  document.body.append(textarea);
+  try {
+    textarea.focus({preventScroll: true});
+    textarea.select();
+    if (!document.execCommand?.('copy')) throw new Error('Clipboard unavailable');
+  } finally {
+    textarea.remove();
+    previousFocus?.focus({preventScroll: true});
+    if (selection) {
+      selection.removeAllRanges();
+      for (const range of ranges) selection.addRange(range);
+    }
+  }
+}
+
 async function copyPrompt(prompt, button, feedback) {
   clearCopyConfirmation();
   const copyRequest = request;
+  const copyFocus = document.activeElement;
+  const useLegacyCopy = typeof navigator === 'undefined' || !navigator.clipboard?.writeText;
   button.disabled = true;
   button.textContent = 'Copying…';
   feedback.textContent = '';
   try {
-    if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
-      throw new Error('Clipboard unavailable');
+    if (useLegacyCopy) {
+      copyWithTextarea(prompt);
+    } else {
+      await navigator.clipboard.writeText(prompt);
     }
-    await navigator.clipboard.writeText(prompt);
     if (copyRequest !== request || !$('reading-text').contains(button)) return;
     button.textContent = 'Copied';
     feedback.textContent = 'Prompt copied.';
@@ -175,6 +208,9 @@ async function copyPrompt(prompt, button, feedback) {
     feedback.textContent = 'Copy unavailable. Select the prompt text to copy it.';
   } finally {
     button.disabled = false;
+    if (useLegacyCopy && copyRequest === request && $('reading-text').contains(button)) {
+      copyFocus?.focus({preventScroll: true});
+    }
   }
 }
 
@@ -218,7 +254,18 @@ function updateChapterProgress() {
   $('chapter').value = start;
   chapterButtons.forEach((button, i) => {
     button.ariaCurrent = i === index ? 'location' : 'false';
+    button.style.setProperty('--chapter-progress', i === index ? `${100 * (current - start + 1) / (end - start + 1)}%` : '0%');
   });
+  // Scroll only the strip, never the document (including ordinary page turns).
+  const active = chapterButtons[index];
+  const strip = $('chapter-overview');
+  if (active) {
+    const bounds = strip.getBoundingClientRect();
+    const buttonBounds = active.getBoundingClientRect();
+    if (buttonBounds.left < bounds.left + 20) strip.scrollLeft -= bounds.left + 20 - buttonBounds.left;
+    else if (buttonBounds.right > bounds.right - 20) strip.scrollLeft += buttonBounds.right - bounds.right + 20;
+  }
+  updateChapterEdges();
   $('chapter-progress').textContent =
     `${title} · pages ${start}–${end} · ${current - start + 1} of ${end - start + 1}`;
 }
@@ -228,25 +275,28 @@ function renderReading() {
   const target = $('reading-text');
   target.replaceChildren();
   if (!pageData) return;
-  const add = (tag, content, cls) => {
+  const add = (tag, content, cls, parent = target) => {
     const node = document.createElement(tag);
     node.textContent = content;
     if (cls) node.className = cls;
-    target.append(node);
+    parent.append(node);
     return node;
   };
   const study = pageData.study;
   if (study) {
-    add('p', `STUDY ${String(study.number).padStart(3, '0')} · Page ${current}`, 'metadata');
-    add('h2', study.title);
-    add('p', study.flags, 'metadata');
-    const image = add('img', '', 'reference');
+    const metadata = add('header', '', 'study-metadata');
+    add('p', `STUDY ${String(study.number).padStart(3, '0')} · Page ${current}`, 'metadata', metadata);
+    add('h2', study.title, '', metadata);
+    add('p', study.flags, 'metadata', metadata);
+    add('p', study.style, 'style-line', metadata);
+    const figure = add('figure', '', 'reference-figure');
+    const image = add('img', '', 'reference', figure);
     image.src = study.image;
+    image.decoding = 'async';
     image.alt = `Reference for Study ${study.number}: ${study.title}`;
-    add('p', 'Source: ' + study.source, 'metadata');
-    add('p', study.style, 'style-line');
-
-    const heading = add('div', '', 'prompt-heading');
+    add('figcaption', 'Source: ' + study.source, 'reference-caption', figure);
+    const promptSection = add('section', '', 'study-section');
+    const heading = add('div', '', 'prompt-heading', promptSection);
     const title = document.createElement('h3');
     title.textContent = 'Image Prompt';
     const actions = document.createElement('div');
@@ -265,10 +315,13 @@ function renderReading() {
     actions.append(copy);
     heading.append(title);
     heading.append(actions);
-    add('p', study.prompt, 'copy');
-    add('h3', 'Working notes');
-    add('p', study.notes, 'copy');
-    add('p', study.try_this, 'copy');
+    add('p', study.prompt, 'copy', promptSection);
+    const notes = add('section', '', 'study-section');
+    add('h3', 'Working notes', '', notes);
+    add('p', study.notes, 'copy', notes);
+    const experiment = add('section', '', 'study-section');
+    add('h3', 'Try this', '', experiment);
+    add('p', study.try_this, 'copy', experiment);
   } else if (current === 1) {
     const cover = add('img', '', 'reference');
     cover.src = 'cover.webp';
@@ -277,12 +330,92 @@ function renderReading() {
   } else {
     add('pre', pageData.text);
   }
+  updateReaderChrome();
 }
 function readingMode(){const large=$('reading-mode').value==='text';$('reading-text').hidden=!large;document.querySelector('.page-viewport').hidden=large;$('text-size-label').hidden=!large;$('page-zoom-label').hidden=large;if(large&&!pageData)text();}
 $('reading-mode').value=typeof matchMedia==='function'&&matchMedia('(max-width: 700px)').matches?'text':'page';
 $('reading-mode').onchange=readingMode;$('text-size').onchange=()=>{$('reading-text').style.setProperty('--reading-size',$('text-size').value+'px');};
 function hashPage(){const match=location.hash.match(/^#page=(\d+)$/);return match?Number(match[1]):current;}
 async function text(){const id=request,n=current;try{const r=await fetch(`pages/${String(n).padStart(3,'0')}.json`,{cache:'no-cache'});if(!r.ok)throw Error();const data=await r.json();if(id===request){pageData=data;$('page-text').textContent=data.text||'No extractable text on this page.';renderReading();}}catch(e){if(id===request){$('page-text').textContent='Page text is unavailable. Please use the original PDF.';$('reading-text').textContent='Text could not load. Choose Original page or download the PDF.';}}}
+let imageAttempt = 0;
+function loadCurrentPageImage(retry = false) {
+  const image = $('page-image');
+  const pageRequest = request, attempt = ++imageAttempt;
+  $('retry-page').hidden = true;
+  $('status').textContent = `Loading page ${current}…`;
+  setPageLoading(true);
+  image.decoding = 'async';
+  image.fetchPriority = 'high';
+  image.onload = () => {
+    if (pageRequest !== request || attempt !== imageAttempt) return;
+    setPageLoading(false);
+    fadePageImage(image);
+    $('status').textContent = `Page ${current} · ${issue.title}`;
+    updateReaderChrome();
+  };
+  image.onerror = () => {
+    if (pageRequest !== request || attempt !== imageAttempt) return;
+    setPageLoading(false);
+    $('status').textContent = 'This page could not load. Refresh or download the PDF.';
+    $('retry-page').hidden = false;
+  };
+  image.alt = `Issue ${issue.number}, magazine page ${current}`;
+  image.src = `pages/${String(current).padStart(3, '0')}.webp${retry ? `?retry=${attempt}` : ''}`;
+}
+$('retry-page').onclick = () => loadCurrentPageImage(true);
+
+function updateChapterEdges() {
+  const strip = $('chapter-overview');
+  $('chapter-overview-shell').classList.toggle('more-left', strip.scrollLeft > 2);
+  $('chapter-overview-shell').classList.toggle('more-right', strip.scrollWidth - strip.clientWidth - strip.scrollLeft > 2);
+}
+function updateReaderChrome() {
+  const rect = $('reader').getBoundingClientRect();
+  const visible = rect.top < window.innerHeight && rect.bottom > 0;
+  const mobile = matchMedia('(max-width: 700px)').matches;
+  document.body.classList.toggle('reader-docked', mobile && visible);
+  updateChapterEdges();
+}
+$('chapter-overview').addEventListener('scroll', updateChapterEdges, {passive: true});
+window.addEventListener('scroll', updateReaderChrome, {passive: true});
+window.addEventListener('resize', () => { updateChapterProgress(); updateReaderChrome(); });
+if (typeof ResizeObserver === 'function') {
+  new ResizeObserver(updateReaderChrome).observe($('reader'));
+}
+
+function isEditing(target) {
+  return /^(INPUT|SELECT|TEXTAREA)$/.test(target?.tagName) ||
+    target?.isContentEditable || Boolean(target?.closest?.('[contenteditable]:not([contenteditable="false"])'));
+}
+function hasSelection() { return Boolean(window.getSelection?.()?.toString()); }
+// Passive touch listeners never block vertical scrolling or pinch zoom. Once a
+// gesture turns vertical, it stays cancelled. Zoomed pages keep native panning.
+let swipe = null;
+const viewport = $('page-viewport');
+viewport.addEventListener('touchstart', event => {
+  swipe = null;
+  if (event.touches.length !== 1 || hasSelection() || isEditing(event.target) ||
+      event.target.closest?.('button, a, input, select, textarea') || Number($('zoom').value) > 100) return;
+  const point = event.touches[0];
+  swipe = {x: point.clientX, y: point.clientY};
+}, {passive: true});
+viewport.addEventListener('touchmove', event => {
+  if (!swipe) return;
+  if (event.touches.length !== 1 || hasSelection()) { swipe = null; return; }
+  const point = event.touches[0];
+  const dx = Math.abs(point.clientX - swipe.x), dy = Math.abs(point.clientY - swipe.y);
+  if (dy > 12 && dy >= dx) swipe = null;
+}, {passive: true});
+viewport.addEventListener('touchend', event => {
+  const start = swipe;
+  swipe = null;
+  if (!start || hasSelection() || event.touches.length || event.changedTouches.length !== 1) return;
+  const point = event.changedTouches[0];
+  const dx = point.clientX - start.x, dy = point.clientY - start.y;
+  if (Math.abs(dx) >= 70 && Math.abs(dx) > Math.abs(dy) * 1.5) show(current + (dx < 0 ? 1 : -1));
+}, {passive: true});
+viewport.addEventListener('touchcancel', () => { swipe = null; }, {passive: true});
+
 function show(n, update = true) {
   current = Math.min(issue.pages, Math.max(1, Number(n) || 1));
   request++;
@@ -298,32 +431,28 @@ function show(n, update = true) {
   $('status').textContent = `Loading page ${current}…`;
   $('page-text').textContent = 'Loading page text…';
 
-  const image = $('page-image');
-  const id = request;
-  setPageLoading(true);
-  image.onload = () => {
-    if (id !== request) return;
-    setPageLoading(false);
-    fadePageImage(image);
-    $('status').textContent = `Page ${current} · ${issue.title}`;
-  };
-  image.onerror = () => {
-    if (id !== request) return;
-    setPageLoading(false);
-    $('status').textContent = 'This page could not load. Refresh or download the PDF.';
-  };
-  image.alt = `Issue ${issue.number}, magazine page ${current}`;
-  image.src = `pages/${String(current).padStart(3, '0')}.webp`;
+  loadCurrentPageImage();
 
   for (const name of ['previous', 'previous-bottom']) $(name).disabled = current === 1;
   for (const name of ['next', 'next-bottom']) $(name).disabled = current === issue.pages;
   updateChapterProgress();
+  $('focus-context').textContent = `Issue ${issue.number} · ${issue.title} · Page ${current}`;
+  updateReaderChrome();
   if (update) history.replaceState(null, '', `#page=${current}`);
   readingMode();
   if ($('text-details').open && $('reading-mode').value !== 'text') text();
   prefetchAdjacentPages();
 }
-for(const name of ['previous','previous-bottom'])$(name).onclick=()=>show(current-1);for(const name of ['next','next-bottom'])$(name).onclick=()=>show(current+1);$('page-number').onchange=()=>show($('page-number').value);$('chapter').onchange=()=>show($('chapter').value);$('zoom').onchange=()=>{const holder=document.querySelector('.page-holder');holder.style.width=`${$('zoom').value}%`;holder.style.maxWidth=$('zoom').value==='100'?'950px':'none';};$('text-details').ontoggle=()=>{readingMode();if($('text-details').open&&$('reading-mode').value!=='text')text();};document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key==='ArrowRight'){e.preventDefault();show(current+1);}if(e.key==='ArrowLeft'){e.preventDefault();show(current-1);}});window.addEventListener('hashchange', () => {
+for(const name of ['previous','previous-bottom'])$(name).onclick=()=>show(current-1);for(const name of ['next','next-bottom'])$(name).onclick=()=>show(current+1);$('page-number').onchange=()=>show($('page-number').value);$('chapter').onchange=()=>show($('chapter').value);$('zoom').onchange=()=>{const holder=document.querySelector('.page-holder');holder.style.width=`${$('zoom').value}%`;holder.style.maxWidth=$('zoom').value==='100'?'950px':'none';};$('text-details').ontoggle=()=>{readingMode();if($('text-details').open&&$('reading-mode').value!=='text')text();};document.addEventListener('keydown', e => {
+  if (isEditing(e.target) || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+  if (e.key.toLowerCase() === 'f' && !e.repeat) {
+    e.preventDefault();
+    $('focus-toggle').onclick();
+  }
+  if (e.key === 'ArrowRight') { e.preventDefault(); show(current + 1); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+});
+window.addEventListener('hashchange', () => {
   if (!/^#page=\d+$/.test(location.hash)) return;
   const arrivingFromOutside = !$('reader').contains(document.activeElement);
   show(hashPage(), false);

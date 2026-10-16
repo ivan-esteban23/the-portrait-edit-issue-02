@@ -18,8 +18,14 @@
     <meta name="twitter:title" content="The Portrait Edit — The Prompt Issue">
     <meta name="twitter:description" content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download.">
     <meta name="twitter:image" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/cover.webp">
-    <link rel="stylesheet" href="style.css?v=professional-5">
-    <script src="reader.js?v=professional-5" defer></script>
+    <link rel="stylesheet" href="style.css?v=professional-6">
+    <script src="reader.js?v=professional-6" defer></script>
+    <noscript>
+      <style>
+        .toolbar, .reading-options, .bottom-nav-slot, .chapter-overview-shell,
+        .page-viewport, #text-details { display: none; }
+      </style>
+    </noscript>
   </head>
   <body>
     <a class="skip" href="#reader">Skip to magazine reader</a>
@@ -92,7 +98,11 @@
           <a id="other-issue" href="#">Explore the other issue ↗</a>
         </div>
 
-        <nav id="chapter-overview" class="chapter-overview" aria-label="Chapter overview"></nav>
+        <div id="chapter-overview-shell" class="chapter-overview-shell">
+          <nav id="chapter-overview" class="chapter-overview" aria-label="Chapter overview"></nav>
+        </div>
+
+        <p id="focus-context" class="focus-context" hidden></p>
 
         <div class="toolbar">
           <label>
@@ -127,7 +137,7 @@
               <option value="200">200%</option>
             </select>
           </label>
-          <button id="focus-toggle" class="focus-toggle" type="button" aria-pressed="false">Focus</button>
+          <button id="focus-toggle" class="focus-toggle" type="button" aria-pressed="false" aria-keyshortcuts="F">Focus</button>
           <p id="chapter-progress" class="chapter-progress" aria-live="polite" aria-atomic="true"></p>
         </div>
 
@@ -156,7 +166,10 @@
         </div>
 
         <article id="reading-text" tabindex="-1" hidden aria-label="Study reading view"></article>
-        <p id="status" role="status" aria-live="polite"></p>
+        <div class="reader-status">
+          <p id="status" role="status" aria-live="polite"></p>
+          <button id="retry-page" class="retry-page" type="button" hidden>Retry page</button>
+        </div>
 
         <div
           id="page-viewport"
@@ -166,14 +179,16 @@
         >
           <div id="page-loading" class="page-loading" aria-hidden="true" hidden></div>
           <div class="page-holder">
-            <img id="page-image" width="1224" height="1584" alt="">
+            <img id="page-image" decoding="async" fetchpriority="high" width="1224" height="1584" alt="">
           </div>
         </div>
 
-        <div class="bottom-controls">
-          <button type="button" id="previous-bottom">← Previous</button>
-          <span id="current-label"></span>
-          <button type="button" id="next-bottom">Next →</button>
+        <div class="bottom-nav-slot">
+          <nav id="bottom-controls" class="bottom-controls" aria-label="Page navigation">
+            <button type="button" id="previous-bottom">← Previous</button>
+            <span id="current-label" aria-live="polite" aria-atomic="true"></span>
+            <button type="button" id="next-bottom">Next →</button>
+          </nav>
         </div>
 
         <details id="text-details">

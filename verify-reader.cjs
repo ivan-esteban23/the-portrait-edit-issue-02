@@ -19,12 +19,20 @@ async function fixture(scenario = {}) {
   let nextTimer = 1, clipboardResolve;
   let observer;
   let context;
+  let selectedText = "";
 
   function element(id, tagName = 'DIV') {
     const classes = new Set();
     let text = '';
     return {
       id, tagName, value: '1', open: false, disabled: false,
+      scrollLeft: 0, clientWidth: 300, scrollWidth: 1500,
+      listeners: {},
+      addEventListener(name, callback) { this.listeners[name] = callback; },
+      getBoundingClientRect() { return this.rect || {top: 900, bottom: 2000, left: 20, right: 280}; },
+      closest() { return null; },
+      select() { context.selected = this.value; },
+      remove() { this.parent.children = this.parent.children.filter(child => child !== this); this.parent = null; },
       get textContent() { return text + this.children.map(child => child.textContent).join(''); },
       set textContent(value) {
         text = String(value);
@@ -81,11 +89,23 @@ async function fixture(scenario = {}) {
       body: el('body'),
       activeElement: el('body'),
       getElementById: el,
+      execCommand(command) {
+        assert.equal(command, 'copy');
+        const textarea = el('body').children.at(-1);
+        assert.equal(textarea.tagName, 'TEXTAREA');
+        assert(textarea.style.cssText.includes('left:-9999px'));
+        copies.push(context.selected);
+        return !scenario.fallbackReject;
+      },
       querySelector: selector => selector === '.toolbar' ? el('toolbar') : selector === '.page-viewport' ? el('page-viewport') : el('holder'),
       createElement: tag => element(undefined, tag.toUpperCase()),
       addEventListener: (name, callback) => { events[name] = callback; }
     },
-    window: { addEventListener: (name, callback) => { windowEvents[name] = callback; } },
+    window: {
+      innerWidth: scenario.width || (scenario.mobile ? 390 : 1280), innerHeight: 800,
+      getSelection: () => ({toString: () => selectedText, rangeCount: 0, removeAllRanges() {}}),
+      addEventListener: (name, callback) => { windowEvents[name] = callback; }
+    },
     location,
     history: {
       replaceState(a, b, hash) { location.hash = hash; historyCalls.push('replace'); },
@@ -114,6 +134,7 @@ async function fixture(scenario = {}) {
   await flush();
   return { el, context, events, windowEvents, location, historyCalls, scrolls, focuses, animations, hintStorage, observer,
     prefetches, copies, timers,
+    selectText(text) { selectedText = text; },
     resolveClipboard() { clipboardResolve(); },
     runTimers() { const pending = [...timers.values()]; timers.clear(); pending.forEach(timer => timer.callback()); }
   };
@@ -237,8 +258,10 @@ function clickEvent(extra = {}) {
     assert(el('page-viewport').hidden); assert(!el('reading-text').hidden);
     page(60); await flush();
     const study = JSON.parse(fs.readFileSync(`${root}/docs/pages/060.json`)).study;
-    assert(el('reading-text').children.some(node => node.textContent === study.prompt));
-    assert(el('reading-text').children.some(node => node.src === study.image));
+    assert.equal(descendant(el('reading-text'), 'copy').textContent, study.prompt);
+    assert.equal(descendant(el('reading-text'), 'reference').src, study.image);
+    assert.equal(descendant(el('reading-text'), 'reference-figure').tagName, 'FIGURE');
+    assert.equal(descendant(el('reading-text'), 'reference-caption').textContent, 'Source: ' + study.source);
     const copy = descendant(el('reading-text'), 'copy-prompt');
     const feedback = descendant(el('reading-text'), 'copy-feedback');
     assert(copy); assert.equal(copy.textContent, 'Copy prompt');
@@ -337,7 +360,7 @@ function clickEvent(extra = {}) {
   const noPrefetch = await fixture({noPrefetch: true});
   assert.equal(noPrefetch.prefetches.length, 0);
 
-  for (const option of [{clipboardReject: true}, {noClipboard: true}]) {
+  for (const option of [{clipboardReject: true}, {noClipboard: true, fallbackReject: true}]) {
     const failed = await fixture({hash: '#page=60', mobile: true, ...option});
     const copy = descendant(failed.el('reading-text'), 'copy-prompt');
     await copy.onclick();
@@ -356,6 +379,116 @@ function clickEvent(extra = {}) {
   pending.el('page-number').value = 3; pending.el('page-number').onchange(); await flush();
   assert.equal(descendant(pending.el('reading-text'), 'copy-prompt'), undefined);
   console.log('PASS Focus restoration/exit, only adjacent low-priority images, chapter ranges, exact prompt copy, timed confirmation, denied/unavailable clipboard and stale-copy isolation.');
+  // Responsive geometry/state checks: same DOM navigation at all breakpoints.
+  for (const width of [320, 390, 700, 768, 1280]) {
+    const f = await fixture({width, mobile: width <= 700, hash: '#page=138'});
+    const {el, windowEvents, context} = f;
+    el('reader').rect = {top: 100, bottom: 2500};
+    windowEvents.scroll();
+    assert.equal(context.document.body.classList.contains('reader-docked'), width <= 700);
+    el('reader').rect = {top: 900, bottom: 3000}; windowEvents.scroll();
+    assert(!context.document.body.classList.contains('reader-docked'));
+    el('reader').rect = {top: -2000, bottom: -1}; windowEvents.scroll();
+    assert(!context.document.body.classList.contains('reader-docked'));
+    const strip = el('chapter-overview'), shell = el('chapter-overview-shell');
+    strip.scrollLeft = 0; strip.listeners.scroll();
+    assert(!shell.classList.contains('more-left')); assert(shell.classList.contains('more-right'));
+    strip.scrollLeft = 1200; strip.listeners.scroll();
+    assert(shell.classList.contains('more-left')); assert(!shell.classList.contains('more-right'));
+    const studio = strip.children[6];
+    strip.scrollLeft = 0;
+    studio.rect = {left: 500, right: 650};
+    const before = f.scrolls.length;
+    windowEvents.resize();
+    assert(strip.scrollLeft > 0); assert.equal(f.scrolls.length, before);
+    assert.equal(studio.style['--chapter-progress'], `${100 * 12 / 23}%`);
+    el('page-number').value = 149; el('page-number').onchange();
+    assert.equal(studio.style['--chapter-progress'], '100%');
+    console.log(`PASS ${width}px responsive geometry: reader-only mobile dock, edge fades, active chapter reveal/progress.`);
+  }
+
+  const touch = await fixture({mobile: true, hash: '#page=138'});
+  const viewport = touch.el('page-viewport');
+  touch.el('zoom').value = '100';
+  const gesture = (dx, dy = 0, extra = {}) => {
+    const target = extra.target || viewport;
+    viewport.listeners.touchstart({target, touches: [{clientX: 200, clientY: 200}]});
+    viewport.listeners.touchmove({touches: [{clientX: 200 + dx, clientY: 200 + dy}]});
+    viewport.listeners.touchend({touches: [], changedTouches: [{clientX: 200 + dx, clientY: 200 + dy}]});
+  };
+  gesture(-80); assert.equal(touch.el('page-number').value, 139);
+  gesture(80); assert.equal(touch.el('page-number').value, 138);
+  gesture(-69); gesture(-80, 160);
+  assert.equal(touch.el('page-number').value, 138);
+  touch.selectText('selected'); gesture(-100); touch.selectText('');
+  gesture(-100, 0, {target: {tagName: 'INPUT'}});
+  gesture(-100, 0, {target: {tagName: 'DIV', isContentEditable: true}});
+  gesture(-100, 0, {target: {tagName: 'BUTTON', closest: () => ({})}});
+  touch.el('zoom').value = '200'; gesture(-100); touch.el('zoom').value = '100';
+  viewport.listeners.touchstart({target: viewport, touches: [{clientX: 200, clientY: 200}]});
+  viewport.listeners.touchmove({touches: [{clientX: 200, clientY: 220}]});
+  viewport.listeners.touchend({touches: [], changedTouches: [{clientX: 100, clientY: 200}]});
+  viewport.listeners.touchstart({target: viewport, touches: [{clientX: 200, clientY: 200}]});
+  viewport.listeners.touchcancel();
+  viewport.listeners.touchend({touches: [], changedTouches: [{clientX: 100, clientY: 200}]});
+  viewport.listeners.touchstart({target: viewport, touches: [{}, {}]});
+  viewport.listeners.touchend({touches: [], changedTouches: [{clientX: 100, clientY: 200}]});
+  assert.equal(touch.el('page-number').value, 138);
+
+  const key = (name, extra = {}) => touch.events.keydown({target: viewport, key: name, preventDefault() {}, ...extra});
+  key('f'); assert(touch.context.document.body.classList.contains('focus-mode'));
+  assert.equal(touch.el('focus-context').hidden, false);
+  assert.equal(touch.el('focus-context').textContent, 'Issue 02 · The Prompt Issue · Page 138');
+  key('ArrowRight'); assert(touch.el('focus-context').textContent.endsWith('Page 139'));
+  for (const extra of [{ctrlKey: true}, {altKey: true}, {metaKey: true}, {shiftKey: true}, {repeat: true}, {target: {tagName: 'INPUT'}}, {target: {tagName: 'SELECT'}}, {target: {tagName: 'TEXTAREA'}}, {target: {isContentEditable: true}}]) key('f', extra);
+  key('Escape'); assert(touch.context.document.body.classList.contains('focus-mode'));
+  key('F'); assert(!touch.context.document.body.classList.contains('focus-mode'));
+  assert(touch.el('focus-context').hidden);
+
+  const retry = await fixture({mobile: true, hash: '#page=60'});
+  const oldPrompt = descendant(retry.el('reading-text'), 'copy');
+  const beforePrefetch = retry.prefetches.length, beforeHistory = retry.historyCalls.length;
+  const image = retry.el('page-image');
+  assert.equal(image.fetchPriority, 'high'); assert.equal(image.decoding, 'async');
+  image.onerror(); assert.equal(retry.el('retry-page').hidden, false);
+  const staleError = image.onerror;
+  retry.el('retry-page').onclick();
+  assert(image.src.startsWith('pages/060.webp?retry='));
+  assert(retry.el('retry-page').hidden); assert(!retry.el('page-loading').hidden);
+  assert.equal(descendant(retry.el('reading-text'), 'copy'), oldPrompt);
+  assert.equal(retry.prefetches.length, beforePrefetch); assert.equal(retry.historyCalls.length, beforeHistory);
+  staleError(); assert(retry.el('retry-page').hidden);
+  image.onerror(); assert(!retry.el('retry-page').hidden);
+  retry.el('retry-page').onclick(); image.onload();
+  assert(retry.el('retry-page').hidden); assert(retry.el('page-loading').hidden);
+  assert.equal(retry.el('page-number').value, 60);
+
+  const legacy = await fixture({mobile: true, hash: '#page=60', noClipboard: true});
+  const legacyCopy = descendant(legacy.el('reading-text'), 'copy-prompt');
+  legacyCopy.focus({preventScroll: true});
+  await legacyCopy.onclick();
+  assert.equal(legacyCopy.textContent, 'Copied');
+  assert.equal(legacy.copies[0], JSON.parse(fs.readFileSync(`${root}/docs/pages/060.json`)).study.prompt);
+  assert.equal(legacy.context.document.activeElement, legacyCopy);
+  assert.equal(legacy.el('body').children.length, 0);
+  legacy.runTimers(); assert.equal(legacyCopy.textContent, 'Copy prompt');
+
+  // Every published study retains its prompt, notes, image and source in flowing mode.
+  const content = await fixture({mobile: true, noPrefetch: true});
+  let studyCount = 0;
+  for (let number = 1; number <= issue.pages; number++) {
+    const data = JSON.parse(fs.readFileSync(`${root}/docs/pages/${String(number).padStart(3, '0')}.json`));
+    if (!data.study) continue;
+    content.el('page-number').value = number; content.el('page-number').onchange(); await flush();
+    const tree = content.el('reading-text'), study = data.study;
+    assert.equal(descendant(tree, 'copy').textContent, study.prompt);
+    assert.equal(descendant(tree, 'reference').src, study.image);
+    assert.equal(descendant(tree, 'reference-caption').textContent, 'Source: ' + study.source);
+    assert(tree.textContent.includes(study.title)); assert(tree.textContent.includes(study.notes));
+    assert(tree.textContent.includes(study.try_this)); studyCount++;
+  }
+  assert.equal(studyCount, 174);
+  console.log('PASS swipes and cancellation, F/context/Escape guards, image-only retry races, legacy clipboard cleanup, and exact content for all 174 studies.');
   assert(fs.readFileSync(`${root}/docs/style.css`, 'utf8').includes('--reading-size:16px'));
   assert(fs.readFileSync(`${root}/docs/index.html`, 'utf8').includes('<option value="16" selected>16 px</option>'));
   console.log('PASS initial page links: focus visible mode once, reduced-motion/fade fallback, no scrolling on ordinary turns.');
