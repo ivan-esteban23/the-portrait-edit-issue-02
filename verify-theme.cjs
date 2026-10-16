@@ -81,14 +81,17 @@ for (const [scheme, color] of [['light', '#f6f4ef'], ['dark', '#0a0a0a']]) {
   assert(html.includes(`<meta name="theme-color" content="${color}" media="(prefers-color-scheme: ${scheme})">`));
 }
 assert(html.includes('<meta name="color-scheme" content="light dark">'));
-assert(html.includes('style.css?v=mobile-focus-1'));
-assert(html.includes('reader.js?v=mobile-focus-1'));
+assert(html.includes('style.css?v=perfect-1'));
+assert(html.includes('reader.js?v=perfect-1'));
 assert.equal(light['--radius'], '2px');
 assert(!css.includes('--subtle'), 'Use one consistent secondary text role');
 assert(Object.keys(overrides).every(key => !/space|type-|radius|tracking|font|width|gutter/.test(key)), 'Themes must share all geometry and typography');
 for (const [, block] of components.matchAll(/\{([^{}]*)\}/g)) {
   const props = declarations(block);
   if (props['font-size']) assert(/var\(--(?:type-|reading-size)/.test(props['font-size']) || props['font-size'] === 'inherit', 'Shared type scale');
-  if (props['border-radius']) assert.equal(props['border-radius'], 'var(--radius)');
+  if (props['border-radius']) assert(['0', 'var(--radius)'].includes(props['border-radius']), 'Only shared 2px corners or square inner segments');
 }
-console.log('PASS: exact requested Light/Dark palettes, automatic themes, one type/spacing/shape system, warm Focus canvas, adaptive browser colors and mobile-focus-1 cache busting.');
+assert.match(css, /body\.focus-mode #chapter-overview-shell,[^{}]*\{ display: none; \}/);
+assert.match(css, /body\.focus-mode #text-details, body\.reading-view #text-details \{ display: none; \}/);
+assert.match(css, /body\.focus-mode \.toolbar-main \.pagination\s*\{[^}]*grid-template-columns: 44px auto auto 44px/);
+console.log('PASS: exact requested Light/Dark palettes, automatic themes, one type/spacing/shape system, warm Focus canvas, adaptive browser colors and perfect-1 cache busting.');

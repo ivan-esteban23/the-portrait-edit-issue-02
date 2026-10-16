@@ -19,14 +19,16 @@ function syncMobileFocusLayout() {
   const preferences = $('reader-preferences');
   const chapters = $('chapter-overview-shell');
   const zoom = $('page-zoom-label');
+  const chapterControl = $('chapter-control');
+  chapters.hidden = active;
   if (active) {
     preferences.open = false;
     $('mobile-focus-options').append(preferences);
-    preferences.insertBefore(chapters, $('reading-options'));
+    $('reading-options').insertBefore(chapterControl, $('view-control'));
     $('reading-options').append(zoom);
     $('reader-preferences-summary').textContent = 'Chapters & reading options';
   } else {
-    $('reader').insertBefore(chapters, $('reader-toolbar'));
+    $('toolbar-main').insertBefore(chapterControl, $('page-controls'));
     $('toolbar-main').insertBefore(zoom, $('focus-toggle'));
     $('toolbar-secondary').append(preferences);
     $('reader-preferences-summary').textContent = 'Reading options';
@@ -40,6 +42,7 @@ function setFocusMode(enabled, persist = false) {
   $('focus-toggle').textContent = enabled ? 'Exit Focus' : 'Focus';
   $('focus-context').hidden = !enabled;
   syncMobileFocusLayout();
+  if (enabled) $('text-details').open = false;
   if (persist) {
     try { localStorage.setItem(focusStorageKey, String(enabled)); } catch (_) {}
   }
@@ -314,16 +317,17 @@ function renderReading() {
   const study = pageData.study;
   if (study) {
     const metadata = add('header', '', 'study-metadata');
-    add('p', `STUDY ${String(study.number).padStart(3, '0')} · Page ${current}`, 'metadata', metadata);
+    add('p', `STUDY ${String(study.number).padStart(3, '0')}`, 'metadata', metadata);
     add('h2', study.title, '', metadata);
-    add('p', study.flags, 'metadata', metadata);
     add('p', study.style, 'style-line', metadata);
     const figure = add('figure', '', 'reference-figure');
     const image = add('img', '', 'reference', figure);
     image.src = study.image;
     image.decoding = 'async';
     image.alt = `Reference for Study ${study.number}: ${study.title}`;
-    add('figcaption', 'Source: ' + study.source, 'reference-caption', figure);
+    const caption = add('figcaption', '', 'reference-details', figure);
+    add('span', 'Source: ' + study.source, 'reference-caption', caption);
+    add('span', study.flags, 'reference-flags', caption);
     const promptSection = add('section', '', 'study-section');
     const heading = add('div', '', 'prompt-heading', promptSection);
     const title = document.createElement('h3');
@@ -361,7 +365,18 @@ function renderReading() {
   }
   updateReaderChrome();
 }
-function readingMode(){const large=$('reading-mode').value==='text';$('reading-text').hidden=!large;document.querySelector('.page-viewport').hidden=large;$('text-size-label').hidden=!large;$('page-zoom-label').hidden=large;if(large&&!pageData)text();}
+function readingMode() {
+  const flowing = $('reading-mode').value === 'text';
+  document.body.classList.toggle('reading-view', flowing);
+  $('reading-text').hidden = !flowing;
+  $('page-viewport').hidden = flowing;
+  $('text-size-label').hidden = !flowing;
+  $('page-zoom-label').hidden = flowing;
+  if (flowing) {
+    $('text-details').open = false;
+    if (!pageData) text();
+  }
+}
 $('reading-mode').value=typeof matchMedia==='function'&&matchMedia('(max-width: 700px)').matches?'text':'page';
 $('reading-mode').onchange=readingMode;$('text-size').onchange=()=>{$('reading-text').style.setProperty('--reading-size',$('text-size').value+'px');};
 function hashPage(){const match=location.hash.match(/^#page=(\d+)$/);return match?Number(match[1]):current;}

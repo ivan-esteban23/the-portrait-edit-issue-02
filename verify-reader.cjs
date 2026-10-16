@@ -76,13 +76,15 @@ async function fixture(scenario = {}) {
   attach('reader', 'chapter-overview-shell', 'reader-toolbar', 'reading-text', 'reader-status', 'page-viewport', 'bottom-controls', 'mobile-focus-options');
   attach('chapter-overview-shell', 'chapter-overview');
   attach('reader-toolbar', 'focus-context', 'toolbar-main', 'toolbar-secondary');
-  attach('toolbar-main', 'chapter-label', 'pagination', 'page-zoom-label', 'focus-toggle');
-  attach('chapter-label', 'chapter');
-  attach('pagination', 'previous', 'page-number', 'page-total', 'next');
+  attach('toolbar-main', 'chapter-control', 'page-controls', 'page-zoom-label', 'focus-toggle');
+  attach('chapter-control', 'chapter');
+  attach('page-controls', 'previous', 'page-number', 'page-total', 'next');
   attach('page-zoom-label', 'zoom');
   attach('toolbar-secondary', 'chapter-progress', 'mobile-focus-progress', 'reader-preferences');
   attach('reader-preferences', 'reader-preferences-summary', 'reading-options');
-  attach('reading-options', 'reading-mode', 'text-size-label');
+  attach('reading-options', 'view-control', 'text-size-label');
+  attach('view-control', 'reading-mode');
+  el('chapter-overview-shell').hidden = false;
   attach('text-size-label', 'text-size');
   attach('reader-status', 'status', 'retry-page');
   el('mobile-focus-options').hidden = true;
@@ -498,12 +500,16 @@ function clickEvent(extra = {}) {
     const preferences = el('reader-preferences'), chapters = el('chapter-overview-shell'), zoom = el('page-zoom-label');
     const originalChapter = el('chapter-overview').children[7];
     preferences.open = true;
+    el('text-details').open = true;
     el('focus-toggle').onclick();
     assert.equal(el('focus-toggle').textContent, 'Exit Focus');
     assert.equal(preferences.open, false);
     assert.equal(preferences.parent, el('mobile-focus-options'));
     assert.equal(el('mobile-focus-options').hidden, false);
-    assert.equal(chapters.parent, preferences);
+    assert.equal(chapters.parent, el('reader'));
+    assert.equal(chapters.hidden, true);
+    assert.equal(el('chapter-control').parent, el('reading-options'));
+    assert.equal(el('text-details').open, false);
     assert.equal(zoom.parent, el('reading-options'));
     assert(!el('reader-toolbar').contains(preferences));
     assert(!el('reader-toolbar').contains(chapters));
@@ -512,11 +518,13 @@ function clickEvent(extra = {}) {
     // Reuse the same controls/handlers, without closing on a scroll or toggle.
     preferences.open = true; preferences.listeners.toggle(); f.windowEvents.scroll();
     assert(preferences.open);
+    assert(chapters.hidden);
     el('reading-mode').value = 'page'; el('reading-mode').onchange();
     assert.equal(el('page-viewport').hidden, false); assert.equal(zoom.hidden, false);
     el('zoom').value = '125'; el('zoom').onchange(); assert.equal(el('holder').style.width, '125%');
     el('reading-mode').value = 'text'; el('reading-mode').onchange(); await flush();
     assert.equal(el('reading-text').hidden, false); assert(zoom.hidden);
+    assert(f.context.document.body.classList.contains('reading-view'));
     el('text-size').value = '20'; el('text-size').onchange();
     assert.equal(el('reading-text').style['--reading-size'], '20px');
     const copy = descendant(el('reading-text'), 'copy-prompt');
@@ -524,7 +532,7 @@ function clickEvent(extra = {}) {
     el('next').onclick(); await flush();
     assert.equal(el('page-number').value, 153); assert.equal(preferences.open, false);
     assert.equal(el('mobile-focus-progress').textContent, 'Night & Lifestyle · 4 of 20');
-    preferences.open = true; originalChapter.focus({preventScroll: true}); originalChapter.onclick();
+    preferences.open = true; el('chapter').focus({preventScroll: true}); el('chapter').value = '150'; el('chapter').onchange();
     assert.equal(f.context.document.activeElement, el('reading-text'));
     assert.equal(el('page-number').value, 150); assert.equal(preferences.open, false);
     assert.equal(el('chapter-overview').children[7], originalChapter);
@@ -536,6 +544,9 @@ function clickEvent(extra = {}) {
     f.resize(768);
     assert.equal(preferences.parent, el('toolbar-secondary'));
     assert.equal(chapters.parent, el('reader'));
+    assert.equal(chapters.hidden, false);
+    assert.equal(el('chapter-control').parent, el('toolbar-main'));
+    assert.equal(el('toolbar-main').children[0], el('chapter-control'));
     assert.equal(zoom.parent, el('toolbar-main'));
     assert(el('reader').children.indexOf(chapters) < el('reader').children.indexOf(el('reader-toolbar')));
     assert(el('toolbar-main').children.indexOf(zoom) < el('toolbar-main').children.indexOf(el('focus-toggle')));
@@ -547,10 +558,22 @@ function clickEvent(extra = {}) {
     el('focus-toggle').onclick();
     assert.equal(preferences.parent, el('toolbar-secondary'));
     assert.equal(chapters.parent, el('reader'));
+    assert.equal(chapters.hidden, false);
+    assert.equal(el('chapter-control').parent, el('toolbar-main'));
+    assert.equal(el('toolbar-main').children[0], el('chapter-control'));
     assert.equal(zoom.parent, el('toolbar-main'));
     assert.equal(el('mobile-focus-options').hidden, true);
     assert.equal(el('text-size').value, '20'); assert.equal(el('zoom').value, '125');
     assert.equal(el('chapter-overview').children.length, 9);
+    el('reading-mode').value = 'page'; el('reading-mode').onchange();
+    assert(!f.context.document.body.classList.contains('reading-view'));
+    el('text-details').open = true; el('text-details').ontoggle(); await flush();
+    assert(el('text-details').open); // Raw extraction is still available outside Focus.
+    el('focus-toggle').onclick(); assert.equal(el('text-details').open, false);
+    el('page-number').value = '1'; el('page-number').onchange();
+    assert(el('previous').disabled); assert(el('previous-bottom').disabled);
+    el('page-number').value = '196'; el('page-number').onchange();
+    assert(el('next').disabled); assert(el('next-bottom').disabled);
     console.log(`PASS ${width}px Focus: short progress, collapsed relocated settings, reused navigation/copy/zoom, visible errors, and desktop/exit restoration.`);
   }
   const persistedMobile = await fixture({mobile: true, hash: '#page=152', storage: new Map([['portrait-edit-focus-mode', 'true']])});
@@ -569,6 +592,13 @@ function clickEvent(extra = {}) {
     assert.equal(descendant(tree, 'copy').textContent, study.prompt);
     assert.equal(descendant(tree, 'reference').src, study.image);
     assert.equal(descendant(tree, 'reference-caption').textContent, 'Source: ' + study.source);
+    const header = descendant(tree, 'study-metadata');
+    assert.equal(header.children.length, 3);
+    assert.equal(header.children[0].textContent, `STUDY ${String(study.number).padStart(3, '0')}`);
+    assert.equal(header.children[1].textContent, study.title);
+    assert.equal(header.children[2].textContent, study.style);
+    assert.equal(descendant(tree, 'reference-flags').textContent, study.flags);
+    assert(descendant(tree, 'reference-figure').contains(descendant(tree, 'reference-flags')));
     assert(tree.textContent.includes(study.title)); assert(tree.textContent.includes(study.notes));
     assert(tree.textContent.includes(study.try_this)); studyCount++;
   }

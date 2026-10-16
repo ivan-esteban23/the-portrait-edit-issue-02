@@ -20,8 +20,8 @@
     <meta name="twitter:title" content="The Portrait Edit — The Prompt Issue">
     <meta name="twitter:description" content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download.">
     <meta name="twitter:image" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/cover.webp">
-    <link rel="stylesheet" href="style.css?v=mobile-focus-1">
-    <script src="reader.js?v=mobile-focus-1" defer></script>
+    <link rel="stylesheet" href="style.css?v=perfect-1">
+    <script src="reader.js?v=perfect-1" defer></script>
     <noscript>
       <style>
         .toolbar, .reader-messages, .bottom-nav-slot, .chapter-overview-shell,
@@ -92,14 +92,14 @@
         <div class="toolbar" id="reader-toolbar">
           <p id="focus-context" class="focus-context" hidden></p>
           <div class="toolbar-main" id="toolbar-main">
-            <label>
+            <label id="chapter-control">
               <span class="control-label">Chapter</span>
               <select id="chapter" aria-label="Jump to chapter">
                 <option value="1">Front matter</option>
               </select>
             </label>
 
-            <div class="pagination">
+            <div class="pagination" id="page-controls">
               <button type="button" id="previous" aria-label="Previous page">←</button>
               <label>
                 <span class="control-label">Page</span>
@@ -132,7 +132,7 @@
             <details class="reader-preferences" id="reader-preferences">
               <summary id="reader-preferences-summary">Reading options</summary>
               <div class="reading-options" id="reading-options">
-                <label>
+                <label id="view-control">
                   <span class="control-label">View</span>
                   <select id="reading-mode">
                     <option value="page">Original page</option>
