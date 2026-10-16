@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-140",
+  "issueSlug": "the-prompt-issue",
+  "page": 191,
+  "studyNumber": 140,
+  "title": "Rust Velvet Jacket & Floral Skirt",
+  "referenceImage": "references/33715f7fe5d9ef00a8922e2ba3107f4231843e416e1ad86cbbc471b66e02bd33.jpeg",
+  "source": "25032.jpg",
+  "prompt": "An original young woman with long, loose blonde hair walks through a bright indoor corridor. She wears a fitted rust velvet button-front jacket with a high collar, over a deep red floral velvet skirt with a high-low hem. A gray backpack sits on her shoulders, and tall burgundy buckled boots show at the hem. Her expression is calm and serious. Soft, cool interior light with a blurred background. Palette of rust, burgundy, and warm gray. Warm and nostalgic, in the style of an early-2000s film still.",
+  "style": "Warm, nostalgic, moody",
+  "workingNotes": "- The rust velvet and floral skirt are the warm contrast.\n- Keep the blurred background for a candid travel feel.",
+  "tryThis": "Try this: Keep the blurred background for a candid travel feel.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "warm",
+    "nostalgic",
+    "moody"
+  ],
+  "date": null
+}

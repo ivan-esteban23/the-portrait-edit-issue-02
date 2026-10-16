@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-104",
+  "issueSlug": "the-prompt-issue",
+  "page": 110,
+  "studyNumber": 104,
+  "title": "Varsity Jacket & Denim Pleats",
+  "referenceImage": "references/7c57f88382619791348a59916767413b8150192363b8fcad78d8af313522824d.jpeg",
+  "source": "25005.jpg",
+  "prompt": "An original young woman with long, wavy light brown hair wears an oversized dark green varsity jacket with brown leather sleeves and an embroidered patch, over a cream ribbed top with a loose bow at the neck. A pleated denim mini skirt and a soft, sunny backdrop complete the look. Her expression is calm and direct. Warm, natural light. Palette of forest green, chocolate, and denim blue. Retro and collegiate, in the style of a 1990s street-style photo.",
+  "style": "Retro, collegiate, cozy",
+  "workingNotes": "- The leather sleeves and bow collar are the defining details.\n- Keep the patch unbranded to avoid text in the image.",
+  "tryThis": "Try this: Keep the patch unbranded.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "retro",
+    "collegiate",
+    "cozy"
+  ],
+  "date": null
+}

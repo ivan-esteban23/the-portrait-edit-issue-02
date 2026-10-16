@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-001",
+  "issueSlug": "the-prompt-issue",
+  "page": 59,
+  "studyNumber": 1,
+  "title": "Autumn Hat Portrait",
+  "referenceImage": "references/fcbca68b518613e048399cb2a1b56fc395508b4837b63c018ce8fe6068e42474.jpeg",
+  "source": "4916.jpg",
+  "prompt": "A vertical portrait of a young woman with long light-brown hair and freckles, wearing a wide-brimmed black hat with a dark fabric rosette and a high-necked black top with textured lace-like detailing. She glances over her shoulder toward the camera with a calm, slightly serious expression. Shot from mid-thigh up with a shallow depth of field, the background a soft blur of autumn foliage in amber and gold at the top left, fading into deep green. Soft, diffused natural daylight, muted warm-cool palette dominated by blacks and greens, with gentle film grain and vintage 1970s color rendering. Melancholic, romantic, Victorian-inspired mood, cinematic and nostalgic.",
+  "style": "Moody, film-like, Victorian-inspired",
+  "workingNotes": "- Original prompt is long; a trimmed version may give more controlled results.\n- Consider adding a film stock anchor such as \"35mm, Kodak Portra.\"",
+  "tryThis": "Try this: Add a 35mm Kodak Portra film-stock reference.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "moody",
+    "film-like",
+    "victorian-inspired"
+  ],
+  "date": null
+}

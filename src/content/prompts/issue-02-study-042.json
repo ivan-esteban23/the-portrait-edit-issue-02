@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-042",
+  "issueSlug": "the-prompt-issue",
+  "page": 26,
+  "studyNumber": 42,
+  "title": "Fur-Collar Beret & Dark Turtleneck",
+  "referenceImage": "references/36c3431d301f8b580c8deee9d08fdac4dc8ee63f602811e7fa98b224eced2e57.jpeg",
+  "source": "24381.jpg",
+  "prompt": "An original young woman with shoulder-length straight blonde hair wears a black sequined beret and a warm taupe ribbed turtleneck. A black fur-collared coat frames her shoulders, and small drop earrings catch the light. Her expression is serious, with her gaze looking off into the distance. A blurred winter street with passersby in the background, bright sunlight. Palette of black, taupe, and soft cream. Classic and moody, in the style of a 1990s film still.",
+  "style": "Classic, moody, wintry",
+  "workingNotes": "- The sequined beret and taupe turtleneck are the key styling.\n- Add 'shallow depth of field' to keep the crowd soft.",
+  "tryThis": "Try this: Add shallow depth of field to soften the crowd.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "classic",
+    "moody",
+    "wintry"
+  ],
+  "date": null
+}

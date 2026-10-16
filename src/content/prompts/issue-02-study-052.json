@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-052",
+  "issueSlug": "the-prompt-issue",
+  "page": 29,
+  "studyNumber": 52,
+  "title": "Black Lace Sleeves & Pale Blue Sky",
+  "referenceImage": "references/20ba1e6d0aa6d030e59b68fae2d781ec92f831c684526194dfa3bb821737b8bb.jpeg",
+  "source": "24391.jpg",
+  "prompt": "An original young woman with blonde hair framing her face peeks out through black lace sleeves that rise above her head. She wears a black floral lace top with a soft tied neckline. Her expression is calm and direct, with soft peach lips. A pale blue sky and blurred foliage in the background. Soft natural light. Palette of black, peach, and sky blue. Romantic and dramatic, in the style of a summer lace editorial.",
+  "style": "Romantic, dramatic, editorial",
+  "workingNotes": "- The lace sleeves framing the face are the central composition.\n- Add 'shallow depth of field' to blur the background.",
+  "tryThis": "Try this: Add shallow depth of field to blur the background.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "romantic",
+    "dramatic",
+    "editorial"
+  ],
+  "date": null
+}

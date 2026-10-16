@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-068",
+  "issueSlug": "the-prompt-issue",
+  "page": 176,
+  "studyNumber": 68,
+  "title": "Y2K Crop Top & Studded Cargo",
+  "referenceImage": "references/55160f40d7ce677a75a7d78dc893a8676fbe3ea6347930b10527fb43c70567db.jpeg",
+  "source": "24403.jpg",
+  "prompt": "An original young woman with long, dark brown hair stands with one hand in her pocket against a gray studio backdrop. She wears a dark brown fitted crop top, layered silver chains, and a wide studded belt with a pendant. Dark cargo trousers with drawstring pockets and silver bangles complete the look. Her expression is confident, with a slight smirk. Soft, even studio light. Palette of chocolate, charcoal gray, and silver. Playful and edgy, in the style of a Y2K streetwear lookbook.",
+  "style": "Playful, edgy, Y2K",
+  "workingNotes": "- The studded belt and cargo trousers are the defining pieces.\n- Add 'full-length' to show the cargo pocket details.",
+  "tryThis": "Try this: Use full-length framing to show the cargo pockets.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "playful",
+    "edgy",
+    "y2k"
+  ],
+  "date": null
+}

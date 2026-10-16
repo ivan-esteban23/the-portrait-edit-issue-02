@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-030",
+  "issueSlug": "the-prompt-issue",
+  "page": 63,
+  "studyNumber": 30,
+  "title": "Off-Shoulder Ribbon & Misty Landscape",
+  "referenceImage": "references/ee4a70c7789994ff44487ffee62691f3edaa45cbdcb7443146384276a3d72396.jpeg",
+  "source": "24548.jpg",
+  "prompt": "An original young woman with long dark hair and a ribbon tied at the back of her head poses in a black-and-white portrait. She wears a white off-shoulder blouse with voluminous puff sleeves and a small pearl earring. Her expression is calm and composed. A soft gray, misty landscape painted on the backdrop, with gentle studio lighting. Monochrome palette of white, gray, and black. Elegant and classic, in the style of a vintage studio portrait.",
+  "style": "Elegant, soft, classic",
+  "workingNotes": "- The ribbon and off-shoulder sleeves are the defining details.\n- Describe the backdrop as 'soft, painted mist' for a more ethereal feel.",
+  "tryThis": "Try this: Describe the backdrop as soft, painted mist.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "elegant",
+    "soft",
+    "classic"
+  ],
+  "date": null
+}

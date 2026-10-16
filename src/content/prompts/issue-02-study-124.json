@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-124",
+  "issueSlug": "the-prompt-issue",
+  "page": 161,
+  "studyNumber": 124,
+  "title": "Black Mini Dress at Night",
+  "referenceImage": "references/dc4666d5d68f48e11eeec706a298950625f5838c2f755338d858cdf592014665.jpeg",
+  "source": "25017.jpg",
+  "prompt": "An original young woman with long, wavy dark brown hair walks along a city sidewalk at night. She wears a fitted black long-sleeve mini dress with a pleated flared skirt and a high, round neckline. Sheer black tights and black pointed stiletto heels complete the look. Her expression is calm, with a red lip. Soft streetlight and blurred building edges. Palette of black, charcoal, and warm streetlight amber. Classic and cinematic, in the style of a night-out street photo.",
+  "style": "Classic, cinematic, sleek",
+  "workingNotes": "- The flared pleated skirt and sheer tights are the key details.\n- Keep the streetlight for a warm, moody glow.",
+  "tryThis": "Try this: Keep the streetlight for a warm glow.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "classic",
+    "cinematic",
+    "sleek"
+  ],
+  "date": null
+}

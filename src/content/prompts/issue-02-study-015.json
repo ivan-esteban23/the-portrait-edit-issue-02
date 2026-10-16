@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-015",
+  "issueSlug": "the-prompt-issue",
+  "page": 18,
+  "studyNumber": 15,
+  "title": "Rust Floral Blouse & Chains",
+  "referenceImage": "references/8ce2e017f995b988bb6e41a8cbd1b05a83d1175716e0b4625fa3b9b9f013d149.jpeg",
+  "source": "5088.jpg",
+  "prompt": "A vertical portrait of an original young woman seated on the ground, looking up and off to one side with a thoughtful, slightly wistful expression. She has long, loose, wavy brown hair falling past her shoulders and down her back, with light freckles across her cheeks and a soft, natural flush. She wears a rust-orange long-sleeved blouse with a small-print floral pattern, a soft collar, and a button placket that opens at the chest. Layered silver chains sit at her neck, one a delicate link chain and the other a longer pendant on a thin chain. Her hands rest in her lap, and her trousers are a deep chocolate brown. The background is a softly blurred pale gray wall with a muted concrete texture. Soft, diffused natural daylight from the side, a warm, earthy palette of rust, caramel, and brown against cool gray. Quiet, bohemian, and contemplative, in the style of a 1970s-inspired natural portrait.",
+  "style": "Soft, bohemian, contemplative",
+  "workingNotes": "- The rust floral blouse and layered chains are the main styling details; keep both.\n- \"Looking up and off to one side\" gives the image its mood; change to \"direct gaze\" for a more confident tone.",
+  "tryThis": "Try this: Try a direct gaze for a more confident tone.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "soft",
+    "bohemian",
+    "contemplative"
+  ],
+  "date": null
+}

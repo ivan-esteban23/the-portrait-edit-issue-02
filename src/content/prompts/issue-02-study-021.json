@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-021",
+  "issueSlug": "the-prompt-issue",
+  "page": 39,
+  "studyNumber": 21,
+  "title": "Blue Track Jacket & Alpine Glow",
+  "referenceImage": "references/8045e898f312e167f733bbbc79e90b0e7e7ee28592df979f930c1f23f7c469f6.jpeg",
+  "source": "24606.jpg",
+  "prompt": "An original young woman with long black hair and blunt bangs wears a blue quilted jacket with white side stripes. She glances over her shoulder toward the camera, with a soft, neutral expression and a light blush on her cheeks. Snow-covered alpine peaks and a deep blue sky fill the background. Bright, clean sunlight, a palette of cobalt blue, white, and warm skin tones. Fresh and calm, in the style of an outdoor lifestyle portrait.",
+  "style": "Calm, fresh, clear",
+  "workingNotes": "- The over-the-shoulder glance adds intimacy; keep it in the prompt.\n- Use 'close-up, head and shoulders' for a tighter crop.",
+  "tryThis": "Try this: Try a head-and-shoulders close-up.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "calm",
+    "fresh",
+    "clear"
+  ],
+  "date": null
+}

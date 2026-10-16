@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-039",
+  "issueSlug": "the-prompt-issue",
+  "page": 172,
+  "studyNumber": 39,
+  "title": "Blue Hair & Plaid Skirt Street Style",
+  "referenceImage": "references/5bb05c0d9edb07c3c748043febbacb2b9d051f47d1d11bb95b1df66bf1a682f8.jpeg",
+  "source": "24385.jpg",
+  "prompt": "An original young woman with long, bright blue hair falls past her shoulders, wearing a fitted mustard-yellow graphic tee with sleeves cut short. Layered chains and a studded belt sit at her waist over a blue plaid pleated skirt with lace trim. A dark backpack rests on one shoulder. Her expression is serious, her gaze turned slightly to the side. Blurred crowd and green trees in the background, natural daylight. Palette of cobalt blue, mustard, and navy. Bold and candid, in the style of a 2000s alternative street-style photo.",
+  "style": "Bold, edgy, candid",
+  "workingNotes": "- The blue hair and mustard tee are the strongest color cues.\n- Keep the blurred crowd for a candid, on-location feel.",
+  "tryThis": "Try this: Keep the blurred crowd for a candid feel.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "bold",
+    "edgy",
+    "candid"
+  ],
+  "date": null
+}

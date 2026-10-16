@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-076",
+  "issueSlug": "the-prompt-issue",
+  "page": 157,
+  "studyNumber": 76,
+  "title": "Black Dress by the Lanterns, Looking Back",
+  "referenceImage": "references/abe4e2a41a00f4e0d401cbbae6ae40c972e90a89a80c7ad871a263060f4c527e.jpeg",
+  "source": "24409.jpg",
+  "prompt": "An original young woman with long, straight black hair and blunt bangs looks back over one shoulder beside a red paper lantern. She wears a fitted black sleeveless mock-neck dress with sheer panels at the waist, and a silver bangle. Red lanterns, weathered brick, and stone steps fill the background. Her expression is calm and direct. Warm, late-afternoon light. Palette of black, red, and brick tones. Bold and urban, in the style of a travel street-style photo.",
+  "style": "Bold, urban, candid",
+  "workingNotes": "- This is a near-duplicate of section 69; keep only one if you don't need both.\n- Use 'warm late-afternoon light' for a glowing atmosphere.",
+  "tryThis": "Try this: Use warm late-afternoon light.",
+  "flags": "Rights check / Repeats Study 69.",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "bold",
+    "urban",
+    "candid"
+  ],
+  "date": null
+}

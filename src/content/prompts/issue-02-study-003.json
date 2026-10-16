@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-003",
+  "issueSlug": "the-prompt-issue",
+  "page": 16,
+  "studyNumber": 3,
+  "title": "High-Key Beauty Portrait",
+  "referenceImage": "references/896709280a531b5d1772b60f9178eac44470955341cb1c9f6911241b1ffe73f5.jpeg",
+  "source": "4570.jpg",
+  "prompt": "A minimalist, high-key beauty portrait of an original young woman against a near-white seamless backdrop, framed vertically and cropped from the upper chest up. Long, straight, glossy black hair falls past her shoulders, with a few loose strands drifting across her face. Her skin is smooth and matte, her lips a muted rosy-brown, and her expression calm, direct, and slightly contemplative. Her arms are folded across her chest, one hand resting on the opposite shoulder, with a thin silver band on one finger. Soft, even studio lighting with little visible shadow, a cool, restrained palette of off-white, pale blue-gray, and deep black, generous negative space that keeps focus on her face and hands. Clean, airy, serene, and quietly melancholic, in the style of a contemporary skincare or jewelry campaign.",
+  "style": "Clean, airy, quietly melancholic",
+  "workingNotes": "- Suited to skincare, cosmetics, or jewelry campaigns.\n- Could be warmed up or the pose changed.",
+  "tryThis": "Try this: Try a warmer palette.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "clean",
+    "airy",
+    "quietly melancholic"
+  ],
+  "date": null
+}

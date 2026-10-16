@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-004",
+  "issueSlug": "the-prompt-issue",
+  "page": 17,
+  "studyNumber": 4,
+  "title": "Studio Ponytail Portrait",
+  "referenceImage": "references/e78bff344bbe23f069045e8db15683f0ee4e0df3ea31843ea441e1d494552b95.jpeg",
+  "source": "4571.jpg",
+  "prompt": "A minimalist studio portrait of an original young woman against a pale gray-white seamless backdrop, framed vertically and cropped from mid-torso up. Her long, straight black hair is swept back from her face and pulled to one side in a low, sleek ponytail that falls past her shoulder and down her chest, with loose strands framing her temples. She wears a fitted black strapless top, with bare shoulders and arms. Natural makeup with soft pink-brown lips, and a calm, direct gaze toward the camera. Soft, even studio lighting with gentle shadows along the jaw and collarbone, a monochrome palette of soft grays, white, and deep black, warm-neutral skin tones. The long ponytail creates a strong diagonal line down the right side of the frame. Poised, editorial, and graphic, in the style of a hair care or minimalist fashion lookbook.",
+  "style": "Poised, graphic, monochrome",
+  "workingNotes": "- Strong choice for hair care campaigns or lookbooks.\n- The diagonal ponytail is the key compositional element.",
+  "tryThis": "Try this: Emphasize the diagonal ponytail.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "poised",
+    "graphic",
+    "monochrome"
+  ],
+  "date": null
+}

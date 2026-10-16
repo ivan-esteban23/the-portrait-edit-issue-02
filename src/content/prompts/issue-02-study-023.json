@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-023",
+  "issueSlug": "the-prompt-issue",
+  "page": 40,
+  "studyNumber": 23,
+  "title": "Blue Jacket in Profile",
+  "referenceImage": "references/44e36f15eaa6aa51dbe4bf289fae5908ba85705e3a8f1ed87ba4c285dd847dc3.jpeg",
+  "source": "24605.jpg",
+  "prompt": "An original young woman with long black hair and full bangs looks over her shoulder with a faint, closed-lip smile. She wears a blue track jacket with white stripes along the sleeves. Snowy mountains fill the background, with soft, even sunlight. Her profile is softly lit, and the palette is cobalt blue, white, and black. Quiet and poised, in the style of a minimal winter lookbook.",
+  "style": "Quiet, poised, soft",
+  "workingNotes": "- The faint smile and profile angle set the tone.\n- Describe the lighting as 'soft, even sunlight' to avoid harsh shadows.",
+  "tryThis": "Try this: Specify soft, even sunlight.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "quiet",
+    "poised",
+    "soft"
+  ],
+  "date": null
+}

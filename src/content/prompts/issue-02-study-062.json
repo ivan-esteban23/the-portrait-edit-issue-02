@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-062",
+  "issueSlug": "the-prompt-issue",
+  "page": 154,
+  "studyNumber": 62,
+  "title": "Cream Turtleneck at a Teahouse Table",
+  "referenceImage": "references/75df72982ece524cf1253cea687f503ff19036120d1e68aaf01525e80506a647.jpeg",
+  "source": "24412.jpg",
+  "prompt": "An original young woman with long, soft brown hair sits at a wooden table in a traditional teahouse, holding a glass water bottle. She wears a cream ribbed turtleneck and a dainty gold pendant necklace. Bowls of noodles and cups of tea sit in front of her. Her expression is relaxed, with a gentle smile. Warm, late-afternoon light through wooden lattice windows. Palette of cream, honey wood, and soft blue. Warm and cozy, in the style of a casual travel lifestyle photo.",
+  "style": "Warm, cozy, candid",
+  "workingNotes": "- The warm light through the lattice windows sets the mood.\n- Keep the tea and noodles for a sense of place.",
+  "tryThis": "Try this: Keep the tea and noodles for a sense of place.",
+  "flags": "Rights check / Repeats Study 66.",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "warm",
+    "cozy",
+    "candid"
+  ],
+  "date": null
+}

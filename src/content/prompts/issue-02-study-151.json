@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-151",
+  "issueSlug": "the-prompt-issue",
+  "page": 142,
+  "studyNumber": 151,
+  "title": "Vintage Print Top & Black Shorts",
+  "referenceImage": "references/76fa15f4420635c53b921a10d6b3d85243cf21be6580c45a705070e79fa8f68d.jpeg",
+  "source": "25044.jpg",
+  "prompt": "An original young woman with long, wavy copper-red hair pulled into a loose bun wears round wire glasses and a black choker. She wears a fitted pink vintage-print long-sleeve top with black contrast sleeves and a crew neckline. Black low-rise cargo shorts sit under a studded black belt, with white ribbed socks and black platform boots. Her expression is calm and direct. A soft blue gradient backdrop with even light. Palette of blush pink, black, and soft sky blue. Playful and retro, in the style of a Y2K streetwear catalog.",
+  "style": "Playful, retro, edgy",
+  "workingNotes": "- The vintage print and studded belt are the defining details.\n- Keep the print abstract to avoid readable text in the image.",
+  "tryThis": "Try this: Keep the print abstract, without readable text.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "playful",
+    "retro",
+    "edgy"
+  ],
+  "date": null
+}

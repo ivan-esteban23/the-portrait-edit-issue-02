@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-149",
+  "issueSlug": "the-prompt-issue",
+  "page": 140,
+  "studyNumber": 149,
+  "title": "Rhinestone Script Top & Cargo Pants",
+  "referenceImage": "references/86f76c4554e829485900b4c447f3d910e2682b8886740243195bb37d41d99ab1.jpeg",
+  "source": "25046.jpg",
+  "prompt": "An original young woman with long, straight black hair wears a black knit beret and small wire glasses. She wears a navy long-sleeve off-shoulder top with rhinestone script across the chest and white side stripes, over a white camisole. A gingham blue waistband peeks under a white drawstring tie on black cargo trousers. A silver shoulder bag hangs at her side. Her expression is calm and direct. Soft, even studio light. Palette of navy, white, and silver. Bold and playful, in the style of a Y2K streetwear lookbook.",
+  "style": "Bold, playful, sporty",
+  "workingNotes": "- The rhinestone script and beret are the signature styling.\n- Keep the rhinestone detail generic to avoid readable text in the image.",
+  "tryThis": "Try this: Keep the rhinestone detail generic, without readable text.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "bold",
+    "playful",
+    "sporty"
+  ],
+  "date": null
+}

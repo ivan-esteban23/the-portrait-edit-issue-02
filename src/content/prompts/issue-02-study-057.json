@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-057",
+  "issueSlug": "the-prompt-issue",
+  "page": 30,
+  "studyNumber": 57,
+  "title": "Blue Lace Blouse & Honey Waves",
+  "referenceImage": "references/9111d2fc544ed48a43fc1b3f900830a54175ae9d15c5e70d016b3ff7c64db499.jpeg",
+  "source": "24402.jpg",
+  "prompt": "An original young woman with long, honey-blonde hair falling over one shoulder sits against a deep blue backdrop. She wears a sheer blue blouse with lace-trimmed cuffs and a ruffled placket, and a single silver drop earring. Her expression is calm and direct, with light freckles. Even studio light, a palette of cornflower blue, honey gold, and soft peach skin. Soft and retro, in the style of a late-1990s editorial portrait.",
+  "style": "Soft, retro, editorial",
+  "workingNotes": "- The sheer lace blouse and honey hair are the key textures.\n- Add 'film grain' to match the vintage print look.",
+  "tryThis": "Try this: Add film grain for a vintage print look.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "soft",
+    "retro",
+    "editorial"
+  ],
+  "date": null
+}

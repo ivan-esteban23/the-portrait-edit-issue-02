@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-022",
+  "issueSlug": "the-prompt-issue",
+  "page": 55,
+  "studyNumber": 22,
+  "title": "Red Embroidered Bodice by the Sea",
+  "referenceImage": "references/bc1742dee14b1d531e0d6bab2fda1d1ebbebd3a8e7c9260d5ff21e06d048438f.jpeg",
+  "source": "24600.jpg",
+  "prompt": "An original young woman with dark brown hair in a loose side braid, with strands blowing across her face, wears a red embroidered high-necked bodice over a white gathered blouse with puff sleeves. Red ribbon ties hang from her shoulders, and gold drop earrings catch the light. She stands on a windswept shoreline under an overcast sky. Her expression is steady and serious. Soft, muted daylight, a palette of crimson, cream, and sandy gold. Timeless and windswept, in the style of a film photograph.",
+  "style": "Earthy, windswept, timeless",
+  "workingNotes": "- The red embroidery against the cream blouse is the defining contrast.\n- Keep the overcast sky to maintain the muted palette.",
+  "tryThis": "Try this: Keep the overcast sky for a muted palette.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "earthy",
+    "windswept",
+    "timeless"
+  ],
+  "date": null
+}

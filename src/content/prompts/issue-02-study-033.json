@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-033",
+  "issueSlug": "the-prompt-issue",
+  "page": 64,
+  "studyNumber": 33,
+  "title": "Coin Headdress & Silver Drops",
+  "referenceImage": "references/9eaad28807d6e901bdacaa20078a2a35d47fb8c137f605e749f266433380e011.jpeg",
+  "source": "24533.jpg",
+  "prompt": "An original young woman wears a silver headdress with coin-like plaques and heart-shaped pendants that fall at her temples. Red coral beads and silver drop earrings add color. Her hair is pulled back, and her expression is calm, with a slight smile. A close-up portrait against a warm neutral backdrop, with soft directional light. Palette of silver, coral red, and warm beige. Ornate and graceful, in the style of a traditional-inspired jewelry editorial.",
+  "style": "Ornate, graceful, intimate",
+  "workingNotes": "- The headdress is the subject; describe its plaques and pendants.\n- Add 'extreme close-up' to fill the frame with the jewelry.",
+  "tryThis": "Try this: Try an extreme close-up of the jewelry.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "ornate",
+    "graceful",
+    "intimate"
+  ],
+  "date": null
+}

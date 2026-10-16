@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-013",
+  "issueSlug": "the-prompt-issue",
+  "page": 130,
+  "studyNumber": 13,
+  "title": "Black Turtleneck & White Socks",
+  "referenceImage": "references/a3bb964cd694defa9fe036e7708da4cb2f5f7bb8801b82eed1cb36bdaa35b448.jpeg",
+  "source": "5030.jpg",
+  "prompt": "A full-body studio fashion portrait of an original young woman with long, straight black hair parted in the center, falling past her shoulders, standing against a plain white seamless backdrop. She wears a fitted black ribbed knit turtleneck with long sleeves that end at her wrists, paired with a short white mini skirt with a relaxed A-line cut. Tall white ribbed knee-high socks and black pointed-toe flats with a small bow detail complete the look. Her arms are relaxed at her sides, and her expression is calm and direct. Soft, even studio lighting with minimal shadow, a high-contrast palette of black, white, and warm skin tones. Clean, preppy, and graphic, in the style of a minimalist catalog or school uniform-inspired fashion editorial.",
+  "style": "Clean, preppy, graphic",
+  "workingNotes": "- The black and white contrast is the core idea; keep the backdrop plain.\n- Add \"head to toe\" to make sure the flats and socks stay in frame.",
+  "tryThis": "Try this: Use head-to-toe framing to include the flats and socks.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "clean",
+    "preppy",
+    "graphic"
+  ],
+  "date": null
+}

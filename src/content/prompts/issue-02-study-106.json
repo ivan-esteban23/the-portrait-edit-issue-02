@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-106",
+  "issueSlug": "the-prompt-issue",
+  "page": 111,
+  "studyNumber": 106,
+  "title": "Reindeer Cardigan by the Window",
+  "referenceImage": "references/c855781c308587e1c525e1708fbc99118bfa85662fb4d100ce9e419d44db8afd.jpeg",
+  "source": "24983.jpg",
+  "prompt": "An original young woman with long, wavy light brown hair and thin round glasses sits on a window ledge, holding a small ginger kitten. She wears a brown and cream reindeer-pattern knit cardigan over a charcoal turtleneck, with a burgundy plaid skirt. Her expression is thoughtful. Soft, diffused window light. Palette of chocolate, cream, and burgundy. This is a duplicate of section 79.",
+  "style": "Cozy, nostalgic, soft",
+  "workingNotes": "- The reindeer knit pattern and kitten are the focal points.\n- Keep only one of sections 79 or 106 if you do not need both.",
+  "tryThis": "Try this: Emphasize the reindeer knit pattern and kitten.",
+  "flags": "Rights check / Repeats Study 79.",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "cozy",
+    "nostalgic",
+    "soft"
+  ],
+  "date": null
+}

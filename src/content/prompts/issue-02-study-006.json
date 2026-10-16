@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-006",
+  "issueSlug": "the-prompt-issue",
+  "page": 61,
+  "studyNumber": 6,
+  "title": "Victorian Library Portrait",
+  "referenceImage": "references/b08a1403eb115174a281d10f35e5d3a67ea886be4f32fdc4f7c507c027d5a495.jpeg",
+  "source": "4574.jpg",
+  "prompt": "A moody, period-inspired portrait of an original young woman standing in a softly blurred library filled with old leather-bound books and brass objects, cropped from mid-thigh up and framed vertically. Long, voluminous light auburn hair falls past her shoulders in soft, defined curls. She wears a fitted dark velvet jacket with a row of small buttons down the front and a high lace-trimmed collar fastened with an ornate brooch. A layered beaded bracelet sits on one wrist, and her arms are folded across her body. Her expression is serious and direct. Warm, soft lighting with gentle falloff into shadow, a muted palette of deep browns and burgundy, amber and gold from the wood and metalwork, and soft rose tones in her skin. Fine grain and slightly faded color give a vintage film look. Scholarly, dignified, and quietly intense, in the style of a historical fiction book cover or Victorian fashion editorial.",
+  "style": "Moody, scholarly, vintage film",
+  "workingNotes": "- Suited to period drama posters or historical fiction covers.\n- Can be shifted to a different era by changing the costume.",
+  "tryThis": "Try this: Shift the costume to a different era.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "moody",
+    "scholarly",
+    "vintage film"
+  ],
+  "date": null
+}

@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-066",
+  "issueSlug": "the-prompt-issue",
+  "page": 155,
+  "studyNumber": 66,
+  "title": "Close-Up at the Teahouse Table",
+  "referenceImage": "references/a5b90cae81b84b38950c77e7c5f58d7cc8c96e9e78108786e6fae52759f6f4ff.jpeg",
+  "source": "24319.jpg",
+  "prompt": "An original young woman with long, soft brown hair and a gentle smile holds a glass water bottle close to the camera. She wears a cream ribbed turtleneck with a dainty gold pendant. Behind her, dark wooden beams and warm, blurred interior light. Her expression is relaxed and warm. Palette of cream, honey wood, and soft amber. Warm and intimate, in the style of a candid lifestyle close-up.",
+  "style": "Warm, intimate, candid",
+  "workingNotes": "- This is a tighter crop of the teahouse photo; keep the shallow depth of field.\n- Add 'shallow depth of field' to blur the background.",
+  "tryThis": "Try this: Add shallow depth of field to blur the background.",
+  "flags": "Rights check / Repeats Study 62.",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "warm",
+    "intimate",
+    "candid"
+  ],
+  "date": null
+}

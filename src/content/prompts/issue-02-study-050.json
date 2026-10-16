@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-050",
+  "issueSlug": "the-prompt-issue",
+  "page": 151,
+  "studyNumber": 50,
+  "title": "Studded Leather & Hooded Jacket",
+  "referenceImage": "references/21a6ebc293da198a764b371370cd4cd870dc60cc786bf7c6e61eb1fec6c3fe79.jpeg",
+  "source": "24392.jpg",
+  "prompt": "An original young woman with long, loose dark brown curls peeks out from a deep gray acid-washed hood. She wears a cropped zip hoodie over a black leather corset, a studded wide belt, and a black leather pleated mini skirt. Studded fingerless gloves and a studded black shoulder bag complete the look. Her expression is serious, with a bold red lip. A city street at night with soft ambient light. Palette of charcoal, black, and silver studs. Edgy and dramatic, in the style of a night-out street-style photo.",
+  "style": "Edgy, dramatic, confident",
+  "workingNotes": "- The studded belt and gloves are the signature accents.\n- Describe the lighting as 'soft street light' to avoid harsh flash.",
+  "tryThis": "Try this: Specify soft street light instead of harsh flash.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "edgy",
+    "dramatic",
+    "confident"
+  ],
+  "date": null
+}

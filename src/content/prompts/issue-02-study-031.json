@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-031",
+  "issueSlug": "the-prompt-issue",
+  "page": 22,
+  "studyNumber": 31,
+  "title": "Sun-Washed Blonde in Black",
+  "referenceImage": "references/129dfbca503f0a75c76073c9087324669a44f278e892a8b81e308a321362fdb1.jpeg",
+  "source": "24535.jpg",
+  "prompt": "An original young woman with long, straight blonde hair parted at the side and fine loose strands catching the light looks directly at the camera. She wears a fitted black mock-neck top with a subtle diagonal seam. Her skin is natural, with light freckles and a soft pink lip. Bright, overexposed sunlight behind her, with blurred green foliage. Soft, natural palette of ivory, gold, and deep black. Natural and direct, in the style of a 35mm film portrait.",
+  "style": "Natural, soft, direct",
+  "workingNotes": "- The overexposed daylight and fine hair strands create the soft film look.\n- Use 'natural skin texture' to keep the realism.",
+  "tryThis": "Try this: Specify natural skin texture.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "natural",
+    "soft",
+    "direct"
+  ],
+  "date": null
+}

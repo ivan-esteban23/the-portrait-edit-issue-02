@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+    <meta
+      name="description"
+      content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download."
+    >
+    <title>The Portrait Edit — The Prompt Issue</title>
+    <meta property="og:title" content="The Portrait Edit — The Prompt Issue">
+    <meta property="og:description" content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download.">
+    <meta property="og:image" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/cover.webp">
+    <meta property="og:url" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Portrait Edit — The Prompt Issue">
+    <meta name="twitter:description" content="Read The Portrait Edit magazine online. Original page designs, chapter navigation and full PDF download.">
+    <meta name="twitter:image" content="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/cover.webp">
+    <link rel="stylesheet" href="style.css?v=ux-refinement-1">
+    <script src="reader.js?v=ux-refinement-1" defer></script>
+    <noscript>
+      <style>
+        .toolbar, .reader-messages, .bottom-nav-slot, .chapter-overview-shell,
+        .page-viewport, .page-scrubber, #mobile-focus-options, #text-details { display: none; }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <a class="skip" href="#reader">Skip to magazine reader</a>
+
+    <header class="masthead">
+      <a href="#top">THE PORTRAIT EDIT</a>
+      <span id="issue-label">Magazine reader</span>
+    </header>
+
+    <main id="top">
+      <section class="intro" aria-labelledby="title">
+        <div>
+          <p class="eyebrow" id="issue-number"></p>
+          <h1 id="title">The Prompt Issue</h1>
+          <p class="deck" id="description"></p>
+          <p class="stats" id="stats"></p>
+
+          <div class="actions">
+            <a class="primary" href="#reader">
+              Start reading <span aria-hidden="true">↓</span>
+            </a>
+          </div>
+        </div>
+
+        <a class="cover-link" href="#reader" aria-label="Start reading">
+          <img
+            id="cover"
+            src="cover.webp"
+            width="480"
+            height="622"
+            alt="Magazine cover"
+          >
+        </a>
+      </section>
+
+      <section class="reading" id="reader" aria-label="Magazine reader">
+        <div class="reader-heading">
+          <div>
+            <p class="eyebrow">REFERENCE / IMAGE PROMPT / WORKING NOTES</p>
+            <h2>The Studies</h2>
+          </div>
+          <a id="other-issue" href="#">Explore the other issue ↗</a>
+        </div>
+
+        <div id="chapter-overview-shell" class="chapter-overview-shell">
+          <nav id="chapter-overview" class="chapter-overview" aria-label="Chapter overview"></nav>
+        </div>
+
+        <div class="toolbar" id="reader-toolbar">
+          <p id="focus-context" class="focus-context" hidden></p>
+          <div class="toolbar-main" id="toolbar-main">
+            <label id="chapter-control">
+              <span class="control-label">Chapter</span>
+              <select id="chapter" aria-label="Jump to chapter">
+                <option value="1">Front matter</option>
+              </select>
+            </label>
+
+            <div class="pagination" id="page-controls" role="group" aria-label="Page navigation">
+              <button type="button" id="previous" aria-label="Previous page">←</button>
+              <div class="page-position" id="page-position">
+                <label>
+                  <span class="control-label">Page</span>
+                  <input
+                    id="page-number"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    value="1"
+                    aria-label="Page number"
+                  >
+                </label>
+                <span id="page-total"></span>
+              </div>
+              <button type="button" id="next" aria-label="Next page">→</button>
+            </div>
+
+            <button id="focus-toggle" class="focus-toggle" type="button" aria-pressed="false" aria-keyshortcuts="F">Focus</button>
+          </div>
+          <div class="toolbar-secondary" id="toolbar-secondary">
+            <p id="chapter-progress" class="chapter-progress" aria-live="polite" aria-atomic="true"></p>
+            <p id="mobile-focus-progress" class="mobile-focus-progress" aria-live="polite" aria-atomic="true"></p>
+            <details class="reader-preferences" id="reader-preferences">
+              <summary id="reader-preferences-summary">Display</summary>
+              <div class="reading-options" id="reading-options">
+                <label id="view-control">
+                  <span class="control-label">View</span>
+                  <select id="reading-mode">
+                    <option value="page">Original page</option>
+                    <option value="text">Reading view</option>
+                  </select>
+                </label>
+                <label id="page-zoom-label">
+                  <span class="control-label">Zoom</span>
+                  <select id="zoom">
+                    <option value="100">Fit</option>
+                    <option value="125">125%</option>
+                    <option value="150">150%</option>
+                    <option value="200">200%</option>
+                  </select>
+                </label>
+                <label id="text-size-label">
+                  <span class="control-label">Text size</span>
+                  <select id="text-size">
+                    <option value="16" selected>16 px</option>
+                    <option value="18">18 px</option>
+                    <option value="20">20 px</option>
+                  </select>
+                </label>
+                <div class="keyboard-help">
+                  <p>Press F to toggle Focus outside form controls.</p>
+                  <div id="keys-hint" class="keys-hint" role="note" hidden>
+                    <span>Use ← → arrow keys to turn pages</span>
+                    <button id="dismiss-keys-hint" type="button" aria-label="Dismiss keyboard shortcut hint">×</button>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="reader-messages">
+          <div class="reader-status">
+            <p id="status" role="status" aria-live="polite"></p>
+            <button id="retry-page" class="retry-page" type="button" hidden>Retry page</button>
+          </div>
+        </div>
+
+        <article id="reading-text" tabindex="-1" hidden aria-label="Study reading view"></article>
+
+        <div
+          id="page-viewport"
+          class="page-viewport"
+          tabindex="0"
+          aria-label="Magazine page; use left and right arrow keys to turn pages"
+        >
+          <div id="page-loading" class="page-loading" aria-hidden="true" hidden></div>
+          <div class="page-holder">
+            <img id="page-image" decoding="async" fetchpriority="high" width="1224" height="1584" alt="">
+          </div>
+        </div>
+
+        <div class="page-scrubber">
+          <div class="scrubber-heading">
+            <label for="page-scrubber">Browse pages</label>
+            <output id="scrubber-page" for="page-scrubber" aria-live="off">Page 1 of 196</output>
+          </div>
+          <div class="scrubber-track">
+            <input id="page-scrubber" type="range" min="1" max="196" step="1" value="1" aria-label="Browse magazine pages" aria-describedby="scrubber-help">
+            <div id="chapter-ticks" class="chapter-ticks" aria-hidden="true"></div>
+          </div>
+          <p id="scrubber-help">Drag to a page, then release to read. Marks indicate chapter openings.</p>
+        </div>
+
+        <div id="mobile-focus-options" class="mobile-focus-options" hidden></div>
+
+        <div class="bottom-nav-slot">
+          <nav id="bottom-controls" class="bottom-controls" aria-label="Page navigation">
+            <button type="button" id="previous-bottom">← Previous</button>
+            <span id="current-label" aria-live="polite" aria-atomic="true"></span>
+            <button type="button" id="next-bottom">Next →</button>
+          </nav>
+        </div>
+
+        <details id="text-details">
+          <summary>Read this page as text</summary>
+          <pre id="page-text"></pre>
+        </details>
+        <noscript>
+          <p>
+            This reader needs JavaScript for navigation. Download the original
+            PDF to read the complete magazine.
+          </p>
+        </noscript>
+      </section>
+
+      <section class="selected" aria-labelledby="selected-title">
+        <div class="section-heading">
+          <h2 id="selected-title">Selected Studies</h2>
+          <p>From the portrait archive</p>
+        </div>
+        <div id="selected-studies" class="selected-grid"></div>
+      </section>
+
+      <aside class="issue-discovery" aria-label="Explore Issue 01">
+        <a
+          id="other-issue-card"
+          class="issue-card"
+          href="https://ivan-esteban23.github.io/the-portrait-edit-issue-01/"
+        >
+          <span class="issue-card-copy">
+            <span class="eyebrow">From the archive</span>
+            <span class="issue-card-title">Explore Issue 01</span>
+            <span class="issue-card-description">The Fashion Issue</span>
+          </span>
+          <span class="issue-card-arrow" aria-hidden="true">↗</span>
+        </a>
+      </aside>
+    </main>
+
+    <footer>
+      <div class="footer-brand">
+        <span class="eyebrow">The Portrait Edit</span>
+        <p>Independent editorial studies</p>
+      </div>
+      <nav class="footer-links" aria-label="Issues and production notes">
+        <a id="footer-issue-01" href="https://ivan-esteban23.github.io/the-portrait-edit-issue-01/">
+          Issue 01 <span>The Fashion Issue</span>
+        </a>
+        <a id="footer-issue-02" href="https://ivan-esteban23.github.io/the-portrait-edit-issue-02/" aria-current="page">
+          Issue 02 <span>The Prompt Issue</span>
+        </a>
+        <a id="source" href="https://github.com/ivan-esteban23/the-portrait-edit">
+          Source &amp; production notes ↗
+        </a>
+      </nav>
+      <div class="footer-download">
+        <a
+          id="download"
+          href="https://github.com/ivan-esteban23/the-portrait-edit-issue-02/releases/download/noir-editorial-1/The_Portrait_Edit_Issue_02.pdf"
+        >Download original PDF</a>
+        <p class="download-note" id="download-note"></p>
+      </div>
+      <p class="footer-note">
+        Web pages are optimized reading copies. Download the original PDF for
+        the full-quality edition and original navigation.
+      </p>
+    </footer>
+  </body>
+</html>

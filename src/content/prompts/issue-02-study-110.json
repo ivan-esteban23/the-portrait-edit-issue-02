@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-110",
+  "issueSlug": "the-prompt-issue",
+  "page": 114,
+  "studyNumber": 110,
+  "title": "Brown Hooded Knit with Lettering",
+  "referenceImage": "references/de018da8557d2d260f15216480b645c080e81065171a35c8497935f8ad78842b.jpeg",
+  "source": "24997.jpg",
+  "prompt": "An original young woman with dark hair in a high ponytail wears a brown knit hooded sweater with cream arched block lettering across the chest and a front kangaroo pocket. She wears wide blue denim jeans with a black belt and an ornate silver buckle. Her hands rest in the pocket. Her expression is calm and direct. A white backdrop with white cars at the sides. Palette of chocolate, cream, and denim blue. Sporty and urban, in the style of a street-style lookbook.",
+  "style": "Sporty, urban, bold",
+  "workingNotes": "- The block lettering and wide denim are the defining pieces.\n- Describe the lettering as 'arched block lettering' to keep it stylized.",
+  "tryThis": "Try this: Specify arched block lettering.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "sporty",
+    "urban",
+    "bold"
+  ],
+  "date": null
+}

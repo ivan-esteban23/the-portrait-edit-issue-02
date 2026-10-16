@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-028",
+  "issueSlug": "the-prompt-issue",
+  "page": 43,
+  "studyNumber": 28,
+  "title": "Fur Hood & Gold Earrings",
+  "referenceImage": "references/1fda10441201120be12055a8cca3109756e69895f046a6eb1aa758ba0ba212ab.jpeg",
+  "source": "24570.jpg",
+  "prompt": "An original young woman in a fluffy beige fur-lined hood wears ornate gold drop earrings and a cream ribbed turtleneck. A tiger-stripe faux-fur collar frames her shoulder. Her expression is serious, with her gaze slightly off to the side. Bright, sunlit sky and a distant hillside behind her. Warm light with film grain, a palette of cream, camel, and gold with deep black accents. Textured and warm, in the style of a film-shot winter editorial.",
+  "style": "Warm, textured, sunlit",
+  "workingNotes": "- The fur hood and tiger-stripe collar are the texture focus.\n- Keep the film grain to match the vintage feel.",
+  "tryThis": "Try this: Keep the film grain for a vintage feel.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "warm",
+    "textured",
+    "sunlit"
+  ],
+  "date": null
+}

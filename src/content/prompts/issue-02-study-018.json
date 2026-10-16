@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-018",
+  "issueSlug": "the-prompt-issue",
+  "page": 171,
+  "studyNumber": 18,
+  "title": "Crimson Wool Coat by the Car",
+  "referenceImage": "references/faa636eb433416665f54f6b3943361845984bcdc8b86122fd234a80c55bec4c8.jpeg",
+  "source": "24603.jpg",
+  "prompt": "An original young woman with long, windswept dark brown hair stands beside a dark car in cool daylight. She wears a full-length red wool wrap coat with a stand collar, a row of gold buttons at the shoulder, and a self-tie belt. She holds a black leather top-handle bag with gold hardware and wears black gloves. Her expression is serious, and her gaze is steady. Crisp, natural light, a rich palette of crimson, charcoal, and gold. Confident and polished, in the style of a winter fashion editorial.",
+  "style": "Confident, bold, editorial",
+  "workingNotes": "- The red coat should be the dominant color; keep the backdrop muted.\n- Add 'shallow depth of field' to separate her from the car.",
+  "tryThis": "Try this: Add shallow depth of field to separate the subject from the car.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "confident",
+    "bold",
+    "editorial"
+  ],
+  "date": null
+}

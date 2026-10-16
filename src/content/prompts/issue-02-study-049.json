@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-049",
+  "issueSlug": "the-prompt-issue",
+  "page": 175,
+  "studyNumber": 49,
+  "title": "Black Collared Dress with Cream Trim",
+  "referenceImage": "references/cfeee23092efd8111164d8e677a67bcf76b61ce8215eb7d71587ba0d93fd9201.jpeg",
+  "source": "24378.jpg",
+  "prompt": "An original young woman with soft, shoulder-length light brown waves sits on a stone ledge in front of a weathered stone wall. She wears a fitted black short-sleeve knit dress with a cream collar, cream placket, and pearl buttons, with cream trim at the cuffs and hem. A simple gold bracelet sits on one wrist. Her expression is calm and composed, looking toward the camera. Soft natural daylight, a palette of black, cream, and warm stone. Refined and classic, in the style of a timeless street portrait.",
+  "style": "Refined, classic, composed",
+  "workingNotes": "- The cream trim and pearl buttons are the key details.\n- Keep the stone wall for a classic architectural backdrop.",
+  "tryThis": "Try this: Keep the stone wall as the backdrop.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "refined",
+    "classic",
+    "composed"
+  ],
+  "date": null
+}

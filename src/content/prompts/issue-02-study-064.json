@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-064",
+  "issueSlug": "the-prompt-issue",
+  "page": 132,
+  "studyNumber": 64,
+  "title": "White Pleated Collared Mini Dress",
+  "referenceImage": "references/65ddaeefc65d30d2a1a0f447591a20adf195a95620a67e7db5799d51a8625320.jpeg",
+  "source": "24411.jpg",
+  "prompt": "An original young woman with shoulder-length light brown hair stands on a green lawn. She wears a fitted sleeveless white collared dress with a deep V neckline and a pleated mini skirt with a brown leather belt. She carries a gray quilted shoulder bag on a tan strap. Her expression is calm, looking off to the side. Soft, natural daylight. Palette of white, green, and warm brown. Fresh and preppy, in the style of a summer street-style editorial.",
+  "style": "Preppy, fresh, sporty",
+  "workingNotes": "- The pleated skirt and collared neckline are the key details.\n- Add 'full-length' to show the belt and skirt hem.",
+  "tryThis": "Try this: Use full-length framing to show the belt and skirt hem.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "preppy",
+    "fresh",
+    "sporty"
+  ],
+  "date": null
+}

@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-123",
+  "issueSlug": "the-prompt-issue",
+  "page": 160,
+  "studyNumber": 123,
+  "title": "Black Lace-Sleeve Top & Bob",
+  "referenceImage": "references/1a2688ee7ab348d81aad4908d0b1608b3b5dd12226c995d3735136752b2ec7fd.jpeg",
+  "source": "25013.jpg",
+  "prompt": "An original young woman with a sleek black bob and blunt bangs stands in a candlelit interior. She wears a fitted black long-sleeve top with lace sleeves and a lace neckline, a black leather choker, and a cross pendant on a silver chain. Her black leather pants have a chain belt with a silver buckle. Her expression is calm and serious, looking off to the side. Warm candlelight and blurred wooden furniture behind her. Palette of black, warm amber, and silver. Sleek and moody, in the style of a 1990s gothic film still.",
+  "style": "Sleek, moody, 90s",
+  "workingNotes": "- The blunt bob and lace sleeves are the signature shapes.\n- Keep the candles for a warm, atmospheric backdrop.",
+  "tryThis": "Try this: Keep the candles for a warm backdrop.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "sleek",
+    "moody",
+    "90s"
+  ],
+  "date": null
+}

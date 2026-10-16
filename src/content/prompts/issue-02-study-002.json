@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-002",
+  "issueSlug": "the-prompt-issue",
+  "page": 15,
+  "studyNumber": 2,
+  "title": "Golden Hour Street Selfie",
+  "referenceImage": "references/b8105ad31f8c38f060cf539ff2ee602444a2a7dae9bf4d785d178cb1cd60e1b6.jpeg",
+  "source": "4564.jpg",
+  "prompt": "A candid, arm's-length selfie of a young woman on a city street at golden hour, framed vertically. She has loose, shoulder-length honey-blonde hair with soft face-framing waves and wears a beige trench coat over a dark top with a delicate layered gold necklace. Low, warm sunlight creates a glowing rim light on her hair and a soft peach wash across her skin. Behind her, a tree-lined street with parked bicycles, cream-colored building facades, and a long shadow stretching across the pavement. Shallow, natural depth of field, warm amber, honey, and peach palette, relaxed and sun-kissed, with a nostalgic summer feel typical of a casual social media photo.",
+  "style": "Candid, sun-kissed, casual social media",
+  "workingNotes": "- Good candidate for a mood board or social post.\n- Variations: different season or city, more painterly treatment.",
+  "tryThis": "Try this: Try a different season.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "candid",
+    "sun-kissed",
+    "casual social media"
+  ],
+  "date": null
+}

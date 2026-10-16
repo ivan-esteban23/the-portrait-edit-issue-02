@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-009",
+  "issueSlug": "the-prompt-issue",
+  "page": 128,
+  "studyNumber": 9,
+  "title": "Mustard Twist Dress",
+  "referenceImage": "references/3846777489f34d2011c92180dacaf1c6fe567cdaef40a2f5a9ff43532a086e12.jpeg",
+  "source": "4991.jpg",
+  "prompt": "A vertical studio fashion portrait of an original young woman with long, wavy copper-red hair falling past her shoulders, standing against a plain white seamless backdrop. She wears a mustard-yellow long-sleeved bodycon mini dress with a high mandarin-style collar, a small ring-shaped cutout at the neckline, an asymmetrical cross-over bodice with a twisted front knot, and softly ruched fabric along the sides. The sleeves are long and slightly flared at the wrists, with silver rings on her fingers. She holds a pale pink structured handbag by its strap. Her expression is calm and direct. Soft, even studio lighting with minimal shadow, a warm, saturated palette of mustard, ochre, and copper against neutral white. Bold, retro, and editorial, in the style of a 1970s-inspired fashion campaign.",
+  "style": "Bold, retro, editorial",
+  "workingNotes": "- The twisted bodice and ruching are the defining details; name them specifically.\n- Mustard works best against a plain backdrop, so keep the background minimal.",
+  "tryThis": "Try this: Use a plain backdrop to emphasize the mustard dress.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "bold",
+    "retro",
+    "editorial"
+  ],
+  "date": null
+}

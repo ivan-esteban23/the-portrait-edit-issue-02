@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-118",
+  "issueSlug": "the-prompt-issue",
+  "page": 66,
+  "studyNumber": 118,
+  "title": "Burgundy Velvet Gown on Stone Stairs",
+  "referenceImage": "references/aa12956fcb5581cb4b010269a88163a617a31642e7c7aa9ac35c28946298790f.jpeg",
+  "source": "25024.jpg",
+  "prompt": "An original young woman with long, dark wavy hair walks down a wide stone staircase. She wears a fitted burgundy velvet jacket with gold beaded trim over a deep wine silk gown with a flowing train. A small pendant rests at her throat. Her expression is calm and serious. Cool, moody light with soft haze. Palette of burgundy, slate gray, and antique gold. Dramatic and gothic, in the style of a cinematic fantasy film still.",
+  "style": "Dramatic, gothic, cinematic",
+  "workingNotes": "- The beaded velvet jacket and train are the signature details.\n- Add 'full-length' to show the train and staircase.",
+  "tryThis": "Try this: Use full-length framing to show the train and staircase.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "dramatic",
+    "gothic",
+    "cinematic"
+  ],
+  "date": null
+}

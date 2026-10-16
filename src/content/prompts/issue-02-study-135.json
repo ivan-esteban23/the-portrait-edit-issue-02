@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-135",
+  "issueSlug": "the-prompt-issue",
+  "page": 190,
+  "studyNumber": 135,
+  "title": "Black Lace Top & Blue Sky",
+  "referenceImage": "references/30a62fbbf58171f3c7e6addb87a6c8b355eb3b168307f2c8fbb7a43f278bcb3a.jpeg",
+  "source": "25021.jpg",
+  "prompt": "An original young woman with long, dark hair blowing slightly across her shoulder stands outdoors against a bright blue sky. She wears a black high-neck long-sleeve lace top with a ruffled hem and a silver chain necklace. Dark cargo trousers and a black strap complete the look. Her expression is calm and serious, with a direct gaze. Warm, natural sunlight with a soft blurred background. Palette of black, sky blue, and warm skin tones. Candid and grunge-inspired, in the style of a film photo.",
+  "style": "Candid, grunge-inspired, moody",
+  "workingNotes": "- The lace top and blue sky are the strongest contrast.\n- Keep the blurred background for a candid film feel.",
+  "tryThis": "Try this: Keep the blurred background for a candid film feel.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "candid",
+    "grunge-inspired",
+    "moody"
+  ],
+  "date": null
+}

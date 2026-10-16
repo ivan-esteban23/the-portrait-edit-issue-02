@@ -1,0 +1,22 @@
+{
+  "id": "issue-02-study-128",
+  "issueSlug": "the-prompt-issue",
+  "page": 70,
+  "studyNumber": 128,
+  "title": "Black Velvet Gown in the Cemetery",
+  "referenceImage": "references/b636d927842887fe4e9a2847b8e67d2aacc865bc227030b0d1307f85e21df576.jpeg",
+  "source": "25014.jpg",
+  "prompt": "An original young woman with long, wavy dark brown hair walks along a fallen-leaf path between old headstones. She wears a black lace-trimmed fitted bodice with covered buttons and a black velvet floor-length skirt, with a silver belt at the waist. Lace cuffs hang from her wrists, and a pendant rests at her throat. Her expression is calm and serious. Soft, filtered light with blurred trees behind her. Palette of black, deep burgundy, and muted green. Dramatic and gothic, in the style of a cinematic period film still.",
+  "style": "Dramatic, gothic, romantic",
+  "workingNotes": "- The lace-trimmed bodice and velvet skirt are the defining textures.\n- Keep the cemetery and leaves for a moody setting.",
+  "tryThis": "Try this: Keep the cemetery and leaves for a moody setting.",
+  "flags": "Rights check",
+  "parameters": {},
+  "model": null,
+  "tags": [
+    "dramatic",
+    "gothic",
+    "romantic"
+  ],
+  "date": null
+}
