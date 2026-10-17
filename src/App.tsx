@@ -9,6 +9,9 @@ import {
 import { currentIssue, readerPath } from "./content/issues";
 import { useTheme, type Theme } from "./hooks/useTheme";
 import { usePageMeta } from "./hooks/usePageMeta";
+import { CommandPalette } from "./components/CommandPalette";
+import { ShortcutsModal } from "./components/ShortcutsModal";
+
 const Home = lazy(() =>
   import("./components/SitePages").then((m) => ({ default: m.Home })),
 );
@@ -30,10 +33,14 @@ const NotFound = lazy(() =>
 const Reader = lazy(() =>
   import("./components/Reader").then((m) => ({ default: m.Reader })),
 );
+
 export default function App() {
   const { theme, setTheme } = useTheme();
   const location = useLocation(),
     navigate = useNavigate();
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
   const [focus, setFocusState] = useState(() => {
     try {
       return localStorage.getItem("portrait-edit-focus-mode") === "true";
@@ -41,6 +48,7 @@ export default function App() {
       return false;
     }
   });
+
   const setFocus = useCallback((value: boolean) => {
     setFocusState(value);
     try {
@@ -49,10 +57,55 @@ export default function App() {
       /* Private browsing still works. */
     }
   }, []);
+
   const readerRoute = /^\/issues\/[^/]+\/pages\/\d+\/?$/.test(
     location.pathname,
   );
   const focused = readerRoute && focus;
+
+  // Global Cmd+K / Ctrl+K listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const cycleTheme = useCallback(() => {
+    const nextTheme: Theme =
+      theme === "system"
+        ? "light"
+        : theme === "light"
+          ? "paper"
+          : theme === "paper"
+            ? "dark"
+            : "system";
+    setTheme(nextTheme);
+  }, [theme, setTheme]);
+
+  const toggleSpreadAction = useCallback(() => {
+    try {
+      const cur = localStorage.getItem("portrait-edit-spread") === "true";
+      localStorage.setItem("portrait-edit-spread", String(!cur));
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "portrait-edit-spread",
+          newValue: String(!cur),
+        }),
+      );
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const toggleFocusAction = useCallback(() => {
+    setFocus(!focus);
+  }, [focus, setFocus]);
+
   useEffect(() => {
     const legacy = () => {
       const match = window.location.hash.match(/^#page=(\d+)$/);
@@ -68,7 +121,9 @@ export default function App() {
     window.addEventListener("hashchange", legacy);
     return () => window.removeEventListener("hashchange", legacy);
   }, [navigate]);
+
   usePageMeta();
+
   return (
     <div className={focused ? "publication focused" : "publication"}>
       <a className="skip-link" href="#main">
@@ -80,6 +135,30 @@ export default function App() {
             The Portrait Edit<span>Independent portrait studies</span>
           </Link>
           <nav aria-label="Publication">
+            <button
+              type="button"
+              className="masthead-search-trigger"
+              onClick={() => setCommandPaletteOpen(true)}
+              title="Search commands, pages, and prompts (⌘K / Ctrl+K)"
+              aria-label="Search and command palette"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <span className="search-trigger-label">Search</span>
+              <kbd className="search-trigger-kbd">⌘K</kbd>
+            </button>
             <Link to={`/issues/${currentIssue.slug}`}>Issue 02</Link>
             <Link to="/prompts">Archive</Link>
             <Link to="/about">About</Link>
@@ -142,6 +221,23 @@ export default function App() {
           </nav>
         </footer>
       )}
+
+      {/* Global Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        currentTheme={theme}
+        onToggleTheme={cycleTheme}
+        onToggleSpread={toggleSpreadAction}
+        onToggleFocus={toggleFocusAction}
+        onOpenShortcuts={() => setShortcutsOpen(true)}
+      />
+
+      {/* Global Keyboard Shortcuts Modal */}
+      <ShortcutsModal
+        isOpen={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+      />
     </div>
   );
 }

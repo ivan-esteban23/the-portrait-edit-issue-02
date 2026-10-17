@@ -5,12 +5,15 @@ import { copyText } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { ImageLightbox } from "./ImageLightbox";
-
+import { PromptStudioDrawer } from "./PromptStudioDrawer";
+import { exportStudyRecipeCard } from "@/lib/cardExport";
 import { formatPromptText, canShare, sharePrompt, type CopyFormat } from "@/lib/promptFormatter";
 
 export function PromptCard({ prompt }: { prompt: Prompt }) {
   const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
+  const [exportingCard, setExportingCard] = useState(false);
+  const [studioOpen, setStudioOpen] = useState(false);
   const alive = useRef(true);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -46,6 +49,23 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
     }
   }
 
+  async function handleExportCard() {
+    setExportingCard(true);
+    try {
+      await exportStudyRecipeCard(prompt);
+      if (alive.current) {
+        setFeedback("Recipe card PNG exported.");
+        timer.current = setTimeout(() => setFeedback(""), 2000);
+      }
+    } catch {
+      if (alive.current) {
+        setFeedback("Unable to export recipe card.");
+      }
+    } finally {
+      if (alive.current) setExportingCard(false);
+    }
+  }
+
   return (
     <section className="prompt-card" aria-label="Image prompt">
       <div className="prompt-card-heading">
@@ -76,6 +96,39 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
           >
             Markdown
           </Button>
+          <Button
+            variant="outline"
+            className="card-tool-btn adjust-params-btn"
+            onClick={() => setStudioOpen(true)}
+            title="Open Prompt Studio parameter tweaker"
+          >
+            Adjust Parameters
+          </Button>
+          <Button
+            variant="outline"
+            className="card-tool-btn recipe-card-export-btn"
+            onClick={handleExportCard}
+            disabled={exportingCard}
+            title="Save as 1080x1350 editorial PNG recipe card"
+          >
+            <svg
+              className="download-icon-svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span>{exportingCard ? "Generating…" : "Save Recipe Card"}</span>
+          </Button>
         </div>
       </div>
       <p className="prompt-body">{prompt.prompt}</p>
@@ -83,6 +136,13 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
         {feedback}
       </p>
       <p className="source-note">Text checked against the published study.</p>
+
+      {/* Interactive Prompt Studio / Parameter Tweaker Drawer */}
+      <PromptStudioDrawer
+        prompt={prompt}
+        isOpen={studioOpen}
+        onClose={() => setStudioOpen(false)}
+      />
     </section>
   );
 }
@@ -91,6 +151,19 @@ export function Study({ prompt }: { prompt: Prompt }) {
   const { isSaved, toggleSaved } = useBookmarks();
   const saved = isSaved(prompt.id);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [studioOpen, setStudioOpen] = useState(false);
+  const [exportingCard, setExportingCard] = useState(false);
+
+  const handleExportCard = async () => {
+    setExportingCard(true);
+    try {
+      await exportStudyRecipeCard(prompt);
+    } catch {
+      /* ignore */
+    } finally {
+      setExportingCard(false);
+    }
+  };
 
   return (
     <article className="study-article">
@@ -101,6 +174,41 @@ export function Study({ prompt }: { prompt: Prompt }) {
             <span> / Page {prompt.page}</span>
           </p>
           <div className="study-header-actions">
+            <Button
+              variant="ghost"
+              className="study-header-tool-btn"
+              onClick={() => setStudioOpen(true)}
+              aria-label="Adjust Parameters in Prompt Studio"
+              title="Open Prompt Studio drawer"
+            >
+              Adjust Parameters
+            </Button>
+            <Button
+              variant="ghost"
+              className="study-header-tool-btn recipe-card-header-btn"
+              onClick={handleExportCard}
+              disabled={exportingCard}
+              aria-label="Save Recipe Card as PNG"
+              title="Export 1080x1350 editorial recipe card PNG"
+            >
+              <svg
+                className="download-icon-svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>{exportingCard ? "Generating…" : "Save Recipe Card"}</span>
+            </Button>
             {canShare() && (
               <Button
                 variant="ghost"
@@ -158,6 +266,12 @@ export function Study({ prompt }: { prompt: Prompt }) {
         title={`Study ${String(prompt.studyNumber).padStart(3, "0")} · ${prompt.title}`}
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
+      />
+
+      <PromptStudioDrawer
+        prompt={prompt}
+        isOpen={studioOpen}
+        onClose={() => setStudioOpen(false)}
       />
 
       <PromptCard key={prompt.id} prompt={prompt} />

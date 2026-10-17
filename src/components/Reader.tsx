@@ -17,6 +17,7 @@ import { NotFound } from "./SitePages";
 import { useTheme, type Theme } from "@/hooks/useTheme";
 import { ImageLightbox } from "./ImageLightbox";
 import { ShortcutsModal } from "./ShortcutsModal";
+import { useSoundEffect } from "@/utils/audio";
 
 // BrowserRouter updates history before a transition finishes rendering. Read the
 // latest address for consecutive gestures so rapid turns never reuse stale props.
@@ -231,6 +232,8 @@ function ReaderView({
   const [turning, setTurning] = useState(false);
   const [showThumbnails, setShowThumbnails] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const { soundEnabled, toggleSound, playPaperTurn } = useSoundEffect();
+  const isInitialPageRender = useRef(true);
   const filmstripRef = useRef<HTMLDivElement>(null);
   const [lightbox, setLightbox] = useState<{
     src: string;
@@ -339,8 +342,13 @@ function ReaderView({
   useEffect(() => {
     setTurning(true);
     const t = setTimeout(() => setTurning(false), 150);
+    if (isInitialPageRender.current) {
+      isInitialPageRender.current = false;
+    } else {
+      playPaperTurn();
+    }
     return () => clearTimeout(t);
-  }, [page]);
+  }, [page, playPaperTurn]);
   useEffect(() => {
     if (showThumbnails && filmstripRef.current) {
       const activeEl = filmstripRef.current.querySelector<HTMLElement>(
@@ -627,6 +635,15 @@ function ReaderView({
                     </div>
                   </fieldset>
                 )}
+                <label className="sound-toggle-row">
+                  <span>Paper turn sound</span>
+                  <input
+                    type="checkbox"
+                    aria-label="Paper turn sound (Web Audio)"
+                    checked={soundEnabled}
+                    onChange={toggleSound}
+                  />
+                </label>
               </div>
               <div className="keyboard-guide">
                 <h3>Keyboard</h3>
@@ -660,6 +677,48 @@ function ReaderView({
             onClick={() => toggleFocus(!currentRouteFocus(focus))}
           >
             {focus ? "Exit Focus" : "Focus"}
+          </Button>
+          <Button
+            variant="ghost"
+            className={`sound-fx-toggle-btn ${soundEnabled ? "is-active" : ""}`}
+            aria-label={`Sound FX: ${soundEnabled ? "On" : "Off"}`}
+            title={`Sound FX: ${soundEnabled ? "On" : "Off"}`}
+            onClick={toggleSound}
+          >
+            {soundEnabled ? (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              </svg>
+            ) : (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <line x1="23" y1="9" x2="17" y2="15" />
+                <line x1="17" y1="9" x2="23" y2="15" />
+              </svg>
+            )}
+            <span className="sound-fx-label">{soundEnabled ? "Sound: On" : "Sound: Off"}</span>
           </Button>
           <Button
             variant="ghost"

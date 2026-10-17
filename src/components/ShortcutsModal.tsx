@@ -22,6 +22,7 @@ export function ShortcutsModal({ isOpen, onClose }: ShortcutsModalProps) {
   if (!isOpen) return null;
 
   const shortcuts = [
+    { key: "⌘K / Ctrl+K", label: "Open Command Palette & Search" },
     { key: "→ / J", label: "Next page" },
     { key: "← / K", label: "Previous page" },
     { key: "Home / End", label: "First / Last page" },

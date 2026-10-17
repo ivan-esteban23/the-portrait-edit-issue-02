@@ -320,6 +320,22 @@ export function Archive() {
               <Button
                 type="button"
                 variant="ghost"
+                className="export-saved-btn print-contact-sheet-btn"
+                onClick={() => {
+                  if (!savedOnly) {
+                    filter("saved", "1");
+                  }
+                  setTimeout(() => {
+                    window.print();
+                  }, 120);
+                }}
+                title="Print editorial contact sheet (@media print)"
+              >
+                Print Contact Sheet 🖨
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
                 className="export-saved-btn"
                 onClick={exportSaved}
                 title="Export saved studies as JSON"
@@ -345,6 +361,29 @@ export function Archive() {
       <p role="status" className="results-count">
         {filtered.length} {filtered.length === 1 ? "study" : "studies"}
       </p>
+
+      {/* Printable Contact Sheet Header (@media print) */}
+      <div className="print-contact-sheet-header" aria-hidden="true">
+        <div className="print-header-masthead">
+          <h2>THE PORTRAIT EDIT — ISSUE 02: THE PROMPT ISSUE</h2>
+          <span>EDITORIAL CONTACT SHEET</span>
+        </div>
+        <div className="print-header-details">
+          <p>
+            Curated Collection: <strong>{activeCollection}</strong>
+          </p>
+          <p>
+            {filtered.length} {filtered.length === 1 ? "study" : "studies"} · Printed{" "}
+            {new Date().toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </p>
+        </div>
+        <div className="print-header-line" />
+      </div>
+
       <div className="archive-grid">
         {filtered.map((p) => (
           <StudyCard

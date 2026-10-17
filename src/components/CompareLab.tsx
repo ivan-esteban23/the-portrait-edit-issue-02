@@ -1,4 +1,4 @@
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useState, useRef, useCallback, type MouseEvent } from "react";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
 import { Button } from "./ui/button";
@@ -23,6 +23,10 @@ export function CompareLab({
   onInspectImage,
 }: CompareLabProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [mode, setMode] = useState<"side-by-side" | "split">("side-by-side");
+  const [splitPos, setSplitPos] = useState<number>(50);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const sliderFrameRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -35,6 +39,40 @@ export function CompareLab({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
+
+  const updateSplitFromClientX = useCallback((clientX: number) => {
+    if (!sliderFrameRef.current) return;
+    const rect = sliderFrameRef.current.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const offsetX = clientX - rect.left;
+    const percent = Math.max(0, Math.min(100, (offsetX / rect.width) * 100));
+    setSplitPos(percent);
+  }, []);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setIsDragging(true);
+    updateSplitFromClientX(e.clientX);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (isDragging) {
+      updateSplitFromClientX(e.clientX);
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -50,10 +88,10 @@ export function CompareLab({
     }
   };
 
-  const renderColumn = (prompt: Prompt, label: string) => {
+  const renderPromptDetails = (prompt: Prompt, label: string) => {
     const paramsList = Object.entries(prompt.parameters || {});
     return (
-      <div className="compare-column">
+      <div className="compare-details-pane">
         <div className="compare-col-header">
           <span className="compare-badge">{label}</span>
           <h3>
@@ -62,28 +100,6 @@ export function CompareLab({
           <p className="compare-meta">
             Issue 02 · Page {prompt.page} · {prompt.model || "Midjourney"}
           </p>
-        </div>
-
-        <div className="compare-image-wrap">
-          <button
-            type="button"
-            className="compare-inspect-btn"
-            onClick={() =>
-              onInspectImage?.(
-                assetUrl(prompt.referenceImage),
-                prompt.title,
-                `Study #${prompt.studyNumber}: ${prompt.title}`,
-              )
-            }
-            title="Click to inspect image fullscreen"
-          >
-            <img
-              src={assetUrl(prompt.referenceImage)}
-              alt={prompt.title}
-              className="compare-image"
-            />
-            <span className="compare-inspect-hint">🔍 Inspect</span>
-          </button>
         </div>
 
         <div className="compare-section">
@@ -164,17 +180,82 @@ export function CompareLab({
     );
   };
 
+  const renderSideBySideColumn = (prompt: Prompt, label: string) => {
+    return (
+      <div className="compare-column">
+        <div className="compare-image-wrap">
+          <button
+            type="button"
+            className="compare-inspect-btn"
+            onClick={() =>
+              onInspectImage?.(
+                assetUrl(prompt.referenceImage),
+                prompt.title,
+                `Study #${prompt.studyNumber}: ${prompt.title}`,
+              )
+            }
+            title="Click to inspect image fullscreen"
+          >
+            <img
+              src={assetUrl(prompt.referenceImage)}
+              alt={prompt.title}
+              className="compare-image"
+            />
+            <span className="compare-inspect-hint">🔍 Inspect</span>
+          </button>
+        </div>
+        {renderPromptDetails(prompt, label)}
+      </div>
+    );
+  };
+
   return (
-    <div className="compare-lab-overlay" role="dialog" aria-modal="true" aria-label="Prompt comparison lab">
+    <div
+      className="compare-lab-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Prompt comparison lab"
+    >
       <div className="compare-lab-container">
         <header className="compare-lab-toolbar">
           <div className="compare-lab-title">
-            <h2>Side-by-Side Compare Lab</h2>
+            <h2>Compare Lab</h2>
             <p>Evaluating prompt variations, camera notes, and visual outputs</p>
           </div>
-          <div className="compare-lab-actions">
-            <Button variant="outline" onClick={onSwap} title="Swap left and right studies">
-              ⇄ Swap Columns
+
+          <div className="compare-toolbar-controls">
+            {/* Segmented Control: Side by Side | Split Curtain */}
+            <div
+              className="compare-mode-segmented"
+              role="radiogroup"
+              aria-label="Comparison layout"
+            >
+              <button
+                type="button"
+                role="radio"
+                aria-checked={mode === "side-by-side"}
+                className={`segmented-mode-btn ${mode === "side-by-side" ? "is-active" : ""}`}
+                onClick={() => setMode("side-by-side")}
+              >
+                Side by Side
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={mode === "split"}
+                className={`segmented-mode-btn ${mode === "split" ? "is-active" : ""}`}
+                onClick={() => setMode("split")}
+              >
+                Split Curtain
+              </button>
+            </div>
+
+            <Button
+              variant="outline"
+              onClick={onSwap}
+              title="Swap left and right studies"
+            >
+              ⇄ Swap Studies
             </Button>
             <Button
               variant="ghost"
@@ -187,11 +268,103 @@ export function CompareLab({
           </div>
         </header>
 
-        <div className="compare-stage">
-          {renderColumn(studyA, "Study A")}
-          <div className="compare-divider" aria-hidden="true" />
-          {renderColumn(studyB, "Study B")}
-        </div>
+        {mode === "side-by-side" ? (
+          <div className="compare-stage">
+            {renderSideBySideColumn(studyA, "Study A")}
+            <div className="compare-divider" aria-hidden="true" />
+            {renderSideBySideColumn(studyB, "Study B")}
+          </div>
+        ) : (
+          <div className="split-curtain-container">
+            {/* Split Curtain Frame */}
+            <div
+              ref={sliderFrameRef}
+              className={`split-curtain-frame ${isDragging ? "is-dragging" : ""}`}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+            >
+              {/* Study B (Background / Right) */}
+              <div className="split-layer split-layer-b">
+                <img
+                  src={assetUrl(studyB.referenceImage)}
+                  alt={`Study B: ${studyB.title}`}
+                  className="split-layer-img"
+                  draggable={false}
+                />
+                <span className="split-side-badge badge-right">
+                  Study B: #{studyB.studyNumber}
+                </span>
+              </div>
+
+              {/* Study A (Foreground / Left, clipped by percentage) */}
+              <div
+                className="split-layer split-layer-a"
+                style={{ clipPath: `inset(0 ${100 - splitPos}% 0 0)` }}
+              >
+                <img
+                  src={assetUrl(studyA.referenceImage)}
+                  alt={`Study A: ${studyA.title}`}
+                  className="split-layer-img"
+                  draggable={false}
+                />
+                <span className="split-side-badge badge-left">
+                  Study A: #{studyA.studyNumber}
+                </span>
+              </div>
+
+              {/* Draggable Divider Handle */}
+              <div
+                className="split-curtain-handle"
+                style={{ left: `${splitPos}%` }}
+                role="slider"
+                aria-label="Curtain comparison slider"
+                aria-valuenow={Math.round(splitPos)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    setSplitPos((p) => Math.max(0, p - 4));
+                  } else if (e.key === "ArrowRight") {
+                    e.preventDefault();
+                    setSplitPos((p) => Math.min(100, p + 4));
+                  } else if (e.key === "Home") {
+                    e.preventDefault();
+                    setSplitPos(0);
+                  } else if (e.key === "End") {
+                    e.preventDefault();
+                    setSplitPos(100);
+                  }
+                }}
+              >
+                <div className="split-handle-line" />
+                <div className="split-handle-thumb">
+                  <span className="thumb-arrow">‹</span>
+                  <span className="thumb-arrow">›</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="split-slider-instructions">
+              <span>Drag handle or swipe to compare details</span>
+              <span>Study A ({Math.round(splitPos)}%) ⇄ Study B ({Math.round(100 - splitPos)}%)</span>
+            </div>
+
+            {/* Split Details Below Slider */}
+            <div className="split-meta-stage">
+              <div className="split-meta-col">
+                {renderPromptDetails(studyA, "Study A (Left)")}
+              </div>
+              <div className="compare-divider" aria-hidden="true" />
+              <div className="split-meta-col">
+                {renderPromptDetails(studyB, "Study B (Right)")}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
