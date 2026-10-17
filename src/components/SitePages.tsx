@@ -1,7 +1,9 @@
-import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { assetUrl, currentIssue, issues, prompts, readerPath } from "@/content";
 import { Button } from "./ui/button";
 import { Study } from "./Study";
+import { StudyCard } from "./StudyCard";
+import { useBookmarks } from "@/hooks/useBookmarks";
 export function Home() {
   const legacy = window.location.hash.match(/^#page=(\d+)$/);
   if (window.location.hash === "#reader")
@@ -23,6 +25,8 @@ export function Home() {
         }
       />
     );
+  const navigate = useNavigate();
+  const { isSaved, toggleSaved } = useBookmarks();
   const featured = currentIssue.featured.map((id) =>
     prompts.find((p) => p.id === id)!,
   );
@@ -71,22 +75,15 @@ export function Home() {
         </div>
         <div className="selected-strip">
           {featured.map((p) => (
-            <Link
-              className="study-card"
-              to={readerPath(p.issueSlug, p.page)}
+            <StudyCard
               key={p.id}
-            >
-              <img
-                src={assetUrl(p.referenceImage)}
-                alt={p.title}
-                loading="lazy"
-              />
-              <p className="eyebrow">
-                Study {String(p.studyNumber).padStart(3, "0")}
-              </p>
-              <h3>{p.title}</h3>
-              <p>{p.style}</p>
-            </Link>
+              prompt={p}
+              to={readerPath(p.issueSlug, p.page)}
+              headingLevel="h3"
+              isSaved={isSaved(p.id)}
+              onToggleSaved={toggleSaved}
+              onTagClick={(t) => navigate(`/prompts?tag=${encodeURIComponent(t)}`)}
+            />
           ))}
         </div>
       </section>
@@ -142,15 +139,18 @@ export function IssueOverview() {
 }
 export function Archive() {
   const [search, setSearch] = useSearchParams();
+  const { isSaved, toggleSaved, exportSaved, savedCount } = useBookmarks();
   const query = search.get("q") ?? "",
     tag = search.get("tag") ?? "",
-    model = search.get("model") ?? "";
+    model = search.get("model") ?? "",
+    savedOnly = search.get("saved") === "1";
   const tags = [...new Set(prompts.flatMap((p) => p.tags))].sort();
   const models = [
     ...new Set(prompts.map((p) => p.model ?? "Unspecified")),
   ].sort();
   const filtered = prompts.filter(
     (p) =>
+      (!savedOnly || isSaved(p.id)) &&
       (!tag || p.tags.includes(tag)) &&
       (!model || (p.model ?? "Unspecified") === model) &&
       `${p.title} ${p.prompt} ${p.style} ${p.studyNumber}`
@@ -203,33 +203,53 @@ export function Archive() {
             ))}
           </select>
         </label>
-        <Button variant="ghost" onClick={() => setSearch({})}>
-          Clear filters
-        </Button>
+        <div className="archive-actions-group">
+          <Button
+            type="button"
+            variant="ghost"
+            className={`saved-pill-btn ${savedOnly ? "is-active" : ""}`}
+            aria-pressed={savedOnly}
+            onClick={() => filter("saved", savedOnly ? "" : "1")}
+          >
+            ★ Saved ({savedCount})
+          </Button>
+          {savedCount > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="export-saved-btn"
+              onClick={exportSaved}
+              title="Export saved studies as JSON"
+            >
+              Export JSON ↗
+            </Button>
+          )}
+          <Button variant="ghost" onClick={() => setSearch({})}>
+            Clear filters
+          </Button>
+        </div>
       </form>
       <p role="status" className="results-count">
         {filtered.length} {filtered.length === 1 ? "study" : "studies"}
       </p>
       <div className="archive-grid">
         {filtered.map((p) => (
-          <Link className="study-card" key={p.id} to={`/prompts/${p.id}`}>
-            <img
-              src={assetUrl(p.referenceImage)}
-              alt={p.title}
-              loading="lazy"
-            />
-            <p className="eyebrow">
-              Study {String(p.studyNumber).padStart(3, "0")}
-            </p>
-            <h2>{p.title}</h2>
-            <p>{p.style}</p>
-          </Link>
+          <StudyCard
+            key={p.id}
+            prompt={p}
+            to={`/prompts/${p.id}`}
+            headingLevel="h2"
+            isSaved={isSaved(p.id)}
+            onToggleSaved={toggleSaved}
+            onTagClick={(t) => filter("tag", t)}
+          />
         ))}
       </div>
       {!filtered.length && (
         <p className="empty-state">
-          No studies match these filters. Try a broader search or clear the
-          filters.
+          {savedOnly && savedCount === 0
+            ? "No studies saved yet. Tap the bookmark icon on any study to add it to your curation board."
+            : "No studies match these filters. Try a broader search or clear the filters."}
         </p>
       )}
     </section>

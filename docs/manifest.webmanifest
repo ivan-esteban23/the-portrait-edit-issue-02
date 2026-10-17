@@ -1,0 +1,36 @@
+{
+  "name": "The Portrait Edit — The Prompt Issue",
+  "short_name": "Portrait Edit",
+  "description": "An independent editorial magazine and working archive of AI portrait prompts.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f4ef",
+  "theme_color": "#f6f4ef",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "cover.webp",
+      "sizes": "480x622",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ]
+}

@@ -3,11 +3,15 @@ import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
 import { copyText } from "@/lib/utils";
 import { Button } from "./ui/button";
+import { useBookmarks } from "@/hooks/useBookmarks";
+import { ImageLightbox } from "./ImageLightbox";
+
 export function PromptCard({ prompt }: { prompt: Prompt }) {
   const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
   const alive = useRef(true);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -15,6 +19,7 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
+
   async function copy() {
     if (timer.current) clearTimeout(timer.current);
     setBusy(true);
@@ -31,6 +36,7 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
       if (alive.current) setBusy(false);
     }
   }
+
   return (
     <section className="prompt-card" aria-label="Image prompt">
       <div className="prompt-card-heading">
@@ -51,28 +57,67 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
     </section>
   );
 }
+
 export function Study({ prompt }: { prompt: Prompt }) {
+  const { isSaved, toggleSaved } = useBookmarks();
+  const saved = isSaved(prompt.id);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   return (
     <article className="study-article">
       <header>
-        <p className="eyebrow">
-          Study {String(prompt.studyNumber).padStart(3, "0")}{" "}
-          <span> / Page {prompt.page}</span>
-        </p>
+        <div className="study-header-row">
+          <p className="eyebrow">
+            Study {String(prompt.studyNumber).padStart(3, "0")}{" "}
+            <span> / Page {prompt.page}</span>
+          </p>
+          <Button
+            variant="ghost"
+            className={`study-bookmark-toggle ${saved ? "is-saved" : ""}`}
+            aria-pressed={saved}
+            onClick={() => toggleSaved(prompt.id)}
+            aria-label={saved ? "Remove from saved" : "Save study"}
+          >
+            <span className="bookmark-icon" aria-hidden="true">
+              {saved ? "★" : "☆"}
+            </span>
+            <span>{saved ? "Saved" : "Save study"}</span>
+          </Button>
+        </div>
         <h1>{prompt.title}</h1>
         <p className="study-style">{prompt.style}</p>
       </header>
-      <figure>
-        <img
-          src={assetUrl(prompt.referenceImage)}
-          alt={`Reference for ${prompt.title}`}
-          decoding="async"
-        />
+      <figure className="study-figure">
+        <button
+          type="button"
+          className="image-inspect-trigger"
+          onClick={() => setLightboxOpen(true)}
+          title="Click to inspect image in detail"
+          aria-label={`Inspect high-resolution reference for ${prompt.title}`}
+        >
+          <img
+            src={assetUrl(prompt.referenceImage)}
+            alt={`Reference for ${prompt.title}`}
+            decoding="async"
+          />
+          <span className="inspect-badge" aria-hidden="true">
+            🔍 Inspect
+          </span>
+        </button>
         <figcaption>
           Source: {prompt.source}
           <span>{prompt.flags}</span>
         </figcaption>
       </figure>
+
+      <ImageLightbox
+        src={assetUrl(prompt.referenceImage)}
+        alt={`Reference for ${prompt.title}`}
+        title={`Study ${String(prompt.studyNumber).padStart(3, "0")} · ${prompt.title}`}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
+
       <PromptCard key={prompt.id} prompt={prompt} />
       <section className="article-section">
         <h3>Working notes</h3>

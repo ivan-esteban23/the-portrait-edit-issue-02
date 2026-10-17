@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="64" fill="#171614"/>
+  <rect x="24" y="24" width="464" height="464" rx="48" fill="none" stroke="#d9d5cb" stroke-width="2"/>
+  <text x="256" y="220" font-family="Georgia, serif" font-size="120" font-style="italic" font-weight="bold" fill="#f6f4ef" text-anchor="middle">The</text>
+  <text x="256" y="320" font-family="Georgia, serif" font-size="80" letter-spacing="4" fill="#f6f4ef" text-anchor="middle">PORTRAIT</text>
+  <text x="256" y="390" font-family="system-ui, sans-serif" font-size="32" letter-spacing="12" fill="#a49f92" text-anchor="middle">EDIT · 02</text>
+</svg>

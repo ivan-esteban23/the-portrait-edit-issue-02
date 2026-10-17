@@ -7,6 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { currentIssue, readerPath } from "./content/issues";
+import { useTheme, type Theme } from "./hooks/useTheme";
 const Home = lazy(() =>
   import("./components/SitePages").then((m) => ({ default: m.Home })),
 );
@@ -29,6 +30,7 @@ const Reader = lazy(() =>
   import("./components/Reader").then((m) => ({ default: m.Reader })),
 );
 export default function App() {
+  const { theme, setTheme } = useTheme();
   const location = useLocation(),
     navigate = useNavigate();
   const [focus, setFocusState] = useState(() => {
@@ -85,6 +87,18 @@ export default function App() {
             <Link to={`/issues/${currentIssue.slug}`}>Issue 02</Link>
             <Link to="/prompts">Archive</Link>
             <Link to="/about">About</Link>
+            <div className="masthead-theme">
+              <select
+                aria-label="Color theme"
+                value={theme}
+                onChange={(e) => setTheme(e.target.value as Theme)}
+              >
+                <option value="system">Auto</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="paper">Paper</option>
+              </select>
+            </div>
           </nav>
         </header>
       )}

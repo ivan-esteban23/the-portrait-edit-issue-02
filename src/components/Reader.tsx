@@ -14,6 +14,8 @@ import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Study } from "./Study";
 import { NotFound } from "./SitePages";
+import { useTheme, type Theme } from "@/hooks/useTheme";
+import { ImageLightbox } from "./ImageLightbox";
 
 // BrowserRouter updates history before a transition finishes rendering. Read the
 // latest address for consecutive gestures so rapid turns never reuse stale props.
@@ -83,15 +85,21 @@ function OriginalPage({
   page,
   issue,
   zoom,
+  onInspect,
 }: {
   page: number;
   issue: Issue;
   zoom: number;
+  onInspect?: (page: number) => void;
 }) {
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [retry, setRetry] = useState(0);
   return (
-    <div className="page-stage" aria-busy={state === "loading"}>
+    <div
+      id="page-viewport"
+      className="page-stage"
+      aria-busy={state === "loading"}
+    >
       {state === "loading" && (
         <>
           <div className="loading-line" aria-hidden="true" />
@@ -131,7 +139,52 @@ function OriginalPage({
           alt={`Issue ${issue.number}, page ${page}`}
           onLoad={() => setState("ready")}
           onError={() => setState("error")}
+          onClick={() => onInspect?.(page)}
+          title="Click to inspect page in detail"
+          style={{ cursor: "zoom-in" }}
         />
+      </div>
+    </div>
+  );
+}
+function SpreadPage({
+  leftPage,
+  rightPage,
+  issue,
+  zoom,
+  onInspect,
+}: {
+  leftPage: number;
+  rightPage: number;
+  issue: Issue;
+  zoom: number;
+  onInspect: (page: number) => void;
+}) {
+  return (
+    <div id="page-viewport" className="page-stage spread-stage">
+      <div
+        className="spread-holder"
+        style={{ width: `${zoom}%`, maxWidth: zoom === 100 ? "1700px" : "none" }}
+      >
+        <div className="spread-leaf spread-left">
+          <OriginalPage
+            page={leftPage}
+            issue={issue}
+            zoom={100}
+            onInspect={onInspect}
+          />
+        </div>
+        <div className="spread-spine" aria-hidden="true" />
+        {rightPage <= issue.pages && (
+          <div className="spread-leaf spread-right">
+            <OriginalPage
+              page={rightPage}
+              issue={issue}
+              zoom={100}
+              onInspect={onInspect}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -149,6 +202,24 @@ function ReaderView({
   const [mode, setMode] = useState<"page" | "text">(() =>
     window.matchMedia("(max-width: 767px)").matches ? "text" : "page",
   );
+  const { theme, setTheme } = useTheme();
+  const spreadCapable = useMedia("(min-width: 1150px)");
+  const [spread, setSpreadState] = useState(() => {
+    try {
+      return localStorage.getItem("portrait-edit-spread") === "true";
+    } catch {
+      return false;
+    }
+  });
+  const setSpread = useCallback((val: boolean) => {
+    setSpreadState(val);
+    try {
+      localStorage.setItem("portrait-edit-spread", String(val));
+    } catch {
+      /* private mode */
+    }
+  }, []);
+  const isSpread = spreadCapable && spread && mode === "page";
   const [zoom, setZoom] = useState(100),
     [size, setSize] = useState(16),
     [settings, setSettings] = useState(false);
@@ -156,12 +227,33 @@ function ReaderView({
     [input, setInput] = useState(String(page));
   const [rawOpen, setRawOpen] = useState(false);
   const [hint, setHint] = useState(false);
+  const [turning, setTurning] = useState(false);
+  const [lightbox, setLightbox] = useState<{
+    src: string;
+    alt: string;
+    title: string;
+  } | null>(null);
   const canvas = useRef<HTMLDivElement>(null);
   const activeChapter = useRef<HTMLButtonElement>(null);
   const strip = useRef<HTMLElement>(null);
   const idle = useIdleChrome(focus && desktop && !settings);
   const chapter = chapterAt(issue, page),
     study = prompts.find((p) => p.issueSlug === issue.slug && p.page === page);
+  const handleInspect = useCallback(
+    (targetPage: number) => {
+      setLightbox({
+        src: assetUrl(
+          `${issue.pageDirectory}/${String(targetPage).padStart(3, "0")}.webp`,
+        ),
+        alt: `Issue ${issue.number}, page ${targetPage}`,
+        title: `Issue ${issue.number} · Page ${targetPage}`,
+      });
+    },
+    [issue],
+  );
+  const step = isSpread ? 2 : 1;
+  const leftPage = page % 2 === 0 ? page : page === 1 ? 1 : page - 1;
+  const rightPage = leftPage + 1;
   const go = useCallback(
     (n: number) => {
       const target = Math.max(1, Math.min(issue.pages, Math.round(n) || 1));
@@ -234,6 +326,11 @@ function ReaderView({
     else if (b.right > s.right) bar.scrollLeft += b.right - s.right + 12;
   }, [chapter.title]);
   useEffect(() => {
+    setTurning(true);
+    const t = setTimeout(() => setTurning(false), 150);
+    return () => clearTimeout(t);
+  }, [page]);
+  useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (editable(e.target) || e.altKey || e.ctrlKey || e.metaKey || settings)
         return;
@@ -249,11 +346,11 @@ function ReaderView({
       }
       if (["ArrowRight", "j", "J"].includes(e.key)) {
         e.preventDefault();
-        go(currentRoutePage(page) + 1);
+        go(currentRoutePage(page) + step);
       }
       if (["ArrowLeft", "k", "K"].includes(e.key)) {
         e.preventDefault();
-        go(currentRoutePage(page) - 1);
+        go(currentRoutePage(page) - step);
       }
       if (e.key === "Home") {
         e.preventDefault();
@@ -266,10 +363,10 @@ function ReaderView({
     };
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
-  }, [page, issue.pages, focus, settings, go, toggleFocus]);
+  }, [page, issue.pages, focus, settings, go, toggleFocus, step]);
   useSwipe(
     canvas,
-    (delta) => go(currentRoutePage(page) + delta),
+    (delta) => go(currentRoutePage(page) + delta * step),
     mode === "text" || zoom === 100,
   );
   const openSettings = (open: boolean) => {
@@ -291,6 +388,15 @@ function ReaderView({
       className={`reader ${focus ? "is-focus" : ""} ${idle ? "chrome-idle" : ""}`}
       aria-label="Magazine reader"
     >
+      <div
+        className="reading-progress-bar"
+        role="progressbar"
+        aria-label="Reading progress"
+        aria-valuenow={page}
+        aria-valuemin={1}
+        aria-valuemax={issue.pages}
+        style={{ width: `${(page / issue.pages) * 100}%` }}
+      />
       <header className="reader-top">
         <div className="reader-controls">
           <Link className="reader-issue" to={`/issues/${issue.slug}`}>
@@ -319,7 +425,7 @@ function ReaderView({
               variant="ghost"
               aria-label="Previous page"
               disabled={page === 1}
-              onClick={() => go(currentRoutePage(page) - 1)}
+              onClick={() => go(currentRoutePage(page) - step)}
             >
               ←
             </Button>
@@ -348,7 +454,7 @@ function ReaderView({
               variant="ghost"
               aria-label="Next page"
               disabled={page === issue.pages}
-              onClick={() => go(currentRoutePage(page) + 1)}
+              onClick={() => go(currentRoutePage(page) + step)}
             >
               →
             </Button>
@@ -359,6 +465,19 @@ function ReaderView({
             </DialogTrigger>
             <DialogContent>
               <div className="settings-grid">
+                <label>
+                  Theme
+                  <select
+                    aria-label="Color theme"
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value as Theme)}
+                  >
+                    <option value="system">System (default)</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="paper">Warm Paper / Sepia</option>
+                  </select>
+                </label>
                 <label>
                   Chapter
                   <select
@@ -386,20 +505,39 @@ function ReaderView({
                   </select>
                 </label>
                 {mode === "page" ? (
-                  <label>
-                    Zoom
-                    <select
-                      aria-label="Zoom"
-                      value={zoom}
-                      onChange={(e) => setZoom(Number(e.target.value))}
+                  <>
+                    <label>
+                      Zoom
+                      <select
+                        aria-label="Zoom"
+                        value={zoom}
+                        onChange={(e) => setZoom(Number(e.target.value))}
+                      >
+                        {[100, 125, 150, 200].map((n) => (
+                          <option key={n} value={n}>
+                            {n === 100 ? "Fit" : `${n}%`}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label
+                      className={`spread-toggle-row ${!spreadCapable ? "is-disabled" : ""}`}
                     >
-                      {[100, 125, 150, 200].map((n) => (
-                        <option key={n} value={n}>
-                          {n === 100 ? "Fit" : `${n}%`}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                      <span>Two-page spread</span>
+                      <input
+                        type="checkbox"
+                        aria-label="Two-page spread"
+                        checked={spread && spreadCapable}
+                        disabled={!spreadCapable}
+                        onChange={(e) => setSpread(e.target.checked)}
+                      />
+                      {!spreadCapable && (
+                        <small className="control-note">
+                          Available on screens 1150px+
+                        </small>
+                      )}
+                    </label>
+                  </>
                 ) : (
                   <fieldset>
                     <legend>Text size</legend>
@@ -481,7 +619,7 @@ function ReaderView({
       </nav>
       <div
         ref={canvas}
-        className="reader-canvas"
+        className={`reader-canvas ${turning ? "page-turn-anim" : ""}`}
         tabIndex={-1}
         aria-label={
           mode === "text" ? "Study reading view" : "Original page canvas"
@@ -489,7 +627,24 @@ function ReaderView({
         style={{ "--reading-size": `${size}px` } as CSSProperties}
       >
         {mode === "page" ? (
-          <OriginalPage key={page} page={page} issue={issue} zoom={zoom} />
+          isSpread ? (
+            <SpreadPage
+              key={`${leftPage}-${rightPage}`}
+              leftPage={leftPage}
+              rightPage={rightPage}
+              issue={issue}
+              zoom={zoom}
+              onInspect={handleInspect}
+            />
+          ) : (
+            <OriginalPage
+              key={page}
+              page={page}
+              issue={issue}
+              zoom={zoom}
+              onInspect={handleInspect}
+            />
+          )
         ) : study ? (
           <Study key={study.id} prompt={study} />
         ) : (
@@ -598,7 +753,7 @@ function ReaderView({
         <Button
           variant="ghost"
           disabled={page === 1}
-          onClick={() => go(currentRoutePage(page) - 1)}
+          onClick={() => go(currentRoutePage(page) - step)}
         >
           ← Previous
         </Button>
@@ -608,11 +763,20 @@ function ReaderView({
         <Button
           variant="ghost"
           disabled={page === issue.pages}
-          onClick={() => go(currentRoutePage(page) + 1)}
+          onClick={() => go(currentRoutePage(page) + step)}
         >
           Next →
         </Button>
       </nav>
+      {lightbox && (
+        <ImageLightbox
+          src={lightbox.src}
+          alt={lightbox.alt}
+          title={lightbox.title}
+          isOpen={Boolean(lightbox)}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </section>
   );
 }

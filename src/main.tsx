@@ -13,3 +13,18 @@ createRoot(document.getElementById("root")!).render(
     </BrowserRouter>
   </StrictMode>,
 );
+
+if (
+  typeof window !== "undefined" &&
+  "serviceWorker" in navigator &&
+  !navigator.webdriver &&
+  !import.meta.env.DEV
+) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`)
+      .catch(() => {
+        /* Service worker registration gracefully skipped in non-supporting contexts */
+      });
+  });
+}
