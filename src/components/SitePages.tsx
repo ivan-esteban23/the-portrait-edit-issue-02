@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { assetUrl, currentIssue, issues, prompts, readerPath } from "@/content";
 import { Button } from "./ui/button";
 import { Study } from "./Study";
 import { StudyCard } from "./StudyCard";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { CompareLab } from "./CompareLab";
+import { ImageLightbox } from "./ImageLightbox";
 export function Home() {
   const legacy = window.location.hash.match(/^#page=(\d+)$/);
   if (window.location.hash === "#reader")
@@ -139,7 +142,28 @@ export function IssueOverview() {
 }
 export function Archive() {
   const [search, setSearch] = useSearchParams();
-  const { isSaved, toggleSaved, exportSaved, savedCount } = useBookmarks();
+  const {
+    isSaved,
+    toggleSaved,
+    exportSaved,
+    exportMarkdown,
+    savedCount,
+    activeCollection,
+    setActiveCollection,
+    createCollection,
+    collections,
+  } = useBookmarks();
+
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [lightbox, setLightbox] = useState<{
+    src: string;
+    alt: string;
+    title: string;
+  } | null>(null);
+  const [newColName, setNewColName] = useState("");
+  const [showNewCol, setShowNewCol] = useState(false);
+
   const query = search.get("q") ?? "",
     tag = search.get("tag") ?? "",
     model = search.get("model") ?? "",
@@ -157,12 +181,25 @@ export function Archive() {
         .toLowerCase()
         .includes(query.toLowerCase()),
   );
+
   function filter(key: string, value: string) {
     const next = new URLSearchParams(search);
     if (value) next.set(key, value);
     else next.delete(key);
     setSearch(next, { replace: true });
   }
+
+  const toggleCompare = (id: string) => {
+    setCompareIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= 2) return [prev[1], id];
+      return [...prev, id];
+    });
+  };
+
+  const studyA = prompts.find((p) => p.id === compareIds[0]);
+  const studyB = prompts.find((p) => p.id === compareIds[1]);
+
   return (
     <section className="archive">
       <header>
@@ -213,16 +250,92 @@ export function Archive() {
           >
             ★ Saved ({savedCount})
           </Button>
-          {savedCount > 0 && (
-            <Button
-              type="button"
-              variant="ghost"
-              className="export-saved-btn"
-              onClick={exportSaved}
-              title="Export saved studies as JSON"
+
+          {/* Collection Moodboard Selector */}
+          <label className="moodboard-select-label">
+            <span className="sr-only">Collection</span>
+            <select
+              aria-label="Moodboard collection"
+              value={activeCollection}
+              onChange={(e) => {
+                if (e.target.value === "__new__") {
+                  setShowNewCol(true);
+                } else {
+                  setActiveCollection(e.target.value);
+                }
+              }}
             >
-              Export JSON ↗
-            </Button>
+              {collections.map((c) => (
+                <option key={c} value={c}>
+                  Collection: {c}
+                </option>
+              ))}
+              <option value="__new__">+ New Collection…</option>
+            </select>
+          </label>
+
+          {showNewCol && (
+            <div className="new-collection-inline">
+              <input
+                type="text"
+                placeholder="Collection name…"
+                value={newColName}
+                onChange={(e) => setNewColName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (newColName.trim()) {
+                      createCollection(newColName.trim());
+                      setNewColName("");
+                      setShowNewCol(false);
+                    }
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (newColName.trim()) {
+                    createCollection(newColName.trim());
+                    setNewColName("");
+                    setShowNewCol(false);
+                  }
+                }}
+              >
+                Add
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowNewCol(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+
+          {savedCount > 0 && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                className="export-saved-btn"
+                onClick={exportSaved}
+                title="Export saved studies as JSON"
+              >
+                Export JSON ↗
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="export-saved-btn"
+                onClick={exportMarkdown}
+                title="Export collection as Markdown"
+              >
+                Export Markdown ↗
+              </Button>
+            </>
           )}
           <Button variant="ghost" onClick={() => setSearch({})}>
             Clear filters
@@ -242,6 +355,8 @@ export function Archive() {
             isSaved={isSaved(p.id)}
             onToggleSaved={toggleSaved}
             onTagClick={(t) => filter("tag", t)}
+            isComparing={compareIds.includes(p.id)}
+            onToggleCompare={toggleCompare}
           />
         ))}
       </div>
@@ -251,6 +366,59 @@ export function Archive() {
             ? "No studies saved yet. Tap the bookmark icon on any study to add it to your curation board."
             : "No studies match these filters. Try a broader search or clear the filters."}
         </p>
+      )}
+
+      {/* Floating comparison dock */}
+      {compareIds.length > 0 && (
+        <aside className="compare-floating-dock" aria-label="Compare selection dock">
+          <div className="compare-dock-content">
+            <span className="compare-dock-count">
+              Selected {compareIds.length}/2 for comparison
+            </span>
+            <div className="compare-dock-actions">
+              <Button
+                type="button"
+                variant="default"
+                disabled={compareIds.length < 2}
+                onClick={() => setCompareOpen(true)}
+                className="dock-compare-btn"
+              >
+                Compare 2 studies ⇄
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setCompareIds([])}
+                className="dock-clear-btn"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </aside>
+      )}
+
+      {/* Compare Lab Modal */}
+      {compareOpen && studyA && studyB && (
+        <CompareLab
+          studyA={studyA}
+          studyB={studyB}
+          isOpen={compareOpen}
+          onClose={() => setCompareOpen(false)}
+          onSwap={() => setCompareIds([compareIds[1], compareIds[0]])}
+          onInspectImage={(src, alt, title) => setLightbox({ src, alt, title })}
+        />
+      )}
+
+      {/* Lightbox for inspect triggers */}
+      {lightbox && (
+        <ImageLightbox
+          src={lightbox.src}
+          alt={lightbox.alt}
+          title={lightbox.title}
+          isOpen={Boolean(lightbox)}
+          onClose={() => setLightbox(null)}
+        />
       )}
     </section>
   );

@@ -16,6 +16,7 @@ import { Study } from "./Study";
 import { NotFound } from "./SitePages";
 import { useTheme, type Theme } from "@/hooks/useTheme";
 import { ImageLightbox } from "./ImageLightbox";
+import { ShortcutsModal } from "./ShortcutsModal";
 
 // BrowserRouter updates history before a transition finishes rendering. Read the
 // latest address for consecutive gestures so rapid turns never reuse stale props.
@@ -228,6 +229,9 @@ function ReaderView({
   const [rawOpen, setRawOpen] = useState(false);
   const [hint, setHint] = useState(false);
   const [turning, setTurning] = useState(false);
+  const [showThumbnails, setShowThumbnails] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const filmstripRef = useRef<HTMLDivElement>(null);
   const [lightbox, setLightbox] = useState<{
     src: string;
     alt: string;
@@ -257,12 +261,19 @@ function ReaderView({
   const go = useCallback(
     (n: number) => {
       const target = Math.max(1, Math.min(issue.pages, Math.round(n) || 1));
+      if (target !== page && "vibrate" in navigator) {
+        try {
+          navigator.vibrate(10);
+        } catch {
+          /* ignore */
+        }
+      }
       setSettings(false);
       navigate(readerPath(issue.slug, target) + window.location.search, {
         replace: true,
       });
     },
-    [issue, navigate],
+    [issue, navigate, page],
   );
   const toggleFocus = useCallback(
     (next: boolean) => {
@@ -331,18 +342,68 @@ function ReaderView({
     return () => clearTimeout(t);
   }, [page]);
   useEffect(() => {
+    if (showThumbnails && filmstripRef.current) {
+      const activeEl = filmstripRef.current.querySelector<HTMLElement>(
+        ".filmstrip-thumb-btn.is-active",
+      );
+      if (activeEl) {
+        activeEl.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  }, [page, showThumbnails]);
+
+  useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (editable(e.target) || e.altKey || e.ctrlKey || e.metaKey || settings)
         return;
-      if (e.key === "Escape" && currentRouteFocus(focus)) {
+
+      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
         e.preventDefault();
-        toggleFocus(false);
+        setShortcutsOpen((o) => !o);
         return;
       }
+
+      if (e.key === "Escape") {
+        if (shortcutsOpen) {
+          e.preventDefault();
+          setShortcutsOpen(false);
+          return;
+        }
+        if (currentRouteFocus(focus)) {
+          e.preventDefault();
+          toggleFocus(false);
+          return;
+        }
+      }
+
       const k = e.key.toLowerCase();
       if (k === "f" && !e.repeat) {
         e.preventDefault();
         toggleFocus(!currentRouteFocus(focus));
+      }
+      if (k === "t" && !e.repeat) {
+        e.preventDefault();
+        setMode((m) => (m === "page" ? "text" : "page"));
+      }
+      if (k === "s" && !e.repeat && spreadCapable) {
+        e.preventDefault();
+        setSpread(!spread);
+      }
+      if (k === "m" && !e.repeat) {
+        e.preventDefault();
+        const nextTheme =
+          theme === "system"
+            ? "light"
+            : theme === "light"
+              ? "paper"
+              : theme === "paper"
+                ? "dark"
+                : "system";
+        setTheme(nextTheme);
       }
       if (["ArrowRight", "j", "J"].includes(e.key)) {
         e.preventDefault();
@@ -363,7 +424,19 @@ function ReaderView({
     };
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
-  }, [page, issue.pages, focus, settings, go, toggleFocus, step]);
+  }, [
+    page,
+    issue.pages,
+    focus,
+    settings,
+    go,
+    toggleFocus,
+    step,
+    shortcutsOpen,
+    spreadCapable,
+    theme,
+    setTheme,
+  ]);
   useSwipe(
     canvas,
     (delta) => go(currentRoutePage(page) + delta * step),
@@ -410,10 +483,10 @@ function ReaderView({
                 value={chapter.startPage}
                 onChange={(e) => go(Number(e.target.value))}
               >
-                <option value="1">Front matter</option>
+                <option value="1">Front matter (p. 1)</option>
                 {issue.chapters.map((c) => (
                   <option key={c.startPage} value={c.startPage}>
-                    {c.title}
+                    {c.title} (p. {c.startPage})
                   </option>
                 ))}
               </select>
@@ -588,6 +661,15 @@ function ReaderView({
           >
             {focus ? "Exit Focus" : "Focus"}
           </Button>
+          <Button
+            variant="ghost"
+            className="shortcuts-trigger-btn"
+            aria-label="Keyboard shortcuts"
+            title="Keyboard shortcuts (?)"
+            onClick={() => setShortcutsOpen(true)}
+          >
+            ?
+          </Button>
         </div>
         <p className="chapter-progress" aria-live="polite">
           {chapter.title}{" "}
@@ -666,12 +748,57 @@ function ReaderView({
         )}
       </div>
       <div className="scrubber">
-        <div className="scrubber-label">
-          <label htmlFor="page-range">Browse the issue</label>
-          <output htmlFor="page-range" aria-live="off">
-            Page {preview} of {issue.pages}
-          </output>
+        <div className="scrubber-header">
+          <div className="scrubber-label">
+            <label htmlFor="page-range">Browse the issue</label>
+            <output htmlFor="page-range" aria-live="off">
+              Page {preview} of {issue.pages}
+            </output>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            className="filmstrip-toggle-btn"
+            aria-expanded={showThumbnails}
+            aria-label="Toggle page thumbnails"
+            onClick={() => setShowThumbnails((v) => !v)}
+          >
+            {showThumbnails ? "Hide thumbnails" : "Thumbnails"}
+          </Button>
         </div>
+        {showThumbnails && (
+          <div
+            ref={filmstripRef}
+            className="thumbnails-filmstrip-drawer"
+            role="region"
+            aria-label="Thumbnails filmstrip"
+          >
+            <div className="filmstrip-scroll">
+              {Array.from({ length: issue.pages }, (_, i) => i + 1).map((pNum) => (
+                <button
+                  key={pNum}
+                  type="button"
+                  className={`filmstrip-thumb-btn ${pNum === page ? "is-active" : ""}`}
+                  aria-label={`Jump to page ${pNum}`}
+                  aria-current={pNum === page ? "page" : undefined}
+                  onClick={() => go(pNum)}
+                >
+                  <img
+                    src={assetUrl(
+                      `${issue.pageDirectory}/${String(pNum).padStart(3, "0")}.webp`,
+                    )}
+                    alt={`Page ${pNum}`}
+                    loading="lazy"
+                    decoding="async"
+                    width={56}
+                    height={72}
+                  />
+                  <span className="filmstrip-thumb-number">{pNum}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="range-track">
           <input
             id="page-range"
@@ -777,6 +904,10 @@ function ReaderView({
           onClose={() => setLightbox(null)}
         />
       )}
+      <ShortcutsModal
+        isOpen={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+      />
     </section>
   );
 }

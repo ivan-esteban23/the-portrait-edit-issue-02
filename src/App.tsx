@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { currentIssue, readerPath } from "./content/issues";
 import { useTheme, type Theme } from "./hooks/useTheme";
+import { usePageMeta } from "./hooks/usePageMeta";
 const Home = lazy(() =>
   import("./components/SitePages").then((m) => ({ default: m.Home })),
 );
@@ -67,12 +68,7 @@ export default function App() {
     window.addEventListener("hashchange", legacy);
     return () => window.removeEventListener("hashchange", legacy);
   }, [navigate]);
-  useEffect(() => {
-    if (!readerRoute) {
-      document.title = "The Portrait Edit — The Prompt Issue";
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }
-  }, [location.pathname, readerRoute]);
+  usePageMeta();
   return (
     <div className={focused ? "publication focused" : "publication"}>
       <a className="skip-link" href="#main">
