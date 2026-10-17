@@ -166,7 +166,10 @@ function SpreadPage({
     <div id="page-viewport" className="page-stage spread-stage">
       <div
         className="spread-holder"
-        style={{ width: `${zoom}%`, maxWidth: zoom === 100 ? "1700px" : "none" }}
+        style={{
+          width: `${zoom}%`,
+          maxWidth: zoom === 100 ? "1700px" : "none",
+        }}
       >
         <div className="spread-leaf spread-left">
           <OriginalPage
@@ -220,6 +223,15 @@ function ReaderView({
     } catch {
       /* private mode */
     }
+  }, []);
+  useEffect(() => {
+    const syncSpread = (event: StorageEvent) => {
+      if (event.key === "portrait-edit-spread") {
+        setSpreadState(event.newValue === "true");
+      }
+    };
+    window.addEventListener("storage", syncSpread);
+    return () => window.removeEventListener("storage", syncSpread);
   }, []);
   const isSpread = spreadCapable && spread && mode === "page";
   const [zoom, setZoom] = useState(100),
@@ -395,7 +407,15 @@ function ReaderView({
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (editable(e.target) || e.altKey || e.ctrlKey || e.metaKey || settings)
+      if (
+        e.defaultPrevented ||
+        editable(e.target) ||
+        e.altKey ||
+        e.ctrlKey ||
+        e.metaKey ||
+        settings ||
+        document.querySelector('[role="dialog"][aria-modal="true"]')
+      )
         return;
 
       if (e.key === "?" || (e.shiftKey && e.key === "/")) {
@@ -471,6 +491,7 @@ function ReaderView({
     step,
     shortcutsOpen,
     spreadCapable,
+    spread,
     theme,
     setTheme,
   ]);
@@ -750,7 +771,9 @@ function ReaderView({
                 <line x1="17" y1="9" x2="23" y2="15" />
               </svg>
             )}
-            <span className="sound-fx-label">{soundEnabled ? "Sound: On" : "Sound: Off"}</span>
+            <span className="sound-fx-label">
+              {soundEnabled ? "Sound: On" : "Sound: Off"}
+            </span>
           </Button>
           <Button
             variant="ghost"
@@ -883,28 +906,30 @@ function ReaderView({
             aria-label="Thumbnails filmstrip"
           >
             <div className="filmstrip-scroll">
-              {Array.from({ length: issue.pages }, (_, i) => i + 1).map((pNum) => (
-                <button
-                  key={pNum}
-                  type="button"
-                  className={`filmstrip-thumb-btn ${pNum === page ? "is-active" : ""}`}
-                  aria-label={`Jump to page ${pNum}`}
-                  aria-current={pNum === page ? "page" : undefined}
-                  onClick={() => go(pNum)}
-                >
-                  <img
-                    src={assetUrl(
-                      `${issue.pageDirectory}/${String(pNum).padStart(3, "0")}.webp`,
-                    )}
-                    alt={`Page ${pNum}`}
-                    loading="lazy"
-                    decoding="async"
-                    width={56}
-                    height={72}
-                  />
-                  <span className="filmstrip-thumb-number">{pNum}</span>
-                </button>
-              ))}
+              {Array.from({ length: issue.pages }, (_, i) => i + 1).map(
+                (pNum) => (
+                  <button
+                    key={pNum}
+                    type="button"
+                    className={`filmstrip-thumb-btn ${pNum === page ? "is-active" : ""}`}
+                    aria-label={`Jump to page ${pNum}`}
+                    aria-current={pNum === page ? "page" : undefined}
+                    onClick={() => go(pNum)}
+                  >
+                    <img
+                      src={assetUrl(
+                        `${issue.pageDirectory}/${String(pNum).padStart(3, "0")}.webp`,
+                      )}
+                      alt={`Page ${pNum}`}
+                      loading="lazy"
+                      decoding="async"
+                      width={56}
+                      height={72}
+                    />
+                    <span className="filmstrip-thumb-number">{pNum}</span>
+                  </button>
+                ),
+              )}
             </div>
           </div>
         )}

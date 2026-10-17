@@ -1,11 +1,15 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { CommandPalette } from "../src/components/CommandPalette";
 import { CompareLab } from "../src/components/CompareLab";
 import { PromptStudioDrawer } from "../src/components/PromptStudioDrawer";
 import { exportStudyRecipeCard } from "../src/lib/cardExport";
-import { isSoundEnabled, setSoundEnabled, playPaperTurnSound } from "../src/utils/audio";
+import {
+  isSoundEnabled,
+  setSoundEnabled,
+  playPaperTurnSound,
+} from "../src/utils/audio";
 import { Archive, IssueOverview } from "../src/components/SitePages";
 import { formatPromptText } from "../src/lib/promptFormatter";
 import promptA from "../src/content/prompts/issue-02-study-005.json";
@@ -36,7 +40,9 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
       const input = screen.getByPlaceholderText(/Type a command/i);
       expect(input).toBeInTheDocument();
       expect(screen.getByText("Toggle Theme")).toBeInTheDocument();
-      expect(screen.getByText("Two-Page Spread", { exact: false })).toBeInTheDocument();
+      expect(
+        screen.getByText("Two-Page Spread", { exact: false }),
+      ).toBeInTheDocument();
 
       // Search for page jumping
       fireEvent.change(input, { target: { value: "42" } });
@@ -44,7 +50,9 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
 
       // Search for study
       fireEvent.change(input, { target: { value: promptA.title } });
-      expect(screen.getByText(new RegExp(promptA.title, "i"))).toBeInTheDocument();
+      expect(
+        screen.getByText(new RegExp(promptA.title, "i")),
+      ).toBeInTheDocument();
 
       // Escape key closes palette
       fireEvent.keyDown(input, { key: "Escape" });
@@ -56,7 +64,9 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
           <CommandPalette isOpen={false} onClose={onClose} />
         </MemoryRouter>,
       );
-      expect(screen.queryByPlaceholderText(/Type a command/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByPlaceholderText(/Type a command/i),
+      ).not.toBeInTheDocument();
     });
 
     it("navigates selection with arrow keys and selects with Enter", () => {
@@ -82,15 +92,15 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
   });
 
   describe("2. Social Image Card Generator", () => {
-    it("renders offscreen canvas and triggers PNG recipe card export", async () => {
-      // Mock canvas methods for jsdom
+    afterEach(() => vi.useRealTimers());
+
+    function mockExport({
+      delay = 0,
+      fail = false,
+      stall = false,
+      encodeFails = false,
+    } = {}) {
       const mockContext = {
-        fillStyle: "",
-        strokeStyle: "",
-        lineWidth: 1,
-        font: "",
-        letterSpacing: "",
-        textAlign: "",
         fillRect: vi.fn(),
         strokeRect: vi.fn(),
         fillText: vi.fn(),
@@ -106,26 +116,84 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
         drawImage: vi.fn(),
         measureText: vi.fn(() => ({ width: 120 })),
       };
-
-      const originalCreateElement = document.createElement.bind(document);
-      const createElementSpy = vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
-        if (tag === "canvas") {
-          const canvas = originalCreateElement("canvas");
-          canvas.getContext = vi.fn(
-            () => mockContext as unknown as CanvasRenderingContext2D,
-          ) as unknown as typeof canvas.getContext;
-          canvas.toBlob = vi.fn((cb) => {
-            cb(new Blob(["mock-image-data"], { type: "image/png" }));
-          });
-          return canvas;
-        }
-        return originalCreateElement(tag);
+      const createElement = document.createElement.bind(document);
+      vi.spyOn(globalThis, "Image").mockImplementation(function () {
+        const image = createElement("img");
+        if (!stall)
+          setTimeout(() => {
+            if (!fail)
+              Object.defineProperties(image, {
+                naturalWidth: { value: 800 },
+                naturalHeight: { value: 1000 },
+              });
+            image.dispatchEvent(new Event(fail ? "error" : "load"));
+          }, delay);
+        return image;
       });
+      vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
+        mockContext as unknown as CanvasRenderingContext2D,
+      );
+      vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation(
+        (callback) => {
+          callback(
+            encodeFails ? null : new Blob(["image"], { type: "image/png" }),
+          );
+        },
+      );
+      vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(
+        () => {},
+      );
+      return mockContext;
+    }
 
-      const success = await exportStudyRecipeCard(promptA);
-      expect(success).toBe(true);
-      expect(mockContext.fillText).toHaveBeenCalled();
-      createElementSpy.mockRestore();
+    it("exports a PNG after the reference image loads", async () => {
+      const ctx = mockExport();
+      expect(await exportStudyRecipeCard(promptA)).toBe(true);
+      expect(ctx.drawImage).toHaveBeenCalledOnce();
+      expect(ctx.drawImage.mock.calls[0][0].naturalWidth).toBe(800);
+    });
+
+    it("waits for a slow reference image instead of drawing an unloaded image", async () => {
+      vi.useFakeTimers();
+      const ctx = mockExport({ delay: 1500 });
+      const exporting = exportStudyRecipeCard(promptA);
+      await vi.advanceTimersByTimeAsync(601);
+      expect(ctx.drawImage).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(899);
+      expect(await exporting).toBe(true);
+      expect(ctx.drawImage).toHaveBeenCalledOnce();
+      expect(ctx.fillText).not.toHaveBeenCalledWith(
+        "Reference Image Unavailable",
+        expect.any(Number),
+        expect.any(Number),
+      );
+    });
+
+    it.each(["failed", "timed out"])(
+      "uses an explicit placeholder for a %s image",
+      async (reason) => {
+        vi.useFakeTimers();
+        const ctx = mockExport({
+          fail: reason === "failed",
+          stall: reason === "timed out",
+        });
+        const exporting = exportStudyRecipeCard(promptA);
+        await vi.advanceTimersByTimeAsync(15000);
+        expect(await exporting).toBe(true);
+        expect(ctx.drawImage).not.toHaveBeenCalled();
+        expect(ctx.fillText).toHaveBeenCalledWith(
+          "Reference Image Unavailable",
+          expect.any(Number),
+          expect.any(Number),
+        );
+      },
+    );
+
+    it("reports a failed PNG encoding instead of claiming a successful export", async () => {
+      mockExport({ encodeFails: true });
+      await expect(exportStudyRecipeCard(promptA)).rejects.toThrow(
+        "Unable to encode recipe card",
+      );
     });
   });
 
@@ -150,13 +218,19 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
       // Click Split Curtain mode button
       fireEvent.click(screen.getByText("Split Curtain"));
 
-      const slider = screen.getByRole("slider", { name: /curtain comparison slider/i });
+      const slider = screen.getByRole("slider", {
+        name: /curtain comparison slider/i,
+      });
       expect(slider).toBeInTheDocument();
       expect(slider).toHaveAttribute("aria-valuenow", "50");
 
       // Verify study badges in split frame
-      expect(screen.getByText(`Study A: #${promptA.studyNumber}`)).toBeInTheDocument();
-      expect(screen.getByText(`Study B: #${promptB.studyNumber}`)).toBeInTheDocument();
+      expect(
+        screen.getByText(`Study A: #${promptA.studyNumber}`),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(`Study B: #${promptB.studyNumber}`),
+      ).toBeInTheDocument();
 
       // Keyboard navigation on slider handle
       fireEvent.keyDown(slider, { key: "ArrowLeft" });
@@ -185,11 +259,7 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
       const onClose = vi.fn();
 
       render(
-        <PromptStudioDrawer
-          prompt={promptA}
-          isOpen={true}
-          onClose={onClose}
-        />,
+        <PromptStudioDrawer prompt={promptA} isOpen={true} onClose={onClose} />,
       );
 
       expect(screen.getByText("Prompt Studio")).toBeInTheDocument();
