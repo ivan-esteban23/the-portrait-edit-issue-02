@@ -97,11 +97,7 @@ function OriginalPage({
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [retry, setRetry] = useState(0);
   return (
-    <div
-      id="page-viewport"
-      className="page-stage"
-      aria-busy={state === "loading"}
-    >
+    <div className="page-stage" aria-busy={state === "loading"}>
       {state === "loading" && (
         <>
           <div className="loading-line" aria-hidden="true" />
@@ -163,7 +159,7 @@ function SpreadPage({
   onInspect: (page: number) => void;
 }) {
   return (
-    <div id="page-viewport" className="page-stage spread-stage">
+    <div className="page-stage spread-stage">
       <div
         className="spread-holder"
         style={{
@@ -202,6 +198,7 @@ function ReaderView({
 }: ReaderProps & { issue: Issue; page: number }) {
   const location = useLocation(),
     navigate = useNavigate();
+  const docked = useMedia("(max-width: 1100px)");
   const small = useMedia("(max-width: 767px)"),
     desktop = useMedia("(min-width: 1101px)");
   const [mode, setMode] = useState<"page" | "text">(() =>
@@ -233,7 +230,19 @@ function ReaderView({
     window.addEventListener("storage", syncSpread);
     return () => window.removeEventListener("storage", syncSpread);
   }, []);
-  const isSpread = spreadCapable && spread && mode === "page";
+  // Keep the cover in single-page mode even when spreads are enabled.
+  const isSpread = spreadCapable && spread && mode === "page" && page > 1;
+  const [nativeZoomed, setNativeZoomed] = useState(
+    () => (window.visualViewport?.scale ?? 1) > 1,
+  );
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const syncZoom = () => setNativeZoomed(viewport.scale > 1);
+    syncZoom();
+    viewport.addEventListener("resize", syncZoom);
+    return () => viewport.removeEventListener("resize", syncZoom);
+  }, []);
   const [zoom, setZoom] = useState(100),
     [size, setSize] = useState(16),
     [settings, setSettings] = useState(false);
@@ -282,6 +291,34 @@ function ReaderView({
     title: string;
   } | null>(null);
   const canvas = useRef<HTMLDivElement>(null);
+  const bottomNav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const node = bottomNav.current;
+    if (!node || !docked) return;
+    const root = document.documentElement;
+    const previousHeight = root.style.getPropertyValue(
+      "--reader-bottom-height",
+    );
+    const measure = () =>
+      root.style.setProperty(
+        "--reader-bottom-height",
+        `${node.getBoundingClientRect().height}px`,
+      );
+    measure();
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(measure);
+    observer?.observe(node, { box: "border-box" });
+    window.addEventListener("resize", measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+      if (previousHeight)
+        root.style.setProperty("--reader-bottom-height", previousHeight);
+      else root.style.removeProperty("--reader-bottom-height");
+    };
+  }, [docked]);
   const activeChapter = useRef<HTMLButtonElement>(null);
   const strip = useRef<HTMLElement>(null);
   const idle = useIdleChrome(focus && desktop && !settings);
@@ -299,9 +336,15 @@ function ReaderView({
     },
     [issue],
   );
-  const step = isSpread ? 2 : 1;
-  const leftPage = page % 2 === 0 ? page : page === 1 ? 1 : page - 1;
+  // Even pages are left (verso), odd pages are right (recto): [2, 3], [4, 5], ...
+  const leftPage = page % 2 === 0 ? page : page - 1;
   const rightPage = leftPage + 1;
+  const firstVisible = isSpread ? leftPage : page;
+  const lastVisible = isSpread ? Math.min(rightPage, issue.pages) : page;
+  const pageLabel =
+    firstVisible === lastVisible
+      ? String(firstVisible)
+      : `${firstVisible}–${lastVisible}`;
   const go = useCallback(
     (n: number) => {
       const target = Math.max(1, Math.min(issue.pages, Math.round(n) || 1));
@@ -318,6 +361,35 @@ function ReaderView({
       });
     },
     [issue, navigate, page],
+  );
+  const getNextPage = useCallback(
+    (curr: number) => {
+      if (!spreadCapable || !spread || mode !== "page") {
+        return Math.min(curr + 1, issue.pages);
+      }
+      if (curr === 1) return 2; // Move from solo cover to the first spread (pages 2 & 3)
+      const next = curr % 2 === 0 ? curr + 2 : curr + 1;
+      return Math.min(next, issue.pages);
+    },
+    [spreadCapable, spread, mode, issue.pages],
+  );
+  const getPrevPage = useCallback(
+    (curr: number) => {
+      if (!spreadCapable || !spread || mode !== "page") {
+        return Math.max(curr - 1, 1);
+      }
+      if (curr <= 3) return 1; // Move from pages 2 or 3 back to solo cover
+      return curr % 2 === 0 ? Math.max(curr - 2, 1) : Math.max(curr - 3, 1);
+    },
+    [spreadCapable, spread, mode],
+  );
+  const turnPage = useCallback(
+    (delta: number) => {
+      // Read the latest route so consecutive gestures never reuse a stale page.
+      const current = currentRoutePage(page);
+      go(delta > 0 ? getNextPage(current) : getPrevPage(current));
+    },
+    [go, getNextPage, getPrevPage, page],
   );
   const toggleFocus = useCallback(
     (next: boolean) => {
@@ -464,11 +536,11 @@ function ReaderView({
       }
       if (["ArrowRight", "j", "J"].includes(e.key)) {
         e.preventDefault();
-        go(currentRoutePage(page) + step);
+        turnPage(1);
       }
       if (["ArrowLeft", "k", "K"].includes(e.key)) {
         e.preventDefault();
-        go(currentRoutePage(page) - step);
+        turnPage(-1);
       }
       if (e.key === "Home") {
         e.preventDefault();
@@ -488,7 +560,7 @@ function ReaderView({
     settings,
     go,
     toggleFocus,
-    step,
+    turnPage,
     shortcutsOpen,
     spreadCapable,
     spread,
@@ -499,7 +571,11 @@ function ReaderView({
     canvas,
     (delta) => {
       dismissTouchHint();
-      go(currentRoutePage(page) + delta * step);
+      go(
+        delta > 0
+          ? getNextPage(currentRoutePage(page))
+          : getPrevPage(currentRoutePage(page)),
+      );
     },
     mode === "text" || zoom === 100,
   );
@@ -558,8 +634,8 @@ function ReaderView({
               className="top-turn"
               variant="ghost"
               aria-label="Previous page"
-              disabled={page === 1}
-              onClick={() => go(currentRoutePage(page) - step)}
+              disabled={firstVisible === 1}
+              onClick={() => turnPage(-1)}
             >
               ←
             </Button>
@@ -587,8 +663,8 @@ function ReaderView({
               className="top-turn"
               variant="ghost"
               aria-label="Next page"
-              disabled={page === issue.pages}
-              onClick={() => go(currentRoutePage(page) + step)}
+              disabled={lastVisible === issue.pages}
+              onClick={() => turnPage(1)}
             >
               →
             </Button>
@@ -832,7 +908,9 @@ function ReaderView({
         ))}
       </nav>
       <div
+        id="page-viewport"
         ref={canvas}
+        data-zoomed={nativeZoomed || (mode === "page" && zoom > 100)}
         className={`reader-canvas ${turning ? "page-turn-anim" : ""}`}
         tabIndex={-1}
         aria-label={
@@ -841,7 +919,7 @@ function ReaderView({
         style={{ "--reading-size": `${size}px` } as CSSProperties}
       >
         {mode === "page" ? (
-          isSpread ? (
+          isSpread && rightPage <= issue.pages ? (
             <SpreadPage
               key={`${leftPage}-${rightPage}`}
               leftPage={leftPage}
@@ -980,7 +1058,7 @@ function ReaderView({
         <div className="quick-steps">
           <Button
             variant="ghost"
-            disabled={page === 1}
+            disabled={firstVisible === 1}
             onClick={() => go(currentRoutePage(page) - 10)}
           >
             −10 pages
@@ -988,7 +1066,7 @@ function ReaderView({
           <span>Marks show chapter openings</span>
           <Button
             variant="ghost"
-            disabled={page === issue.pages}
+            disabled={lastVisible === issue.pages}
             onClick={() => go(currentRoutePage(page) + 10)}
           >
             +10 pages
@@ -1010,21 +1088,25 @@ function ReaderView({
           )}
         </details>
       )}
-      <nav className="reader-bottom" aria-label="Bottom page navigation">
+      <nav
+        ref={bottomNav}
+        className="reader-bottom"
+        aria-label="Bottom page navigation"
+      >
         <Button
           variant="ghost"
-          disabled={page === 1}
-          onClick={() => go(currentRoutePage(page) - step)}
+          disabled={firstVisible === 1}
+          onClick={() => turnPage(-1)}
         >
           ← Previous
         </Button>
         <span aria-live="polite">
-          {page} / {issue.pages}
+          {pageLabel} / {issue.pages}
         </span>
         <Button
           variant="ghost"
-          disabled={page === issue.pages}
-          onClick={() => go(currentRoutePage(page) + step)}
+          disabled={lastVisible === issue.pages}
+          onClick={() => turnPage(1)}
         >
           Next →
         </Button>

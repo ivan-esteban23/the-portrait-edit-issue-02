@@ -351,3 +351,159 @@ test("Prompt Studio traps focus and blocks reader shortcuts until closed", async
   await page.keyboard.press("ArrowRight");
   await expect(page).toHaveURL(/pages\/61$/);
 });
+
+test("spread pagination has a single cover and turns whole visible spreads", async ({
+  page,
+}) => {
+  test.skip(
+    (page.viewportSize()?.width ?? 0) < 1150,
+    "Spread requires desktop width",
+  );
+  await page.addInitScript(() =>
+    localStorage.setItem("portrait-edit-spread", "true"),
+  );
+  await page.goto("issues/the-prompt-issue/pages/1");
+  const previous = page.getByRole("button", {
+    name: "← Previous",
+    exact: true,
+  });
+  const next = page.getByRole("button", { name: "Next →", exact: true });
+  const nav = page.getByRole("navigation", { name: "Bottom page navigation" });
+  await expect(page.locator(".page-art")).toHaveCount(1);
+  await expect(previous).toBeDisabled();
+  await next.click();
+  await expect(page).toHaveURL(/pages\/2$/);
+  await expect(page.locator(".page-art")).toHaveCount(2);
+  await expect(nav).toContainText("2–3 / 196");
+  await expect(page.locator("#page-viewport")).toHaveCount(1);
+  await page.locator(".reader-canvas").focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page).toHaveURL(/pages\/4$/);
+  await previous.click();
+  await expect(page).toHaveURL(/pages\/2$/);
+  await previous.click();
+  await expect(page).toHaveURL(/pages\/1$/);
+  await page.locator(".reader-canvas").focus();
+  await page.locator(".reader-canvas").evaluate((node) => {
+    for (const key of ["j", "j"])
+      node.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+  });
+  await expect(page).toHaveURL(/pages\/4$/);
+  await page.goto("issues/the-prompt-issue/pages/3");
+  await expect(nav).toContainText("2–3 / 196");
+  await next.click();
+  await expect(page).toHaveURL(/pages\/4$/);
+  await page.goto("issues/the-prompt-issue/pages/196");
+  await expect(page.locator(".page-art")).toHaveCount(1);
+  await expect(next).toBeDisabled();
+  await previous.click();
+  await expect(page).toHaveURL(/pages\/194$/);
+  await expect(nav).toContainText("194–195 / 196");
+});
+
+test("trackpad navigation ignores vertical scroll and inertia and resets after zoom", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  await mode(page, "page");
+  await page.clock.install();
+  const canvas = page.locator(".reader-canvas");
+  await page.evaluate(() => {
+    Object.defineProperty(window.visualViewport!, "scale", {
+      configurable: true,
+      value: 2,
+    });
+    window.visualViewport!.dispatchEvent(new Event("resize"));
+  });
+  await expect(canvas).toHaveCSS("touch-action", "auto");
+  await canvas.dispatchEvent("wheel", { deltaX: 40 });
+  await expect(page).toHaveURL(/pages\/60$/);
+  await page.evaluate(() => {
+    Reflect.deleteProperty(window.visualViewport!, "scale");
+    window.visualViewport!.dispatchEvent(new Event("resize"));
+  });
+  await expect(canvas).toHaveCSS("touch-action", "pan-y pinch-zoom");
+  await canvas.dispatchEvent("wheel", { deltaX: 40, deltaY: 50 });
+  await canvas.dispatchEvent("wheel", { deltaX: 34, deltaY: 0 });
+  await expect(page).toHaveURL(/pages\/60$/);
+  await canvas.evaluate((node) => {
+    for (let i = 0; i < 5; i++)
+      node.dispatchEvent(
+        new WheelEvent("wheel", { bubbles: true, deltaX: 40 }),
+      );
+  });
+  await expect(page).toHaveURL(/pages\/61$/);
+  await page.clock.fastForward(400);
+  await canvas.dispatchEvent("wheel", { deltaX: -40 });
+  await expect(page).toHaveURL(/pages\/60$/);
+  await settings(page);
+  await page.getByLabel("Zoom", { exact: true }).selectOption("150");
+  await page.getByRole("button", { name: "Close display settings" }).click();
+  await expect(canvas).toHaveCSS("touch-action", "auto");
+  await canvas.dispatchEvent("wheel", { deltaX: 40 });
+  await expect(page).toHaveURL(/pages\/60$/);
+  await settings(page);
+  await page.getByLabel("Zoom", { exact: true }).selectOption("100");
+  await page.getByRole("button", { name: "Close display settings" }).click();
+  await expect(canvas).toHaveCSS("touch-action", "pan-y pinch-zoom");
+  await canvas.dispatchEvent("wheel", { deltaX: 40 });
+  await expect(page).toHaveURL(/pages\/61$/);
+});
+
+test("mobile dock clearance follows its rendered height and resets on desktop", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 600 });
+  await page.goto(reader);
+  const dock = page.locator(".reader-bottom");
+  await expect(dock).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const height = document
+          .querySelector(".reader-bottom")!
+          .getBoundingClientRect().height;
+        return (
+          Math.abs(
+            parseFloat(
+              document.documentElement.style.getPropertyValue(
+                "--reader-bottom-height",
+              ),
+            ) - height,
+          ) < 1
+        );
+      }),
+    )
+    .toBe(true);
+  await dock.evaluate((node) => {
+    node.style.paddingBottom = "80px";
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const height = document
+          .querySelector(".reader-bottom")!
+          .getBoundingClientRect().height;
+        return (
+          parseFloat(
+            getComputedStyle(document.querySelector(".reader")!).paddingBottom,
+          ) >=
+          height + 23.5
+        );
+      }),
+    )
+    .toBe(true);
+  await noOverflow(page);
+  await page.setViewportSize({ width: 1194, height: 834 });
+  await expect(dock).not.toHaveCSS("position", "fixed");
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        document.documentElement.style.getPropertyValue(
+          "--reader-bottom-height",
+        ),
+      ),
+    )
+    .toBe("");
+  await noOverflow(page);
+});

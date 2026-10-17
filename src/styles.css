@@ -26,6 +26,7 @@
     ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Code", Consolas,
     monospace;
   --gutter: clamp(20px, 5vw, 72px);
+  --reader-bottom-height: 72px;
   --measure: min(68ch, 100%);
 }
 :root[data-theme="light"] {
@@ -87,7 +88,8 @@
 }
 html {
   scroll-padding-top: 120px;
-  scroll-padding-bottom: 96px;
+  scroll-padding-bottom: calc(var(--reader-bottom-height) + 24px);
+  scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
   background: var(--bg);
 }
@@ -521,6 +523,10 @@ select:hover {
 }
 /* Reader stage: quiet chrome above a continuous editorial article. */
 .reader {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   padding: 0 var(--gutter) 24px;
 }
 .reader-top {
@@ -534,6 +540,8 @@ select:hover {
 }
 .reader-controls {
   display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
   align-items: center;
   gap: 12px;
 }
@@ -544,6 +552,8 @@ select:hover {
   white-space: nowrap;
 }
 .chapter-control {
+  min-width: 0;
+  flex: 1 1 12rem;
   max-width: 24ch;
 }
 .chapter-control select {
@@ -639,6 +649,11 @@ select:hover {
 }
 .reader-canvas {
   outline: none;
+  min-width: 0;
+  touch-action: pan-y pinch-zoom;
+}
+.reader-canvas[data-zoomed="true"] {
+  touch-action: auto;
 }
 .page-stage {
   position: relative;
@@ -817,6 +832,7 @@ select:hover {
   overflow-wrap: anywhere;
 }
 .extracted-text {
+  width: 100%;
   max-width: 950px;
   margin: 24px auto;
   color: var(--muted);
@@ -826,6 +842,7 @@ select:hover {
   padding-block: 12px;
 }
 .scrubber {
+  width: 100%;
   max-width: 950px;
   margin: 24px auto 0;
 }
@@ -885,11 +902,15 @@ select:hover {
   font-size: max(16px, 1rem);
 }
 .reader-bottom {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding-block: 16px;
+  padding-bottom: calc(var(--space-2) + max(env(safe-area-inset-bottom), 12px));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
   max-width: 950px;
   margin: auto;
   transition: opacity 180ms ease;
@@ -908,6 +929,7 @@ select:hover {
   opacity: 1;
 }
 .is-focus {
+  min-height: 100vh;
   min-height: 100dvh;
 }
 .is-focus .reader-top {
@@ -927,6 +949,7 @@ select:hover {
   left: 50%;
   transform: translate(-50%, -50%);
   width: min(560px, calc(100% - 32px));
+  max-height: 85vh;
   max-height: 85dvh;
   overflow-y: auto;
   background: var(--surface);
@@ -1008,12 +1031,9 @@ select:hover {
 }
 @media (max-width: 1100px) {
   .reader {
-    padding-inline: max(
-      16px,
-      env(safe-area-inset-left),
-      env(safe-area-inset-right)
-    );
-    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: calc(var(--reader-bottom-height) + 24px);
   }
   .reader-bottom {
     position: fixed;
@@ -1049,6 +1069,7 @@ select:hover {
     width: 100%;
     max-width: 100vw;
     box-sizing: border-box;
+    max-height: 85vh;
     max-height: 85dvh;
     border-radius: 6px 6px 0 0;
     padding: 24px max(24px, env(safe-area-inset-right))
@@ -1194,11 +1215,8 @@ select:hover {
     padding: 32px 20px;
   }
   .reader {
-    padding-inline: max(
-      8px,
-      env(safe-area-inset-left),
-      env(safe-area-inset-right)
-    );
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
   }
   .reader-controls {
     justify-content: space-between;
@@ -1293,7 +1311,9 @@ select:hover {
     margin-inline: 12px;
   }
   .reader-bottom button {
-    min-width: 100px;
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: normal;
   }
   .scrubber {
     padding-inline: 12px;
@@ -1396,11 +1416,6 @@ select:hover {
   }
 }
 
-/* Viewport touch ergonomics */
-#page-viewport {
-  touch-action: pan-y pinch-zoom;
-}
-
 /* Two-Page Spread */
 .spread-stage {
   padding: clamp(8px, 2vw, 32px);
@@ -1431,6 +1446,10 @@ select:hover {
   position: relative;
   background: var(--border);
   flex: none;
+  box-shadow:
+    -6px 0 10px -2px rgba(0, 0, 0, 0.12),
+    6px 0 10px -2px rgba(0, 0, 0, 0.12);
+  z-index: 2;
 }
 .spread-spine::before {
   content: "";
@@ -1568,7 +1587,9 @@ select:hover {
   pointer-events: none;
   opacity: 0;
   transform: translateY(2px);
-  transition: opacity 120ms ease, transform 120ms ease;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
 }
 .card-action-btn:hover .action-tooltip,
 .card-action-btn.is-copied .action-tooltip {
@@ -1805,7 +1826,9 @@ select:hover {
   flex-shrink: 0;
   cursor: pointer;
   scroll-snap-align: center;
-  transition: border-color 120ms ease, transform 120ms ease;
+  transition:
+    border-color 120ms ease,
+    transform 120ms ease;
   min-height: auto;
 }
 .filmstrip-thumb-btn:hover {
@@ -2969,7 +2992,9 @@ select:hover {
     size: A4 portrait;
     margin: 15mm 15mm 15mm 15mm;
   }
-  body, html, .publication {
+  body,
+  html,
+  .publication {
     background: #ffffff !important;
     color: #000000 !important;
     font-size: 11pt !important;
@@ -3167,7 +3192,7 @@ select:hover {
    ========================================================================== */
 .touch-swipe-hint {
   position: fixed;
-  bottom: calc(72px + env(safe-area-inset-bottom));
+  bottom: calc(var(--reader-bottom-height) + 8px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 25;
@@ -3202,4 +3227,3 @@ select:hover {
     display: none;
   }
 }
-
