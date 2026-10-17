@@ -287,3 +287,67 @@ test("page turns return long reading views to the beginning", async ({
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await expect(next).toBeFocused();
 });
+
+test("command palette spread changes update the current reader immediately", async ({
+  page,
+}) => {
+  test.skip(
+    (page.viewportSize()?.width ?? 0) < 1150,
+    "Spread requires desktop width",
+  );
+  await page.goto(reader);
+  const toggle = async () => {
+    await page
+      .getByRole("button", { name: "Search and command palette" })
+      .click();
+    const search = page.getByPlaceholder(/Type a command/);
+    await search.fill("Toggle Two-Page Spread");
+    await search.press("Enter");
+  };
+  await toggle();
+  await expect(page.locator(".spread-stage")).toBeVisible();
+  await toggle();
+  await expect(page.locator(".spread-stage")).toHaveCount(0);
+  await page.locator(".reader-canvas").focus();
+  await page.keyboard.press("s");
+  await expect(page.locator(".spread-stage")).toBeVisible();
+  await page.keyboard.press("s");
+  await expect(page.locator(".spread-stage")).toHaveCount(0);
+});
+
+test("Prompt Studio traps focus and blocks reader shortcuts until closed", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  await mode(page, "text");
+  const opener = page.getByRole("button", {
+    name: "Adjust Parameters in Prompt Studio",
+    exact: true,
+  });
+  await opener.click();
+  const dialog = page.getByRole("dialog", {
+    name: "Prompt Studio",
+    exact: true,
+  });
+  const close = dialog.getByRole("button", {
+    name: "Close Prompt Studio",
+    exact: true,
+  });
+  await expect(close).toBeFocused();
+  await dialog.getByRole("button", { name: "Done", exact: true }).focus();
+  await page.keyboard.press("Tab");
+  await expect(close).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(
+    dialog.getByRole("button", { name: "Done", exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("End");
+  await expect(page).toHaveURL(/pages\/60$/);
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(opener).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(page).toHaveURL(/pages\/61$/);
+});

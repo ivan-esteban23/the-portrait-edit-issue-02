@@ -1,4 +1,5 @@
-import { useState, useId, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import type { Prompt } from "@/content/schema";
 import { copyText } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -44,17 +45,27 @@ export function PromptStudioDrawer({
   isOpen,
   onClose,
 }: PromptStudioDrawerProps) {
-  const titleId = useId();
+  const returnFocus = useRef<HTMLElement | null>(null);
 
   // Extract initial parameters from study
-  const initialAr = (prompt.parameters?.["ar"] || prompt.parameters?.["--ar"] || "4:5") as string;
-  const initialS = Number(prompt.parameters?.["s"] || prompt.parameters?.["--s"] || 250);
-  const initialC = Number(prompt.parameters?.["c"] || prompt.parameters?.["--c"] || 0);
+  const initialAr = (prompt.parameters?.["ar"] ||
+    prompt.parameters?.["--ar"] ||
+    "4:5") as string;
+  const initialS = Number(
+    prompt.parameters?.["s"] || prompt.parameters?.["--s"] || 250,
+  );
+  const initialC = Number(
+    prompt.parameters?.["c"] || prompt.parameters?.["--c"] || 0,
+  );
 
   const [aspectRatio, setAspectRatio] = useState<string>(initialAr);
   const [modelPreset, setModelPreset] = useState<string>("--v 6.1");
-  const [stylize, setStylize] = useState<number>(initialS >= 50 && initialS <= 750 ? initialS : 250);
-  const [chaos, setChaos] = useState<number>(initialC >= 0 && initialC <= 30 ? initialC : 0);
+  const [stylize, setStylize] = useState<number>(
+    initialS >= 50 && initialS <= 750 ? initialS : 250,
+  );
+  const [chaos, setChaos] = useState<number>(
+    initialC >= 0 && initialC <= 30 ? initialC : 0,
+  );
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -66,21 +77,6 @@ export function PromptStudioDrawer({
     setSelectedKeywords([]);
     setCopied(false);
   }, [prompt.id, initialAr, initialS, initialC]);
-
-  // Handle Escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
 
   const toggleKeyword = (kw: string) => {
     setSelectedKeywords((prev) =>
@@ -103,7 +99,8 @@ export function PromptStudioDrawer({
     .trim();
 
   // Construct modified prompt string
-  const keywordsString = selectedKeywords.length > 0 ? `, ${selectedKeywords.join(", ")}` : "";
+  const keywordsString =
+    selectedKeywords.length > 0 ? `, ${selectedKeywords.join(", ")}` : "";
 
   let parametersString = "";
   if (modelPreset.startsWith("--")) {
@@ -119,9 +116,10 @@ export function PromptStudioDrawer({
     parametersString += ` --c ${chaos}`;
   }
 
-  const modifiedPrompt = modelPreset === "[FLUX.1 Dev]"
-    ? `[FLUX.1 Dev] ${cleanBasePrompt}${keywordsString} --ar ${aspectRatio}`
-    : `${cleanBasePrompt}${keywordsString}${parametersString}`;
+  const modifiedPrompt =
+    modelPreset === "[FLUX.1 Dev]"
+      ? `[FLUX.1 Dev] ${cleanBasePrompt}${keywordsString} --ar ${aspectRatio}`
+      : `${cleanBasePrompt}${keywordsString}${parametersString}`;
 
   const handleCopy = async () => {
     try {
@@ -134,213 +132,246 @@ export function PromptStudioDrawer({
   };
 
   return (
-    <div
-      className="prompt-studio-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      onClick={onClose}
+    <DialogPrimitive.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <aside
-        className="prompt-studio-drawer"
-        onClick={(e) => e.stopPropagation()}
-        aria-label="Prompt Studio Parameter Tweaker"
-      >
-        <header className="prompt-studio-header">
-          <div>
-            <span className="prompt-studio-eyebrow">
-              Study #{String(prompt.studyNumber).padStart(3, "0")} · Parameter Studio
-            </span>
-            <h2 id={titleId}>Prompt Studio</h2>
-          </div>
-          <Button
-            variant="ghost"
-            className="prompt-studio-close-btn"
-            onClick={onClose}
-            aria-label="Close Prompt Studio"
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="prompt-studio-overlay">
+          <DialogPrimitive.Content
+            asChild
+            aria-describedby={undefined}
+            onOpenAutoFocus={() => {
+              returnFocus.current =
+                document.activeElement instanceof HTMLElement
+                  ? document.activeElement
+                  : null;
+            }}
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+              returnFocus.current?.focus({ preventScroll: true });
+            }}
+            onKeyDown={(event) => event.stopPropagation()}
           >
-            ✕
-          </Button>
-        </header>
-
-        <div className="prompt-studio-body">
-          {/* Section: Aspect Ratio Presets */}
-          <div className="studio-group">
-            <label className="studio-group-label">
-              Aspect Ratio <span>(--ar)</span>
-            </label>
-            <div className="studio-pill-group" role="radiogroup" aria-label="Aspect ratio">
-              {ASPECT_RATIO_PRESETS.map((p) => (
-                <button
-                  key={p.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={aspectRatio === p.value}
-                  className={`studio-pill-btn ${aspectRatio === p.value ? "is-active" : ""}`}
-                  onClick={() => setAspectRatio(p.value)}
+            <aside className="prompt-studio-drawer">
+              <header className="prompt-studio-header">
+                <div>
+                  <span className="prompt-studio-eyebrow">
+                    Study #{String(prompt.studyNumber).padStart(3, "0")} ·
+                    Parameter Studio
+                  </span>
+                  <DialogPrimitive.Title asChild>
+                    <h2>Prompt Studio</h2>
+                  </DialogPrimitive.Title>
+                </div>
+                <Button
+                  variant="ghost"
+                  className="prompt-studio-close-btn"
+                  onClick={onClose}
+                  aria-label="Close Prompt Studio"
                 >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
+                  ✕
+                </Button>
+              </header>
 
-          {/* Section: Model Presets */}
-          <div className="studio-group">
-            <label className="studio-group-label">
-              Model & Engine <span>(Diffusion Target)</span>
-            </label>
-            <div className="studio-pill-group" role="radiogroup" aria-label="Model preset">
-              {MODEL_PRESETS.map((m) => (
-                <button
-                  key={m.label}
-                  type="button"
-                  role="radio"
-                  aria-checked={modelPreset === m.value}
-                  className={`studio-pill-btn ${modelPreset === m.value ? "is-active" : ""}`}
-                  onClick={() => setModelPreset(m.value)}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Section: Stylize Slider */}
-          <div className="studio-group">
-            <div className="studio-slider-header">
-              <label htmlFor="stylize-slider" className="studio-group-label">
-                Stylize <span>(--s)</span>
-              </label>
-              <output htmlFor="stylize-slider" className="studio-val-badge">
-                --s {stylize}
-              </output>
-            </div>
-            <input
-              id="stylize-slider"
-              type="range"
-              min={50}
-              max={750}
-              step={25}
-              value={stylize}
-              onChange={(e) => setStylize(Number(e.target.value))}
-              className="studio-range-slider"
-            />
-            <div className="studio-quick-presets">
-              {STYLIZE_PRESETS.map((val) => (
-                <button
-                  key={val}
-                  type="button"
-                  className={`studio-micro-btn ${stylize === val ? "is-active" : ""}`}
-                  onClick={() => setStylize(val)}
-                >
-                  {val}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Section: Chaos Slider */}
-          <div className="studio-group">
-            <div className="studio-slider-header">
-              <label htmlFor="chaos-slider" className="studio-group-label">
-                Chaos / Variation <span>(--c)</span>
-              </label>
-              <output htmlFor="chaos-slider" className="studio-val-badge">
-                --c {chaos}
-              </output>
-            </div>
-            <input
-              id="chaos-slider"
-              type="range"
-              min={0}
-              max={30}
-              step={1}
-              value={chaos}
-              onChange={(e) => setChaos(Number(e.target.value))}
-              className="studio-range-slider"
-            />
-            <div className="studio-quick-presets">
-              {[0, 5, 10, 20, 30].map((val) => (
-                <button
-                  key={val}
-                  type="button"
-                  className={`studio-micro-btn ${chaos === val ? "is-active" : ""}`}
-                  onClick={() => setChaos(val)}
-                >
-                  {val === 0 ? "0 (Stable)" : val}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Section: Lighting & Film Modifiers */}
-          <div className="studio-group">
-            <label className="studio-group-label">
-              Lighting & Film Modifiers <span>(Click to toggle)</span>
-            </label>
-            <div className="studio-keywords-grid">
-              {LIGHTING_FILM_KEYWORDS.map((kw) => {
-                const active = selectedKeywords.includes(kw);
-                return (
-                  <button
-                    key={kw}
-                    type="button"
-                    aria-pressed={active}
-                    className={`keyword-chip ${active ? "is-active" : ""}`}
-                    onClick={() => toggleKeyword(kw)}
+              <div className="prompt-studio-body">
+                {/* Section: Aspect Ratio Presets */}
+                <div className="studio-group">
+                  <label className="studio-group-label">
+                    Aspect Ratio <span>(--ar)</span>
+                  </label>
+                  <div
+                    className="studio-pill-group"
+                    role="radiogroup"
+                    aria-label="Aspect ratio"
                   >
-                    <span>{active ? "✓ " : "+ "}</span>
-                    {kw}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+                    {ASPECT_RATIO_PRESETS.map((p) => (
+                      <button
+                        key={p.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={aspectRatio === p.value}
+                        className={`studio-pill-btn ${aspectRatio === p.value ? "is-active" : ""}`}
+                        onClick={() => setAspectRatio(p.value)}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-          {/* Live Updated Preview Box */}
-          <div className="studio-group preview-box-group">
-            <div className="preview-box-header">
-              <span className="studio-group-label">Live Prompt Preview</span>
-              <button
-                type="button"
-                className="studio-reset-link"
-                onClick={handleReset}
-                title="Reset all tweaks to study defaults"
-              >
-                Reset to default
-              </button>
-            </div>
-            <div
-              id="prompt-preview"
-              className="studio-prompt-preview"
-              tabIndex={0}
-              role="region"
-              aria-label="Live Prompt Preview"
-            >
-              <p className="preview-text">{modifiedPrompt}</p>
-            </div>
-          </div>
-        </div>
+                {/* Section: Model Presets */}
+                <div className="studio-group">
+                  <label className="studio-group-label">
+                    Model & Engine <span>(Diffusion Target)</span>
+                  </label>
+                  <div
+                    className="studio-pill-group"
+                    role="radiogroup"
+                    aria-label="Model preset"
+                  >
+                    {MODEL_PRESETS.map((m) => (
+                      <button
+                        key={m.label}
+                        type="button"
+                        role="radio"
+                        aria-checked={modelPreset === m.value}
+                        className={`studio-pill-btn ${modelPreset === m.value ? "is-active" : ""}`}
+                        onClick={() => setModelPreset(m.value)}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-        <footer className="prompt-studio-footer">
-          <Button
-            type="button"
-            variant="default"
-            className="studio-copy-action-btn"
-            onClick={handleCopy}
-          >
-            {copied ? "✓ Copied to Clipboard!" : "Copy Modified Prompt"}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onClose}
-          >
-            Done
-          </Button>
-        </footer>
-      </aside>
-    </div>
+                {/* Section: Stylize Slider */}
+                <div className="studio-group">
+                  <div className="studio-slider-header">
+                    <label
+                      htmlFor="stylize-slider"
+                      className="studio-group-label"
+                    >
+                      Stylize <span>(--s)</span>
+                    </label>
+                    <output
+                      htmlFor="stylize-slider"
+                      className="studio-val-badge"
+                    >
+                      --s {stylize}
+                    </output>
+                  </div>
+                  <input
+                    id="stylize-slider"
+                    type="range"
+                    min={50}
+                    max={750}
+                    step={25}
+                    value={stylize}
+                    onChange={(e) => setStylize(Number(e.target.value))}
+                    className="studio-range-slider"
+                  />
+                  <div className="studio-quick-presets">
+                    {STYLIZE_PRESETS.map((val) => (
+                      <button
+                        key={val}
+                        type="button"
+                        className={`studio-micro-btn ${stylize === val ? "is-active" : ""}`}
+                        onClick={() => setStylize(val)}
+                      >
+                        {val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section: Chaos Slider */}
+                <div className="studio-group">
+                  <div className="studio-slider-header">
+                    <label
+                      htmlFor="chaos-slider"
+                      className="studio-group-label"
+                    >
+                      Chaos / Variation <span>(--c)</span>
+                    </label>
+                    <output htmlFor="chaos-slider" className="studio-val-badge">
+                      --c {chaos}
+                    </output>
+                  </div>
+                  <input
+                    id="chaos-slider"
+                    type="range"
+                    min={0}
+                    max={30}
+                    step={1}
+                    value={chaos}
+                    onChange={(e) => setChaos(Number(e.target.value))}
+                    className="studio-range-slider"
+                  />
+                  <div className="studio-quick-presets">
+                    {[0, 5, 10, 20, 30].map((val) => (
+                      <button
+                        key={val}
+                        type="button"
+                        className={`studio-micro-btn ${chaos === val ? "is-active" : ""}`}
+                        onClick={() => setChaos(val)}
+                      >
+                        {val === 0 ? "0 (Stable)" : val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section: Lighting & Film Modifiers */}
+                <div className="studio-group">
+                  <label className="studio-group-label">
+                    Lighting & Film Modifiers <span>(Click to toggle)</span>
+                  </label>
+                  <div className="studio-keywords-grid">
+                    {LIGHTING_FILM_KEYWORDS.map((kw) => {
+                      const active = selectedKeywords.includes(kw);
+                      return (
+                        <button
+                          key={kw}
+                          type="button"
+                          aria-pressed={active}
+                          className={`keyword-chip ${active ? "is-active" : ""}`}
+                          onClick={() => toggleKeyword(kw)}
+                        >
+                          <span>{active ? "✓ " : "+ "}</span>
+                          {kw}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Live Updated Preview Box */}
+                <div className="studio-group preview-box-group">
+                  <div className="preview-box-header">
+                    <span className="studio-group-label">
+                      Live Prompt Preview
+                    </span>
+                    <button
+                      type="button"
+                      className="studio-reset-link"
+                      onClick={handleReset}
+                      title="Reset all tweaks to study defaults"
+                    >
+                      Reset to default
+                    </button>
+                  </div>
+                  <div
+                    id="prompt-preview"
+                    className="studio-prompt-preview"
+                    tabIndex={0}
+                    role="region"
+                    aria-label="Live Prompt Preview"
+                  >
+                    <p className="preview-text">{modifiedPrompt}</p>
+                  </div>
+                </div>
+              </div>
+
+              <footer className="prompt-studio-footer">
+                <Button
+                  type="button"
+                  variant="default"
+                  className="studio-copy-action-btn"
+                  onClick={handleCopy}
+                >
+                  {copied ? "✓ Copied to Clipboard!" : "Copy Modified Prompt"}
+                </Button>
+                <Button type="button" variant="ghost" onClick={onClose}>
+                  Done
+                </Button>
+              </footer>
+            </aside>
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Overlay>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

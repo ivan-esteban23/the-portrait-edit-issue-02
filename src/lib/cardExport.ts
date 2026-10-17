@@ -26,7 +26,10 @@ function wrapText(
         // Last line, see if remainder fits or truncate with ellipsis
         const remainder = words.slice(i).join(" ");
         let truncated = remainder;
-        while (ctx.measureText(`${truncated}…`).width > maxWidth && truncated.length > 0) {
+        while (
+          ctx.measureText(`${truncated}…`).width > maxWidth &&
+          truncated.length > 0
+        ) {
           truncated = truncated.slice(0, -1).trim();
         }
         lines.push(`${truncated}…`);
@@ -44,48 +47,27 @@ function wrapText(
   return lines;
 }
 
-/**
- * Loads an HTMLImageElement safely with crossOrigin and fallback
- */
+/** Wait for a usable image; failed or stalled requests use the card placeholder. */
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    let settled = false;
-
-    const timer = setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        resolve(img);
-      }
-    }, 600);
-
+    const finish = (error?: Error) => {
+      clearTimeout(timer);
+      img.onload = null;
+      img.onerror = null;
+      if (error) reject(error);
+      else resolve(img);
+    };
+    const timer = setTimeout(
+      () => finish(new Error("Reference image timed out")),
+      15000,
+    );
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      if (!settled) {
-        settled = true;
-        clearTimeout(timer);
-        resolve(img);
-      }
+      if (img.naturalWidth > 0 && img.naturalHeight > 0) finish();
+      else finish(new Error("Reference image has no dimensions"));
     };
-    img.onerror = () => {
-      if (!settled) {
-        clearTimeout(timer);
-        const fallback = new Image();
-        fallback.onload = () => {
-          if (!settled) {
-            settled = true;
-            resolve(fallback);
-          }
-        };
-        fallback.onerror = (err) => {
-          if (!settled) {
-            settled = true;
-            reject(err);
-          }
-        };
-        fallback.src = src;
-      }
-    };
+    img.onerror = () => finish(new Error("Reference image failed to load"));
     img.src = src;
   });
 }
@@ -275,9 +257,12 @@ export async function exportStudyRecipeCard(
 
   // Parameters row
   const paramsEntries = Object.entries(prompt.parameters || {});
-  const paramsStr = paramsEntries.length > 0
-    ? paramsEntries.map(([k, v]) => `${k.startsWith("--") ? k : `--${k}`} ${v}`).join("   ")
-    : "Standard editorial portrait parameters";
+  const paramsStr =
+    paramsEntries.length > 0
+      ? paramsEntries
+          .map(([k, v]) => `${k.startsWith("--") ? k : `--${k}`} ${v}`)
+          .join("   ")
+      : "Standard editorial portrait parameters";
 
   ctx.font = "500 15px 'Inter Variable', Inter, ui-monospace, monospace";
   ctx.fillStyle = metaColor;
@@ -319,17 +304,20 @@ export async function exportStudyRecipeCard(
   const filename = `portrait-edit-study-${studyNumStr}.png`;
 
   if (canvas.toBlob) {
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }, "image/png");
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((result) => {
+        if (result) resolve(result);
+        else reject(new Error("Unable to encode recipe card"));
+      }, "image/png");
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   } else {
     // Fallback for environments lacking canvas.toBlob
     const dataUrl = canvas.toDataURL("image/png");
