@@ -9,8 +9,8 @@ interface StudyCardProps {
   prompt: Prompt;
   to: string;
   headingLevel?: "h2" | "h3";
-  isSaved: boolean;
-  onToggleSaved: (id: string) => void;
+  isSaved?: boolean;
+  onToggleSaved?: (id: string) => void;
   onTagClick?: (tag: string) => void;
   isComparing?: boolean;
   onToggleCompare?: (id: string) => void;
@@ -20,7 +20,7 @@ export function StudyCard({
   prompt,
   to,
   headingLevel = "h2",
-  isSaved,
+  isSaved = false,
   onToggleSaved,
   onTagClick,
   isComparing = false,
@@ -56,7 +56,7 @@ export function StudyCard({
   const handleToggleBookmark = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onToggleSaved(prompt.id);
+    onToggleSaved?.(prompt.id);
   };
 
   const handleShare = async (e: MouseEvent) => {

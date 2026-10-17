@@ -232,6 +232,35 @@ function ReaderView({
   const [turning, setTurning] = useState(false);
   const [showThumbnails, setShowThumbnails] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [showTouchHint, setShowTouchHint] = useState(false);
+  const touchHintDismissed = useRef(false);
+
+  useEffect(() => {
+    try {
+      const isTouch =
+        typeof window !== "undefined" &&
+        ("ontouchstart" in window ||
+          (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0));
+      const dismissed = localStorage.getItem("portrait-edit-touch-hint");
+      if (isTouch && !dismissed) {
+        setShowTouchHint(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const dismissTouchHint = useCallback(() => {
+    if (touchHintDismissed.current) return;
+    touchHintDismissed.current = true;
+    setShowTouchHint(false);
+    try {
+      localStorage.setItem("portrait-edit-touch-hint", "dismissed");
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const { soundEnabled, toggleSound, playPaperTurn } = useSoundEffect();
   const isInitialPageRender = useRef(true);
   const filmstripRef = useRef<HTMLDivElement>(null);
@@ -447,7 +476,10 @@ function ReaderView({
   ]);
   useSwipe(
     canvas,
-    (delta) => go(currentRoutePage(page) + delta * step),
+    (delta) => {
+      dismissTouchHint();
+      go(currentRoutePage(page) + delta * step);
+    },
     mode === "text" || zoom === 100,
   );
   const openSettings = (open: boolean) => {
@@ -738,6 +770,24 @@ function ReaderView({
           </span>
         </p>
       </header>
+      {showTouchHint && (
+        <div
+          className="touch-swipe-hint"
+          role="status"
+          aria-live="polite"
+          aria-label="Swipe gesture hint"
+        >
+          <span className="touch-swipe-text">← Swipe to turn pages →</span>
+          <button
+            type="button"
+            className="touch-swipe-dismiss"
+            onClick={dismissTouchHint}
+            aria-label="Dismiss swipe hint"
+          >
+            ×
+          </button>
+        </div>
+      )}
       <nav ref={strip} className="chapter-strip" aria-label="Chapter overview">
         {issue.chapters.map((c) => (
           <button

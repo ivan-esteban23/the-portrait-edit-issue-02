@@ -1,12 +1,13 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { CommandPalette } from "../src/components/CommandPalette";
 import { CompareLab } from "../src/components/CompareLab";
 import { PromptStudioDrawer } from "../src/components/PromptStudioDrawer";
 import { exportStudyRecipeCard } from "../src/lib/cardExport";
 import { isSoundEnabled, setSoundEnabled, playPaperTurnSound } from "../src/utils/audio";
-import { Archive } from "../src/components/SitePages";
+import { Archive, IssueOverview } from "../src/components/SitePages";
+import { formatPromptText } from "../src/lib/promptFormatter";
 import promptA from "../src/content/prompts/issue-02-study-005.json";
 import promptB from "../src/content/prompts/issue-02-study-006.json";
 
@@ -245,6 +246,23 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
       // Clicking calls window.print
       fireEvent.click(printBtn);
     });
+
+    it("renders Print Contact Sheet button and print container on IssueOverview", () => {
+      window.print = vi.fn();
+
+      render(
+        <MemoryRouter initialEntries={["/issues/the-prompt-issue"]}>
+          <Routes>
+            <Route path="/issues/:slug" element={<IssueOverview />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+
+      const printBtn = screen.getByText(/Print Contact Sheet/i);
+      expect(printBtn).toBeInTheDocument();
+      fireEvent.click(printBtn);
+      expect(window.print).toHaveBeenCalled();
+    });
   });
 
   describe("6. Synthesized Paper-Turn Sound (Web Audio API)", () => {
@@ -260,6 +278,29 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
 
       // Calling playPaperTurnSound should not throw in Node/JSDOM
       expect(() => playPaperTurnSound()).not.toThrow();
+    });
+  });
+
+  describe("7. Discord /imagine Command & Multi-Tool Formats", () => {
+    it("formats prompt text as Discord /imagine command with parameters", () => {
+      const discordText = formatPromptText(promptA, "discord");
+      expect(discordText.startsWith("/imagine prompt:")).toBe(true);
+      expect(discordText).toContain(promptA.prompt.trim().replace(/\s+/g, " "));
+      if (promptA.parameters && Object.keys(promptA.parameters).length > 0) {
+        expect(discordText).toContain("--");
+      }
+    });
+
+    it("formats prompt as Midjourney, FLUX, and Plain Text", () => {
+      const plainText = formatPromptText(promptA, "plain");
+      expect(plainText).toEqual(promptA.prompt.trim().replace(/\s+/g, " "));
+
+      const mjText = formatPromptText(promptA, "midjourney");
+      expect(mjText).toContain(promptA.prompt.trim().replace(/\s+/g, " "));
+
+      const fluxText = formatPromptText(promptA, "flux");
+      expect(fluxText).not.toContain("--v 6");
+      expect(fluxText.length).toBeGreaterThan(0);
     });
   });
 });

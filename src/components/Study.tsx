@@ -33,13 +33,13 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
       const text = formatPromptText(prompt, format);
       await copyText(text);
       if (!alive.current) return;
-      setFeedback(
-        format === "raw"
-          ? "Prompt copied."
-          : format === "params"
-            ? "Prompt with parameters copied."
-            : "Markdown card copied.",
-      );
+      let msg = "Prompt copied.";
+      if (format === "discord") msg = "Discord /imagine command copied.";
+      else if (format === "midjourney" || format === "params") msg = "Midjourney prompt copied.";
+      else if (format === "flux") msg = "FLUX prompt copied.";
+      else if (format === "markdown") msg = "Markdown card copied.";
+      else if (format === "plain") msg = "Plain text prompt copied.";
+      setFeedback(msg);
       timer.current = setTimeout(() => setFeedback(""), 1600);
     } catch {
       if (alive.current)
@@ -78,57 +78,88 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
                 ? "Copying…"
                 : "Copy prompt"}
           </Button>
-          <Button
-            variant="outline"
-            className="format-sub-btn"
-            onClick={() => copyFormat("params")}
-            disabled={busy}
-            title="Copy prompt with parameter flags"
-          >
-            + Params
-          </Button>
-          <Button
-            variant="outline"
-            className="format-sub-btn"
-            onClick={() => copyFormat("markdown")}
-            disabled={busy}
-            title="Copy formatted Markdown card"
-          >
-            Markdown
-          </Button>
-          <Button
-            variant="outline"
-            className="card-tool-btn adjust-params-btn"
-            onClick={() => setStudioOpen(true)}
-            title="Open Prompt Studio parameter tweaker"
-          >
-            Adjust Parameters
-          </Button>
-          <Button
-            variant="outline"
-            className="card-tool-btn recipe-card-export-btn"
-            onClick={handleExportCard}
-            disabled={exportingCard}
-            title="Save as 1080x1350 editorial PNG recipe card"
-          >
-            <svg
-              className="download-icon-svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+          <div className="prompt-secondary-actions">
+            <Button
+              variant="outline"
+              className="format-sub-btn discord-copy-btn"
+              onClick={() => copyFormat("discord")}
+              disabled={busy}
+              title="Copy Discord /imagine command"
+              aria-label="Discord /imagine"
             >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            <span>{exportingCard ? "Generating…" : "Save Recipe Card"}</span>
-          </Button>
+              <span className="btn-label-long">Discord /imagine</span>
+              <span className="btn-label-short">/imagine</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="format-sub-btn mj-copy-btn"
+              onClick={() => copyFormat("midjourney")}
+              disabled={busy}
+              title="Copy Midjourney prompt with parameters"
+              aria-label="Midjourney (+ Params)"
+            >
+              <span className="btn-label-long">+ Params</span>
+              <span className="btn-label-short">+ Params</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="format-sub-btn flux-copy-btn"
+              onClick={() => copyFormat("flux")}
+              disabled={busy}
+              title="Copy FLUX prompt"
+              aria-label="FLUX"
+            >
+              FLUX
+            </Button>
+            <Button
+              variant="outline"
+              className="format-sub-btn"
+              onClick={() => copyFormat("markdown")}
+              disabled={busy}
+              title="Copy formatted Markdown card"
+              aria-label="Markdown"
+            >
+              <span className="btn-label-long">Markdown</span>
+              <span className="btn-label-short">MD</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="card-tool-btn adjust-params-btn"
+              onClick={() => setStudioOpen(true)}
+              title="Open Prompt Studio parameter tweaker"
+              aria-label="Adjust Parameters"
+            >
+              <span className="btn-label-long">Adjust Parameters</span>
+              <span className="btn-label-short">Adjust</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="card-tool-btn recipe-card-export-btn"
+              onClick={handleExportCard}
+              disabled={exportingCard}
+              title="Save as 1080x1350 editorial PNG recipe card"
+              aria-label="Save Recipe Card"
+            >
+              <svg
+                className="download-icon-svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span className="btn-label-long">{exportingCard ? "Generating…" : "Save Recipe Card"}</span>
+              <span className="btn-label-short">{exportingCard ? "…" : "Card"}</span>
+            </Button>
+          </div>
         </div>
       </div>
       <p className="prompt-body">{prompt.prompt}</p>
@@ -181,7 +212,8 @@ export function Study({ prompt }: { prompt: Prompt }) {
               aria-label="Adjust Parameters in Prompt Studio"
               title="Open Prompt Studio drawer"
             >
-              Adjust Parameters
+              <span className="btn-label-long">Adjust Parameters</span>
+              <span className="btn-label-short">Adjust</span>
             </Button>
             <Button
               variant="ghost"
@@ -207,7 +239,8 @@ export function Study({ prompt }: { prompt: Prompt }) {
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span>{exportingCard ? "Generating…" : "Save Recipe Card"}</span>
+              <span className="btn-label-long">{exportingCard ? "Generating…" : "Save Recipe Card"}</span>
+              <span className="btn-label-short">{exportingCard ? "…" : "Card"}</span>
             </Button>
             {canShare() && (
               <Button

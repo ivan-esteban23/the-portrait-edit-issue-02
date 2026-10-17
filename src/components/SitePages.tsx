@@ -97,6 +97,9 @@ export function IssueOverview() {
   const { slug } = useParams();
   const issue = issues.find((i) => i.slug === slug);
   if (!issue) return <NotFound />;
+  const issueStudies = prompts.filter((p) => p.issueSlug === issue.slug);
+  const { isSaved, toggleSaved } = useBookmarks();
+
   return (
     <section className="overview">
       <header>
@@ -114,6 +117,15 @@ export function IssueOverview() {
           <div className="hero-actions">
             <Button asChild variant="default">
               <Link to={readerPath(issue.slug)}>Start reading</Link>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="print-contact-sheet-btn"
+              onClick={() => window.print()}
+              title="Print editorial contact sheet (@media print)"
+            >
+              Print Contact Sheet 🖨
             </Button>
             <a href={issue.pdfUrl}>
               Download PDF · {(issue.pdfBytes / 1e6).toFixed(1)} MB ↗
@@ -136,6 +148,40 @@ export function IssueOverview() {
             </Link>
           ))}
         </nav>
+      </div>
+
+      {/* Printable Contact Sheet Header (@media print) */}
+      <div className="print-contact-sheet-header" aria-hidden="true">
+        <div className="print-header-masthead">
+          <h2>THE PORTRAIT EDIT — ISSUE {issue.number}: {issue.title.toUpperCase()}</h2>
+          <span>EDITORIAL CONTACT SHEET</span>
+        </div>
+        <div className="print-header-details">
+          <p>
+            Publication Issue: <strong>Issue {issue.number} — {issue.title}</strong>
+          </p>
+          <p>
+            {issueStudies.length} {issueStudies.length === 1 ? "study" : "studies"} · Printed{" "}
+            {new Date().toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </p>
+        </div>
+      </div>
+
+      <div className="issue-print-studies" aria-hidden="true">
+        {issueStudies.map((p) => (
+          <StudyCard
+            key={p.id}
+            prompt={p}
+            to={readerPath(p.issueSlug, p.page)}
+            headingLevel="h3"
+            isSaved={isSaved(p.id)}
+            onToggleSaved={toggleSaved}
+          />
+        ))}
       </div>
     </section>
   );
@@ -315,24 +361,25 @@ export function Archive() {
             </div>
           )}
 
+          <Button
+            type="button"
+            variant="ghost"
+            className="export-saved-btn print-contact-sheet-btn"
+            onClick={() => {
+              if (savedCount > 0 && !savedOnly) {
+                filter("saved", "1");
+              }
+              setTimeout(() => {
+                window.print();
+              }, 120);
+            }}
+            title="Print editorial contact sheet (@media print)"
+          >
+            Print Contact Sheet 🖨
+          </Button>
+
           {savedCount > 0 && (
             <>
-              <Button
-                type="button"
-                variant="ghost"
-                className="export-saved-btn print-contact-sheet-btn"
-                onClick={() => {
-                  if (!savedOnly) {
-                    filter("saved", "1");
-                  }
-                  setTimeout(() => {
-                    window.print();
-                  }, 120);
-                }}
-                title="Print editorial contact sheet (@media print)"
-              >
-                Print Contact Sheet 🖨
-              </Button>
               <Button
                 type="button"
                 variant="ghost"

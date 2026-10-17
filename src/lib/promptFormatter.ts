@@ -1,22 +1,55 @@
 import type { Prompt } from "@/content/schema";
 
-export type CopyFormat = "raw" | "params" | "markdown";
+export type CopyFormat =
+  | "raw"
+  | "plain"
+  | "params"
+  | "midjourney"
+  | "discord"
+  | "flux"
+  | "markdown";
+
+function cleanPromptText(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function getParametersString(parameters?: Record<string, string | number | boolean>): string {
+  if (!parameters) return "";
+  return Object.entries(parameters)
+    .map(([k, v]) => `${k.startsWith("--") ? k : `--${k}`} ${v}`)
+    .join(" ");
+}
 
 export function formatPromptText(prompt: Prompt, format: CopyFormat = "raw"): string {
   if (format === "raw") {
     return prompt.prompt;
   }
 
-  if (format === "params") {
-    const raw = prompt.prompt.trim();
-    const params = Object.entries(prompt.parameters || {})
-      .map(([k, v]) => `${k.startsWith("--") ? k : `--${k}`} ${v}`)
-      .join(" ");
+  const cleaned = cleanPromptText(prompt.prompt);
+  const params = getParametersString(prompt.parameters);
 
-    if (!params) return raw;
-    // Don't duplicate if already present in prompt string
-    if (raw.includes(params)) return raw;
-    return `${raw} ${params}`;
+  if (format === "plain") {
+    return cleaned;
+  }
+
+  if (format === "discord") {
+    const combined = params && !cleaned.includes(params) ? `${cleaned} ${params}` : cleaned;
+    return `/imagine prompt: ${combined}`;
+  }
+
+  if (format === "midjourney" || format === "params") {
+    if (!params) return cleaned;
+    if (cleaned.includes(params)) return cleaned;
+    return `${cleaned} ${params}`;
+  }
+
+  if (format === "flux") {
+    // FLUX works best with natural language; strip Midjourney parameter flags (--ar, --v, --s, --c, etc.)
+    const fluxText = cleaned
+      .replace(/\s*--(?:v|version|s|stylize|c|chaos|style|quality|q|iw|no|stop|repeat|seed|weird|w)\s+[^\s]+/gi, "")
+      .replace(/\s*--[a-z0-9_-]+/gi, "")
+      .trim();
+    return fluxText;
   }
 
   if (format === "markdown") {

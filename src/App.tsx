@@ -156,7 +156,10 @@ export default function App() {
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
-              <span className="search-trigger-label">Search</span>
+              <span className="search-trigger-label">
+                <span className="search-label-long">Search</span>
+                <span className="search-label-short">Find</span>
+              </span>
               <kbd className="search-trigger-kbd">⌘K</kbd>
             </button>
             <Link to={`/issues/${currentIssue.slug}`}>Issue 02</Link>
