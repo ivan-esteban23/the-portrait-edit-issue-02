@@ -74,15 +74,8 @@ export function StudyCard({
   const Heading = headingLevel;
 
   return (
-    <Link
+    <article
       className={`study-card ${selectionMode ? "is-selection-mode" : ""} ${isSelected ? "is-selected" : ""}`}
-      to={to}
-      onClick={(e) => {
-        if (selectionMode) {
-          e.preventDefault();
-          onToggleSelect?.(prompt.id);
-        }
-      }}
     >
       <div className="study-card-media">
         {selectionMode && (
@@ -98,6 +91,7 @@ export function StudyCard({
               type="checkbox"
               className="card-selection-checkbox"
               checked={isSelected}
+              onClick={(e) => e.stopPropagation()}
               onChange={() => onToggleSelect?.(prompt.id)}
               aria-label={`Select Study #${prompt.studyNumber}: ${prompt.title}`}
             />
@@ -313,6 +307,18 @@ export function StudyCard({
           ))}
         </div>
       )}
-    </Link>
+      <Link
+        className="study-card-overlay"
+        to={to}
+        aria-label={`View study ${prompt.title || prompt.id}`}
+        onClick={(e) => {
+          if (selectionMode) {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleSelect?.(prompt.id);
+          }
+        }}
+      />
+    </article>
   );
 }
