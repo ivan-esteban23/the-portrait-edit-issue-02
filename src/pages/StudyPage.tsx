@@ -1,8 +1,9 @@
 import { Link, useParams } from "react-router-dom";
-import { prompts, readerPath } from "@/content";
+import { assetUrl, currentIssue, prompts, readerPath } from "@/content";
 import { Study } from "@/components/Study";
 import { useEffect } from "react";
 import { NotFoundPage } from "./NotFoundPage";
+import { usePageMeta, truncateMetaDescription } from "@/hooks/usePageMeta";
 
 export function StudyPage() {
   const { id } = useParams();
@@ -10,6 +11,14 @@ export function StudyPage() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [id]);
   const prompt = prompts.find((p) => p.id === id);
+  usePageMeta({
+    title: prompt
+      ? `Study #${prompt.studyNumber}: ${prompt.title} | The Portrait Edit`
+      : "Page not found | The Portrait Edit",
+    description: prompt ? truncateMetaDescription(prompt.prompt) : undefined,
+    image: assetUrl(prompt?.referenceImage ?? currentIssue.cover),
+    path: prompt ? `/prompts/${prompt.id}` : undefined,
+  });
   if (!prompt) return <NotFoundPage />;
   return (
     <section className="standalone-study">

@@ -21,6 +21,7 @@ import { useIdleChrome, useMedia } from "@/hooks/useReader";
 import { Button } from "./ui/button";
 import { Study } from "./Study";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { truncateMetaDescription, usePageMeta } from "@/hooks/usePageMeta";
 import { useTheme } from "@/hooks/useTheme";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { saveReadingProgress } from "@/hooks/useReadingProgress";
@@ -231,6 +232,12 @@ function ReaderView({
         p.page >= firstVisible &&
         p.page <= lastVisible,
     );
+  usePageMeta({
+    title: `Page ${page} — ${chapter.title} | The Portrait Edit`,
+    description: study ? truncateMetaDescription(study.prompt) : undefined,
+    image: assetUrl(study?.referenceImage ?? issue.cover),
+    path: readerPath(issue.slug, page),
+  });
   const pageLabel =
     firstVisible === lastVisible
       ? String(firstVisible)

@@ -1,16 +1,25 @@
 import { Link, useParams } from "react-router-dom";
-import { assetUrl, issues, prompts, readerPath } from "@/content";
+import { assetUrl, currentIssue, issues, prompts, readerPath } from "@/content";
 import { Button } from "@/components/ui/button";
 import { StudyCard } from "@/components/StudyCard";
 import { useLastReadPage } from "@/hooks/useReadingProgress";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { NotFoundPage } from "./NotFoundPage";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 export function IssueOverviewPage() {
   const { slug } = useParams();
   const issue = issues.find((i) => i.slug === slug);
   const lastReadPage = useLastReadPage(issue);
   const { isSaved, toggleSaved } = useBookmarks();
+  usePageMeta({
+    title: issue
+      ? `Issue ${issue.number} — ${issue.title} | The Portrait Edit`
+      : "Page not found | The Portrait Edit",
+    description: issue?.description,
+    image: assetUrl(issue?.cover ?? currentIssue.cover),
+    path: issue ? `/issues/${issue.slug}` : undefined,
+  });
   if (!issue) return <NotFoundPage />;
   const issueStudies = prompts.filter((p) => p.issueSlug === issue.slug);
 
