@@ -1,3 +1,4 @@
+import { Icon } from "@/components/ui/Icon";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import {
   Link,
@@ -152,20 +153,7 @@ export default function App() {
               title="Search commands, pages, and prompts (⌘K / Ctrl+K)"
               aria-label="Search and command palette"
             >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
+              <Icon name="search" size={15} />
               <span className="search-trigger-label">
                 <span className="search-label-long">Search</span>
                 <span className="search-label-short">Find</span>

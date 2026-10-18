@@ -1,3 +1,4 @@
+import { Icon } from "@/components/ui/Icon";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
@@ -175,22 +176,7 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
               title="Save as 1080x1350 editorial PNG recipe card"
               aria-label="Save Recipe Card"
             >
-              <svg
-                className="download-icon-svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
+              <Icon name="download" size={14} className="download-icon-svg" />
               <span className="btn-label-long">
                 {exportingCard ? "Generating…" : "Save Recipe Card"}
               </span>
@@ -282,22 +268,7 @@ export function Study({
               aria-label="Save Recipe Card as PNG"
               title="Export 1080x1350 editorial recipe card PNG"
             >
-              <svg
-                className="download-icon-svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
+              <Icon name="download" size={14} className="download-icon-svg" />
               <span className="btn-label-long">
                 {exportingCard ? "Generating…" : "Save Recipe Card"}
               </span>
