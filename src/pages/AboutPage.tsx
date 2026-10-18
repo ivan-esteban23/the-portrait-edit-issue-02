@@ -1,4 +1,14 @@
+import { assetUrl, currentIssue } from "@/content";
+import { usePageMeta } from "@/hooks/usePageMeta";
+
 export function AboutPage() {
+  usePageMeta({
+    title: "About | The Portrait Edit",
+    description:
+      "About The Portrait Edit — an editorial magazine exploring AI-generated portrait photography",
+    image: assetUrl(currentIssue.cover),
+    path: "/about",
+  });
   return (
     <article className="about editorial-copy">
       <p className="eyebrow">About the publication</p>

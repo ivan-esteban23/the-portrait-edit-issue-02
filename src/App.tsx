@@ -9,7 +9,6 @@ import {
 } from "react-router-dom";
 import { currentIssue, readerPath } from "./content/issues";
 import { useTheme, type Theme } from "./hooks/useTheme";
-import { usePageMeta } from "./hooks/usePageMeta";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const CommandPalette = lazy(() =>
@@ -134,8 +133,6 @@ export default function App() {
     window.addEventListener("hashchange", legacy);
     return () => window.removeEventListener("hashchange", legacy);
   }, [navigate]);
-
-  usePageMeta();
 
   return (
     <div className={focused ? "publication focused" : "publication"}>

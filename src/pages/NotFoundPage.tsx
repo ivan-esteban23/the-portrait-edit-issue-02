@@ -1,8 +1,13 @@
 import { Link } from "react-router-dom";
-import { currentIssue, readerPath } from "@/content";
+import { assetUrl, currentIssue, readerPath } from "@/content";
 import { Button } from "@/components/ui/button";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 export function NotFoundPage() {
+  usePageMeta({
+    title: "Page not found | The Portrait Edit",
+    image: assetUrl(currentIssue.cover),
+  });
   return (
     <section className="not-found">
       <p className="eyebrow">404 / Outside the issue</p>

@@ -1,12 +1,13 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { prompts } from "@/content";
+import { assetUrl, currentIssue, prompts } from "@/content";
 import { Button } from "@/components/ui/button";
 import { StudyCard } from "@/components/StudyCard";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { splitPromptParameters } from "@/lib/promptFormatter";
 import { copyText } from "@/lib/utils";
 import { generateMarkdownDossier, downloadFile } from "@/lib/dossier";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 type ParsedParameters = ReturnType<typeof splitPromptParameters>;
 
@@ -20,6 +21,13 @@ const ImageLightbox = lazy(() =>
 );
 
 export function ArchivePage() {
+  usePageMeta({
+    title: `Prompt Archive (${prompts.length} Studies) | The Portrait Edit`,
+    description:
+      "Browse and filter all 174 portrait studies in The Portrait Edit Issue 02",
+    image: assetUrl(currentIssue.cover),
+    path: "/prompts",
+  });
   const archive = useRef<HTMLElement>(null);
   const [preparingPrint, setPreparingPrint] = useState(false);
   async function printSelection() {

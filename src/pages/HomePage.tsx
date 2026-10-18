@@ -4,11 +4,18 @@ import { Button } from "@/components/ui/button";
 import { StudyCard } from "@/components/StudyCard";
 import { useLastReadPage } from "@/hooks/useReadingProgress";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 export function HomePage() {
   const lastReadPage = useLastReadPage(currentIssue);
   const navigate = useNavigate();
   const { isSaved, toggleSaved } = useBookmarks();
+  usePageMeta({
+    title: "The Portrait Edit — Issue 02",
+    description: currentIssue.description,
+    image: assetUrl(currentIssue.cover),
+    path: "/",
+  });
   const legacy = window.location.hash.match(/^#page=(\d+)$/);
   if (window.location.hash === "#reader")
     return (
