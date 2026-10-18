@@ -2,9 +2,13 @@ import { issueSchema } from "./schema";
 export const issues = Object.values(
   import.meta.glob("./issues/*/issue.json", { eager: true, import: "default" }),
 ).map((data) => issueSchema.parse(data));
-export const currentIssue = issues.find(
-  (issue) => issue.slug === "the-prompt-issue",
-)!;
+const requiredIssue = issues.find((issue) => issue.slug === "the-prompt-issue");
+if (!requiredIssue) {
+  throw new Error(
+    'Unable to load The Portrait Edit: required issue "the-prompt-issue" is missing from src/content/issues/.',
+  );
+}
+export const currentIssue = requiredIssue;
 export const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 export const readerPath = (slug: string, page = 1) =>
   `/issues/${slug}/pages/${page}`;

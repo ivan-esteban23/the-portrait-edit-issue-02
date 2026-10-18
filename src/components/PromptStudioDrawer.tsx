@@ -79,11 +79,55 @@ export interface RemixRecord {
 
 const REMIX_STORAGE_KEY = "the-portrait-edit:remixes";
 
+function isRemixRecord(value: unknown): value is RemixRecord {
+  if (typeof value !== "object" || value === null || Array.isArray(value))
+    return false;
+  const record = value as Record<string, unknown>;
+  if (
+    typeof record.parameters !== "object" ||
+    record.parameters === null ||
+    Array.isArray(record.parameters)
+  )
+    return false;
+  const parameters = record.parameters as Record<string, unknown>;
+  return (
+    ["id", "promptId", "title", "prompt"].every(
+      (key) => typeof record[key] === "string",
+    ) &&
+    typeof record.timestamp === "number" &&
+    Number.isFinite(record.timestamp) &&
+    ["ar", "aspectRatio", "modelPreset"].every(
+      (key) =>
+        parameters[key] === undefined || typeof parameters[key] === "string",
+    ) &&
+    ["stylize", "chaos"].every(
+      (key) =>
+        parameters[key] === undefined ||
+        (typeof parameters[key] === "number" &&
+          Number.isFinite(parameters[key])),
+    ) &&
+    (parameters.keywords === undefined ||
+      (Array.isArray(parameters.keywords) &&
+        parameters.keywords.every((keyword) => typeof keyword === "string")))
+  );
+}
+
 function loadRemixes(): RemixRecord[] {
   try {
     const raw = localStorage.getItem(REMIX_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed.every(isRemixRecord)) {
+      throw new Error(
+        "Saved remix history must be an array of valid remix records.",
+      );
+    }
+    return parsed;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(
+      `Unable to load saved remixes (${REMIX_STORAGE_KEY}): ${message}`,
+    );
     return [];
   }
 }
