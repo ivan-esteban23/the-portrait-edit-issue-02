@@ -292,7 +292,7 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
   });
 
   describe("5. Printable Editorial Contact Sheet", () => {
-    it("renders Print Contact Sheet button and print header in moodboard view", () => {
+    it("renders Print Contact Sheet button and print header in moodboard view", async () => {
       // Seed localStorage with a saved study
       localStorage.setItem("portrait-edit-saved", JSON.stringify([promptA.id]));
 
@@ -313,8 +313,9 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
       ).toBeInTheDocument();
       expect(screen.getByText("EDITORIAL CONTACT SHEET")).toBeInTheDocument();
 
-      // Clicking calls window.print
-      fireEvent.click(printBtn);
+      // Printing waits until the selected images and fonts are ready.
+      await act(async () => { fireEvent.click(printBtn); });
+      expect(window.print).toHaveBeenCalled();
     });
 
     it("renders Print Contact Sheet button and print container on IssueOverview", () => {

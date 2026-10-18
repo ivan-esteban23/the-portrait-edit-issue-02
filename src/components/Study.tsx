@@ -7,10 +7,15 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 import { exportStudyRecipeCard } from "@/lib/cardExport";
 import {
   formatPromptText,
+  getCommandParameters,
+  formatCommand,
   canShare,
   sharePrompt,
   type CopyFormat,
 } from "@/lib/promptFormatter";
+
+import { CommandParameters } from "./CommandParameters";
+import { RelatedStudies } from "./RelatedStudies";
 
 const ImageLightbox = lazy(() =>
   import("./ImageLightbox").then((m) => ({ default: m.ImageLightbox })),
@@ -22,10 +27,26 @@ const PromptStudioDrawer = lazy(() =>
 );
 
 export function PromptCard({ prompt }: { prompt: Prompt }) {
+  const recordedParameters = getCommandParameters(prompt);
+  const parameters = recordedParameters.length
+    ? recordedParameters
+    : [
+        { key: "ar", value: "4:5" },
+        { key: "v", value: "6.1" },
+        { key: "s", value: "250" },
+      ];
+  const [enabledParameters, setEnabledParameters] = useState(() =>
+    recordedParameters.map((parameter) => parameter.key),
+  );
   const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
   const [exportingCard, setExportingCard] = useState(false);
   const [studioOpen, setStudioOpen] = useState(false);
+  useEffect(() => {
+    setEnabledParameters(
+      getCommandParameters(prompt).map((parameter) => parameter.key),
+    );
+  }, [prompt.id]);
   const alive = useRef(true);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -42,12 +63,23 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
     setBusy(true);
     setFeedback("");
     try {
-      const text = formatPromptText(prompt, format);
+      const command = formatCommand(
+        prompt.prompt,
+        parameters,
+        enabledParameters,
+      );
+      const text =
+        format === "discord"
+          ? `/imagine prompt: ${command}`
+          : format === "midjourney"
+            ? command
+            : formatPromptText(prompt, format);
       await copyText(text);
       if (!alive.current) return;
       let msg = "Prompt copied.";
       if (format === "discord") msg = "Discord /imagine command copied.";
-      else if (format === "midjourney" || format === "params") msg = "Midjourney prompt copied.";
+      else if (format === "midjourney" || format === "params")
+        msg = "Midjourney prompt copied.";
       else if (format === "flux") msg = "FLUX prompt copied.";
       else if (format === "markdown") msg = "Markdown card copied.";
       else if (format === "plain") msg = "Plain text prompt copied.";
@@ -83,7 +115,11 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
       <div className="prompt-card-heading">
         <h3>Image Prompt</h3>
         <div className="prompt-copy-actions">
-          <Button variant="ghost" onClick={() => copyFormat("raw")} disabled={busy}>
+          <Button
+            variant="ghost"
+            onClick={() => copyFormat("raw")}
+            disabled={busy}
+          >
             {feedback === "Prompt copied."
               ? "Copied"
               : busy
@@ -168,12 +204,26 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span className="btn-label-long">{exportingCard ? "Generating…" : "Save Recipe Card"}</span>
-              <span className="btn-label-short">{exportingCard ? "…" : "Card"}</span>
+              <span className="btn-label-long">
+                {exportingCard ? "Generating…" : "Save Recipe Card"}
+              </span>
+              <span className="btn-label-short">
+                {exportingCard ? "…" : "Card"}
+              </span>
             </Button>
           </div>
         </div>
       </div>
+      <CommandParameters
+        parameters={parameters}
+        enabled={enabledParameters}
+        onChange={setEnabledParameters}
+        hint={
+          recordedParameters.length
+            ? undefined
+            : "Optional starting points. Select flags for your command."
+        }
+      />
       <p className="prompt-body">{prompt.prompt}</p>
       <p role="status" className="copy-feedback">
         {feedback}
@@ -194,7 +244,13 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
   );
 }
 
-export function Study({ prompt }: { prompt: Prompt }) {
+export function Study({
+  prompt,
+  context = "detail",
+}: {
+  prompt: Prompt;
+  context?: "detail" | "reader";
+}) {
   const { isSaved, toggleSaved } = useBookmarks();
   const saved = isSaved(prompt.id);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -255,8 +311,12 @@ export function Study({ prompt }: { prompt: Prompt }) {
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span className="btn-label-long">{exportingCard ? "Generating…" : "Save Recipe Card"}</span>
-              <span className="btn-label-short">{exportingCard ? "…" : "Card"}</span>
+              <span className="btn-label-long">
+                {exportingCard ? "Generating…" : "Save Recipe Card"}
+              </span>
+              <span className="btn-label-short">
+                {exportingCard ? "…" : "Card"}
+              </span>
             </Button>
             {canShare() && (
               <Button
@@ -343,6 +403,7 @@ export function Study({ prompt }: { prompt: Prompt }) {
         <h3>Try this</h3>
         <p className="preserve-text">{prompt.tryThis}</p>
       </section>
+      <RelatedStudies prompt={prompt} context={context} />
     </article>
   );
 }

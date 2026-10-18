@@ -1054,7 +1054,7 @@ function ReaderView({
             />
           )
         ) : study ? (
-          <Study key={study.id} prompt={study} />
+          <Study key={study.id} prompt={study} context="reader" />
         ) : (
           <>
             {page === 1 && (

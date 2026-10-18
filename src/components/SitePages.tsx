@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   Link,
   Navigate,
@@ -67,12 +67,16 @@ export function Home() {
           <div className="hero-actions">
             <Button asChild variant="default">
               <Link to={readerPath(currentIssue.slug, lastReadPage)}>
-                {lastReadPage > 1 ? `Resume reading · Page ${lastReadPage} ↗` : "Start reading ↗"}
+                {lastReadPage > 1
+                  ? `Resume reading · Page ${lastReadPage} ↗`
+                  : "Start reading ↗"}
               </Link>
             </Button>
             {lastReadPage > 1 && (
               <Button asChild variant="outline">
-                <Link to={readerPath(currentIssue.slug)}>Start from beginning</Link>
+                <Link to={readerPath(currentIssue.slug)}>
+                  Start from beginning
+                </Link>
               </Button>
             )}
             <Link to={`/issues/${currentIssue.slug}`}>Inside the issue</Link>
@@ -106,7 +110,9 @@ export function Home() {
               headingLevel="h3"
               isSaved={isSaved(p.id)}
               onToggleSaved={toggleSaved}
-              onTagClick={(t) => navigate(`/prompts?tag=${encodeURIComponent(t)}`)}
+              onTagClick={(t) =>
+                navigate(`/prompts?tag=${encodeURIComponent(t)}`)
+              }
             />
           ))}
         </div>
@@ -139,7 +145,9 @@ export function IssueOverview() {
           <div className="hero-actions">
             <Button asChild variant="default">
               <Link to={readerPath(issue.slug, lastReadPage)}>
-                {lastReadPage > 1 ? `Resume reading (Page ${lastReadPage}) ↗` : "Start reading"}
+                {lastReadPage > 1
+                  ? `Resume reading (Page ${lastReadPage}) ↗`
+                  : "Start reading"}
               </Link>
             </Button>
             {lastReadPage > 1 && (
@@ -182,15 +190,22 @@ export function IssueOverview() {
       {/* Printable Contact Sheet Header (@media print) */}
       <div className="print-contact-sheet-header" aria-hidden="true">
         <div className="print-header-masthead">
-          <h2>THE PORTRAIT EDIT — ISSUE {issue.number}: {issue.title.toUpperCase()}</h2>
+          <h2>
+            THE PORTRAIT EDIT — ISSUE {issue.number}:{" "}
+            {issue.title.toUpperCase()}
+          </h2>
           <span>EDITORIAL CONTACT SHEET</span>
         </div>
         <div className="print-header-details">
           <p>
-            Publication Issue: <strong>Issue {issue.number} — {issue.title}</strong>
+            Publication Issue:{" "}
+            <strong>
+              Issue {issue.number} — {issue.title}
+            </strong>
           </p>
           <p>
-            {issueStudies.length} {issueStudies.length === 1 ? "study" : "studies"} · Printed{" "}
+            {issueStudies.length}{" "}
+            {issueStudies.length === 1 ? "study" : "studies"} · Printed{" "}
             {new Date().toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
@@ -216,6 +231,26 @@ export function IssueOverview() {
   );
 }
 export function Archive() {
+  const archive = useRef<HTMLElement>(null);
+  const [preparingPrint, setPreparingPrint] = useState(false);
+  async function printSelection() {
+    setPreparingPrint(true);
+    try {
+      const images = Array.from(
+        archive.current?.querySelectorAll<HTMLImageElement>(
+          ".archive-grid img",
+        ) || [],
+      );
+      images.forEach((image) => {
+        image.loading = "eager";
+      });
+      await Promise.allSettled(images.map((image) => image.decode?.()));
+      await document.fonts?.ready;
+      window.print();
+    } finally {
+      setPreparingPrint(false);
+    }
+  }
   const [search, setSearch] = useSearchParams();
   const {
     isSaved,
@@ -276,7 +311,7 @@ export function Archive() {
   const studyB = prompts.find((p) => p.id === compareIds[1]);
 
   return (
-    <section className="archive">
+    <section className="archive" ref={archive}>
       <header>
         <p className="eyebrow">The working collection</p>
         <h1>Portrait prompts</h1>
@@ -394,17 +429,12 @@ export function Archive() {
             type="button"
             variant="ghost"
             className="export-saved-btn print-contact-sheet-btn"
-            onClick={() => {
-              if (savedCount > 0 && !savedOnly) {
-                filter("saved", "1");
-              }
-              setTimeout(() => {
-                window.print();
-              }, 120);
-            }}
+            onClick={printSelection}
+            disabled={preparingPrint || filtered.length === 0}
+            aria-busy={preparingPrint}
             title="Print editorial contact sheet (@media print)"
           >
-            Print Contact Sheet 🖨
+            {preparingPrint ? "Preparing sheet…" : "Print Contact Sheet 🖨"}
           </Button>
 
           {savedCount > 0 && (
@@ -446,10 +476,20 @@ export function Archive() {
         </div>
         <div className="print-header-details">
           <p>
-            Curated Collection: <strong>{activeCollection}</strong>
+            {savedOnly ? (
+              <>
+                Curated Collection: <strong>{activeCollection}</strong>
+              </>
+            ) : (
+              <strong>Archive selection</strong>
+            )}
+            {tag && ` · #${tag}`}
+            {model && ` · ${model}`}
+            {query && ` · “${query}”`}
           </p>
           <p>
-            {filtered.length} {filtered.length === 1 ? "study" : "studies"} · Printed{" "}
+            {filtered.length} {filtered.length === 1 ? "study" : "studies"} ·
+            Printed{" "}
             {new Date().toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
@@ -485,7 +525,10 @@ export function Archive() {
 
       {/* Floating comparison dock */}
       {compareIds.length > 0 && (
-        <aside className="compare-floating-dock" aria-label="Compare selection dock">
+        <aside
+          className="compare-floating-dock"
+          aria-label="Compare selection dock"
+        >
           <div className="compare-dock-content">
             <span className="compare-dock-count">
               Selected {compareIds.length}/2 for comparison
@@ -549,6 +592,9 @@ export function Archive() {
 }
 export function StudyPage() {
   const { id } = useParams();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [id]);
   const prompt = prompts.find((p) => p.id === id);
   if (!prompt) return <NotFound />;
   return (

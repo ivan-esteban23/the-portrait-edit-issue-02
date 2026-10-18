@@ -34,7 +34,8 @@ test("reader bookmarks synchronize and progress resumes in a fresh session", asy
       ),
     )
     .toBe(61);
-  await page.goto("./");
+  const homeUrl = page.url().split("/issues/")[0] + "/";
+  await page.goto(homeUrl);
   await expect(
     page.getByRole("link", { name: "Resume reading · Page 61 ↗", exact: true }),
   ).toBeVisible();
@@ -56,7 +57,7 @@ test("reader bookmarks synchronize and progress resumes in a fresh session", asy
   });
   try {
     const fresh = await context.newPage();
-    await fresh.goto(page.url().split("/issues/")[0] + "/");
+    await fresh.goto(homeUrl);
     await fresh
       .getByRole("link", { name: "Resume reading · Page 61 ↗", exact: true })
       .click();
@@ -125,6 +126,7 @@ test("lightbox touch gestures anchor, clamp, cancel safely, and dismiss with foc
       const matrix = new DOMMatrix((node as HTMLElement).style.transform);
       return { x: matrix.m41, y: matrix.m42, zoom: matrix.a };
     });
+  await expect.poll(async () => (await translation()).zoom).toBe(2.5);
   const first = await translation();
   expect(first.zoom).toBe(2.5);
   expect(first.x).toBeCloseTo(expected.x, 1);
@@ -142,9 +144,15 @@ test("lightbox touch gestures anchor, clamp, cancel safely, and dismiss with foc
     { x: a.x - box.width * 0.1, y: a.y },
     { x: b.x + box.width * 0.1, y: b.y },
   ]);
-  expect((await translation()).zoom).toBeCloseTo(2, 3);
+  await expect.poll(async () => (await translation()).zoom).toBeCloseTo(2, 3);
   await touch(viewport, "touchend", [a], [b]);
   await touch(viewport, "touchmove", [{ x: a.x + 5000, y: a.y + 5000 }]);
+  await expect
+    .poll(async () => (await translation()).x)
+    .toBeCloseTo(box.width / 2, 1);
+  await expect
+    .poll(async () => (await translation()).y)
+    .toBeCloseTo(box.height / 2, 1);
   const clamped = await translation();
   expect(clamped.x).toBeCloseTo(box.width / 2, 1);
   expect(clamped.y).toBeCloseTo(box.height / 2, 1);

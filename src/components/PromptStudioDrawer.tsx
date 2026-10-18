@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import type { Prompt } from "@/content/schema";
 import { copyText } from "@/lib/utils";
+import { formatCommand, splitPromptParameters } from "@/lib/promptFormatter";
+import { CommandParameters } from "./CommandParameters";
 import { Button } from "./ui/button";
 
 interface PromptStudioDrawerProps {
@@ -46,6 +48,15 @@ export function PromptStudioDrawer({
   onClose,
 }: PromptStudioDrawerProps) {
   const returnFocus = useRef<HTMLElement | null>(null);
+  const alive = useRef(true);
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+    };
+  }, []);
 
   // Extract initial parameters from study
   const initialAr = (prompt.parameters?.["ar"] ||
@@ -67,7 +78,26 @@ export function PromptStudioDrawer({
     initialC >= 0 && initialC <= 30 ? initialC : 0,
   );
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
-  const [copied, setCopied] = useState<boolean>(false);
+  const [copied, setCopied] = useState<string>("");
+  const [enabledParameters, setEnabledParameters] = useState([
+    "v",
+    "style",
+    "ar",
+    "s",
+    "c",
+  ]);
+
+  useEffect(() => {
+    setCopied("");
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+  }, [
+    aspectRatio,
+    modelPreset,
+    stylize,
+    chaos,
+    selectedKeywords,
+    enabledParameters,
+  ]);
 
   // Sync state when prompt changes
   useEffect(() => {
@@ -75,7 +105,8 @@ export function PromptStudioDrawer({
     setStylize(initialS >= 50 && initialS <= 750 ? initialS : 250);
     setChaos(initialC >= 0 && initialC <= 30 ? initialC : 0);
     setSelectedKeywords([]);
-    setCopied(false);
+    setCopied("");
+    setEnabledParameters(["v", "style", "ar", "s", "c"]);
   }, [prompt.id, initialAr, initialS, initialC]);
 
   const toggleKeyword = (kw: string) => {
@@ -90,13 +121,12 @@ export function PromptStudioDrawer({
     setStylize(250);
     setChaos(0);
     setSelectedKeywords([]);
-    setCopied(false);
+    setCopied("");
+    setEnabledParameters(["v", "style", "ar", "s", "c"]);
   };
 
   // Strip existing parameter flags from base prompt text for clean appending
-  const cleanBasePrompt = prompt.prompt
-    .replace(/\s+--(ar|v|s|c|style|chaos|stylize)\s+[^\s]+/gi, "")
-    .trim();
+  const cleanBasePrompt = splitPromptParameters(prompt.prompt).text;
 
   // Construct modified prompt string
   const keywordsString =
@@ -116,18 +146,38 @@ export function PromptStudioDrawer({
     parametersString += ` --c ${chaos}`;
   }
 
+  const parameters = Array.from(
+    splitPromptParameters(parametersString).parameters,
+    ([key, value]) => ({ key, value }),
+  );
+  const commandText = formatCommand(
+    `${cleanBasePrompt}${keywordsString}`,
+    parameters,
+    enabledParameters,
+  );
   const modifiedPrompt =
     modelPreset === "[FLUX.1 Dev]"
-      ? `[FLUX.1 Dev] ${cleanBasePrompt}${keywordsString} --ar ${aspectRatio}`
-      : `${cleanBasePrompt}${keywordsString}${parametersString}`;
+      ? `[FLUX.1 Dev] ${cleanBasePrompt}${keywordsString}`
+      : commandText;
 
-  const handleCopy = async () => {
+  const handleCopy = async (format: "plain" | "discord" = "plain") => {
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     try {
-      await copyText(modifiedPrompt);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await copyText(
+        format === "discord"
+          ? `/imagine prompt: ${commandText}`
+          : modifiedPrompt,
+      );
+      if (!alive.current) return;
+      setCopied(
+        format === "discord"
+          ? "Discord /imagine command copied."
+          : "Modified prompt copied.",
+      );
+      feedbackTimer.current = setTimeout(() => setCopied(""), 2000);
     } catch {
-      /* ignore */
+      if (alive.current)
+        setCopied("Copy unavailable. Select the preview text to copy it.");
     }
   };
 
@@ -328,6 +378,21 @@ export function PromptStudioDrawer({
                   </div>
                 </div>
 
+                <CommandParameters
+                  parameters={parameters}
+                  enabled={enabledParameters}
+                  onChange={(keys) => {
+                    setEnabledParameters(keys);
+                    setCopied("");
+                  }}
+                />
+                <p
+                  role="status"
+                  aria-label="Copy feedback"
+                  className="studio-copy-feedback"
+                >
+                  {copied}
+                </p>
                 {/* Live Updated Preview Box */}
                 <div className="studio-group preview-box-group">
                   <div className="preview-box-header">
@@ -360,9 +425,18 @@ export function PromptStudioDrawer({
                   type="button"
                   variant="default"
                   className="studio-copy-action-btn"
-                  onClick={handleCopy}
+                  onClick={() => handleCopy()}
                 >
-                  {copied ? "✓ Copied to Clipboard!" : "Copy Modified Prompt"}
+                  {copied === "Modified prompt copied."
+                    ? "✓ Copied to Clipboard!"
+                    : "Copy Modified Prompt"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleCopy("discord")}
+                >
+                  Copy Discord /imagine
                 </Button>
                 <Button type="button" variant="ghost" onClick={onClose}>
                   Done
