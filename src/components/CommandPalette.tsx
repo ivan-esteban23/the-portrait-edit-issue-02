@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useId, useMemo } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useId, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { currentIssue, prompts, readerPath } from "@/content";
 import type { Theme } from "@/hooks/useTheme";
@@ -37,8 +37,8 @@ export function CommandPalette({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const titleId = useId();
 
-  // Focus input on open
-  useEffect(() => {
+  // Reset before paint so reopening cannot erase a query already being typed.
+  useLayoutEffect(() => {
     if (isOpen) {
       setQuery("");
       setSelectedIndex(0);

@@ -243,7 +243,7 @@ test("system theme changes and form controls retain cross-platform legibility", 
       await page
         .locator("body")
         .evaluate((e) => getComputedStyle(e).backgroundColor),
-    ).toBe(scheme === "light" ? "rgb(246, 244, 239)" : "rgb(10, 10, 10)");
+    ).toBe(scheme === "light" ? "rgb(246, 244, 239)" : "rgb(18, 18, 18)");
   }
   await settings(page);
   for (const control of await page.locator("input,select").all())
@@ -302,7 +302,13 @@ test("command palette spread changes update the current reader immediately", asy
       .click();
     const search = page.getByPlaceholder(/Type a command/);
     await search.fill("Toggle Two-Page Spread");
+    // Wait for filtering and selection before submitting the keyboard command.
+    await expect(page.getByRole("dialog").getByRole("option")).toHaveCount(1);
+    await expect(
+      page.getByRole("option", { name: /^Toggle Two-Page Spread/ }),
+    ).toHaveAttribute("aria-selected", "true");
     await search.press("Enter");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   };
   await toggle();
   await expect(page.locator(".spread-stage")).toBeVisible();
@@ -505,5 +511,121 @@ test("mobile dock clearance follows its rendered height and resets on desktop", 
       ),
     )
     .toBe("");
+  await noOverflow(page);
+});
+
+test("theme controls, shortcuts, and browser tabs share the same preference", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  const mastheadTheme = page.locator(".masthead").getByLabel("Color theme");
+  await mastheadTheme.selectOption("paper");
+  await settings(page);
+  const displayTheme = page.getByRole("dialog").getByLabel("Color theme");
+  await expect(displayTheme).toHaveValue("paper");
+  await displayTheme.selectOption("dark");
+  await expect(mastheadTheme).toHaveValue("dark");
+  await page.getByRole("button", { name: "Close display settings" }).click();
+  await page.locator(".reader-canvas").focus();
+  await page.keyboard.press("m");
+  await expect(mastheadTheme).toHaveValue("system");
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator("body")).toHaveCSS(
+    "background-color",
+    "rgb(18, 18, 18)",
+  );
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(page.locator("body")).toHaveCSS(
+    "background-color",
+    "rgb(246, 244, 239)",
+  );
+  await mastheadTheme.selectOption("paper");
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator("body")).toHaveCSS(
+    "background-color",
+    "rgb(242, 236, 224)",
+  );
+  const other = await page.context().newPage();
+  try {
+    await other.goto(reader);
+    const otherTheme = other.locator(".masthead").getByLabel("Color theme");
+    await expect(otherTheme).toHaveValue("paper");
+    await otherTheme.selectOption("light");
+    await expect(mastheadTheme).toHaveValue("light");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await other.evaluate(() => localStorage.clear());
+    await expect(mastheadTheme).toHaveValue("system");
+  } finally {
+    await other.close();
+  }
+});
+
+test("variable fonts optically adapt between reading and display sizes", async ({
+  page,
+}) => {
+  await page.goto("prompts/issue-02-study-005");
+  await expect(
+    page.getByRole("heading", { name: "Frost Fantasy Portrait", exact: true }),
+  ).toBeVisible();
+  const differences = await page.evaluate(async () => {
+    const measured: { family: string; difference: number }[] = [];
+    for (const [family, size] of [
+      ["Newsreader Variable", 72],
+      ["Inter Variable", 32],
+    ] as const) {
+      await document.fonts.load(`400 ${size}px "${family}"`);
+      const sample = document.createElement("span");
+      sample.textContent = "Editorial typography reads naturally.";
+      Object.assign(sample.style, {
+        position: "fixed",
+        left: "-10000px",
+        whiteSpace: "pre",
+        fontFamily: `"${family}"`,
+        fontSize: `${size}px`,
+        fontWeight: "400",
+        fontOpticalSizing: "auto",
+      });
+      document.body.append(sample);
+      try {
+        const optical = sample.getBoundingClientRect().width;
+        sample.style.fontOpticalSizing = "none";
+        measured.push({
+          family,
+          difference: Math.abs(optical - sample.getBoundingClientRect().width),
+        });
+      } finally {
+        sample.remove();
+      }
+    }
+    return measured;
+  });
+  for (const result of differences)
+    expect(result.difference, result.family).toBeGreaterThan(0.1);
+  await noOverflow(page);
+});
+
+test("unavailable web fonts preserve readable layout and navigation", async ({
+  page,
+}, info) => {
+  let blocked = 0;
+  await page.route("**/*.woff2", async (route) => {
+    blocked++;
+    await route.abort();
+  });
+  await page.goto(reader);
+  await mode(page, "text");
+  await expect(
+    page.getByRole("heading", { name: "Frost Fantasy Portrait", exact: true }),
+  ).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  expect(blocked).toBeGreaterThan(0);
+  await noOverflow(page);
+  await page.screenshot({
+    path: `test-results/${info.project.name}-fallback-fonts.png`,
+  });
+  const number = page.getByLabel("Page number", { exact: true });
+  await number.fill("61");
+  await number.press("Enter");
+  await expect(page).toHaveURL(/pages\/61$/);
   await noOverflow(page);
 });
