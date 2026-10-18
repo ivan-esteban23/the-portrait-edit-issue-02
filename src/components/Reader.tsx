@@ -1,4 +1,9 @@
-import { Icon } from "@/components/ui/Icon";
+import { useSlideshow } from "@/hooks/useSlideshow";
+import { useReaderKeyboard } from "@/hooks/useReaderKeyboard";
+import { useSwipeGestures } from "@/hooks/useSwipeGestures";
+import { ReaderToolbar } from "./reader/ReaderToolbar";
+import { ReaderScrubber } from "./reader/ReaderScrubber";
+import { RawText, OriginalPage, SpreadPage } from "./reader/ReaderPages";
 import {
   lazy,
   Suspense,
@@ -8,16 +13,15 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { assetUrl, chapterAt, issues, prompts, readerPath } from "@/content";
 import type { Issue } from "@/content/schema";
-import { editable, lightHaptic } from "@/lib/utils";
-import { useIdleChrome, useMedia, useSwipe } from "@/hooks/useReader";
+import { lightHaptic } from "@/lib/utils";
+import { useIdleChrome, useMedia } from "@/hooks/useReader";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Study } from "./Study";
 import { NotFound } from "./SitePages";
-import { useTheme, type Theme } from "@/hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { saveReadingProgress } from "@/hooks/useReadingProgress";
 import { useSoundEffect } from "@/utils/audio";
@@ -54,173 +58,6 @@ export function Reader(props: ReaderProps) {
   )
     return <NotFound />;
   return <ReaderView {...props} issue={issue} page={n} />;
-}
-function RawText({
-  page,
-  pdfUrl,
-  pageDirectory,
-}: {
-  page: number;
-  pdfUrl: string;
-  pageDirectory: string;
-}) {
-  const [text, setText] = useState("Loading page text…");
-  const [error, setError] = useState(false);
-  useEffect(() => {
-    const controller = new AbortController();
-    setText("Loading page text…");
-    setError(false);
-    fetch(assetUrl(`${pageDirectory}/${String(page).padStart(3, "0")}.json`), {
-      signal: controller.signal,
-    })
-      .then((r) => {
-        if (!r.ok) throw Error("Text unavailable");
-        return r.json();
-      })
-      .then((data: unknown) => {
-        if (
-          typeof data !== "object" ||
-          data === null ||
-          !("text" in data) ||
-          typeof data.text !== "string"
-        ) {
-          throw new Error("Text unavailable");
-        }
-        setText(data.text);
-      })
-      .catch((e) => {
-        if (e.name !== "AbortError") {
-          setError(true);
-          setText("Page text is unavailable.");
-        }
-      });
-    return () => controller.abort();
-  }, [page, pageDirectory]);
-  return (
-    <div className="raw-page">
-      <pre>{text}</pre>
-      {error && <a href={pdfUrl}>Download the PDF</a>}
-    </div>
-  );
-}
-function OriginalPage({
-  page,
-  issue,
-  zoom,
-  onInspect,
-}: {
-  page: number;
-  issue: Issue;
-  zoom: number;
-  onInspect?: (page: number) => void;
-}) {
-  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
-  const [retry, setRetry] = useState(0);
-  return (
-    <div className="page-stage" aria-busy={state === "loading"}>
-      {state === "loading" && (
-        <>
-          <div className="loading-line" aria-hidden="true" />
-          <span className="sr-only" role="status">
-            Loading page {page}
-          </span>
-        </>
-      )}
-      {state === "error" && (
-        <div className="page-error" role="alert">
-          <p>This page could not load.</p>
-          <Button
-            onClick={() => {
-              setState("loading");
-              setRetry((r) => r + 1);
-            }}
-          >
-            Retry page
-          </Button>
-          <a href={issue.pdfUrl}>Download PDF</a>
-        </div>
-      )}
-      <div
-        className="page-holder"
-        style={{ width: `${zoom}%`, maxWidth: zoom === 100 ? "950px" : "none" }}
-      >
-        <img
-          role="button"
-          tabIndex={0}
-          aria-label={`Inspect page ${page} in detail`}
-          onClick={(event) => {
-            event.currentTarget.focus();
-            onInspect?.(page);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              onInspect?.(page);
-            }
-          }}
-          style={{ cursor: "zoom-in" }}
-          key={retry}
-          className={state === "ready" ? "page-art loaded" : "page-art"}
-          src={assetUrl(
-            `${issue.pageDirectory}/${String(page).padStart(3, "0")}.webp${retry ? `?retry=${retry}` : ""}`,
-          )}
-          width="1224"
-          height="1584"
-          decoding="async"
-          fetchPriority="high"
-          alt={`Issue ${issue.number}, page ${page}`}
-          onLoad={() => setState("ready")}
-          onError={() => setState("error")}
-          title="Click to inspect page in detail"
-        />
-      </div>
-    </div>
-  );
-}
-function SpreadPage({
-  leftPage,
-  rightPage,
-  issue,
-  zoom,
-  onInspect,
-}: {
-  leftPage: number;
-  rightPage: number;
-  issue: Issue;
-  zoom: number;
-  onInspect: (page: number) => void;
-}) {
-  return (
-    <div className="page-stage spread-stage">
-      <div
-        className="spread-holder"
-        style={{
-          width: `${zoom}%`,
-          maxWidth: zoom === 100 ? "1700px" : "none",
-        }}
-      >
-        <div className="spread-leaf spread-left">
-          <OriginalPage
-            page={leftPage}
-            issue={issue}
-            zoom={100}
-            onInspect={onInspect}
-          />
-        </div>
-        <div className="spread-spine" aria-hidden="true" />
-        {rightPage <= issue.pages && (
-          <div className="spread-leaf spread-right">
-            <OriginalPage
-              page={rightPage}
-              issue={issue}
-              zoom={100}
-              onInspect={onInspect}
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
 function ReaderView({
   issue,
@@ -280,24 +117,18 @@ function ReaderView({
   const [zoom, setZoom] = useState(100),
     [size, setSize] = useState(16),
     [settings, setSettings] = useState(false);
-  const [preview, setPreview] = useState(page),
-    [input, setInput] = useState(String(page));
   const [rawOpen, setRawOpen] = useState(false);
-  const [hint, setHint] = useState(false);
   const [turning, setTurning] = useState(false);
   const [showThumbnails, setShowThumbnails] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [showTouchHint, setShowTouchHint] = useState(false);
   const touchHintDismissed = useRef(false);
 
-  // Slideshow (presentation mode) & Fullscreen state
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [slideshowInterval, setSlideshowInterval] = useState(6000);
-  const [loopSlideshow, setLoopSlideshow] = useState(false);
-  const [slideshowProgress, setSlideshowProgress] = useState(0);
-  const [isHoverPaused, setIsHoverPaused] = useState(false);
+  // Fullscreen state
   const [isFullscreen, setIsFullscreen] = useState(() =>
-    typeof document !== "undefined" ? Boolean(document.fullscreenElement) : false,
+    typeof document !== "undefined"
+      ? Boolean(document.fullscreenElement)
+      : false,
   );
 
   useEffect(() => {
@@ -337,7 +168,6 @@ function ReaderView({
 
   const { soundEnabled, toggleSound, playPaperTurn } = useSoundEffect();
   const isInitialPageRender = useRef(true);
-  const filmstripRef = useRef<HTMLDivElement>(null);
   const [lightbox, setLightbox] = useState<{
     src: string;
     alt: string;
@@ -518,65 +348,34 @@ function ReaderView({
     toggleFocus(!currentRouteFocus(focus));
   }, [focus, toggleFocus]);
 
-  const toggleSlideshow = useCallback(() => {
-    setIsPlaying((prev) => !prev);
-  }, []);
-
-  const isModalOpen =
-    settings ||
-    rawOpen ||
-    shortcutsOpen ||
-    Boolean(lightbox) ||
-    showThumbnails;
-  const isEffectivelyPlaying = isPlaying && !isHoverPaused && !isModalOpen;
-
-  useEffect(() => {
-    setSlideshowProgress(0);
-  }, [page]);
-
-  useEffect(() => {
-    if (!isEffectivelyPlaying) return;
-    const stepMs = 50;
-    const intervalId = setInterval(() => {
-      setSlideshowProgress((prev) => {
-        const next = prev + (stepMs / slideshowInterval) * 100;
-        if (next >= 100) {
-          const curr = currentRoutePage(page);
-          if (curr >= issue.pages) {
-            if (loopSlideshow) {
-              go(1);
-              return 0;
-            } else {
-              setIsPlaying(false);
-              setAnnouncement("Reached end of issue");
-              return 0;
-            }
-          } else {
-            turnPage(1);
-            return 0;
-          }
-        }
-        return next;
-      });
-    }, stepMs);
-
-    return () => clearInterval(intervalId);
-  }, [
-    isEffectivelyPlaying,
-    slideshowInterval,
+  const {
+    isPlaying,
+    toggleSlideshow,
+    slideshowSpeed,
+    setSlideshowSpeed,
     loopSlideshow,
+    setLoopSlideshow,
+    slideshowProgress,
+    setIsHoverPaused,
+  } = useSlideshow({
     page,
-    issue.pages,
-    go,
-    turnPage,
-  ]);
+    pageCount: issue.pages,
+    getCurrentPage: () => currentRoutePage(page),
+    onPageSelect: go,
+    onAdvance: turnPage,
+    onEnd: () => setAnnouncement("Reached end of issue"),
+    paused:
+      settings ||
+      rawOpen ||
+      shortcutsOpen ||
+      Boolean(lightbox) ||
+      showThumbnails,
+  });
   useEffect(() => {
     const value = new URLSearchParams(location.search).get("focus");
     if (value === "1" || value === "0") setFocus(value === "1");
   }, [location.search, setFocus]);
   useEffect(() => {
-    setPreview(page);
-    setInput(String(page));
     document.title = `Page ${page} · ${issue.title} — The Portrait Edit`;
   }, [page, issue.title]);
   useEffect(() => {
@@ -631,123 +430,27 @@ function ReaderView({
     }
     return () => clearTimeout(t);
   }, [page, playPaperTurn]);
-  useEffect(() => {
-    if (showThumbnails && filmstripRef.current) {
-      const activeEl = filmstripRef.current.querySelector<HTMLElement>(
-        ".filmstrip-thumb-btn.is-active",
-      );
-      if (activeEl) {
-        activeEl.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: "center",
-        });
-      }
-    }
-  }, [page, showThumbnails]);
-
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (
-        e.defaultPrevented ||
-        editable(e.target) ||
-        e.altKey ||
-        e.ctrlKey ||
-        e.metaKey ||
-        settings ||
-        document.querySelector('[role="dialog"][aria-modal="true"]')
-      )
-        return;
-
-      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
-        e.preventDefault();
-        setShortcutsOpen((o) => !o);
-        return;
-      }
-
-      if (e.key === "Escape") {
-        if (shortcutsOpen) {
-          e.preventDefault();
-          setShortcutsOpen(false);
-          return;
-        }
-        if (currentRouteFocus(focus)) {
-          e.preventDefault();
-          toggleFocus(false);
-          return;
-        }
-      }
-
-      const k = e.key.toLowerCase();
-      if (k === "b" && !e.repeat && study) {
-        e.preventDefault();
-        toggleStudyBookmark();
-      }
-      if (k === "p" && !e.repeat) {
-        e.preventDefault();
-        setIsPlaying((playing) => !playing);
-      }
-      if (k === "f" && !e.repeat) {
-        e.preventDefault();
-        toggleFullscreen();
-      }
-      if (k === "t" && !e.repeat) {
-        e.preventDefault();
-        setMode((m) => (m === "page" ? "text" : "page"));
-      }
-      if (k === "s" && !e.repeat && spreadCapable) {
-        e.preventDefault();
-        setSpread(!spread);
-      }
-      if (k === "m" && !e.repeat) {
-        e.preventDefault();
-        const nextTheme =
-          theme === "system"
-            ? "light"
-            : theme === "light"
-              ? "paper"
-              : theme === "paper"
-                ? "dark"
-                : "system";
-        setTheme(nextTheme);
-      }
-      if (["ArrowRight", "j", "J"].includes(e.key)) {
-        e.preventDefault();
-        turnPage(1);
-      }
-      if (["ArrowLeft", "k", "K"].includes(e.key)) {
-        e.preventDefault();
-        turnPage(-1);
-      }
-      if (e.key === "Home") {
-        e.preventDefault();
-        go(1);
-      }
-      if (e.key === "End") {
-        e.preventDefault();
-        go(issue.pages);
-      }
-    };
-    document.addEventListener("keydown", key);
-    return () => document.removeEventListener("keydown", key);
-  }, [
-    page,
-    issue.pages,
-    focus,
+  useReaderKeyboard({
     settings,
-    go,
-    toggleFocus,
-    toggleFullscreen,
-    turnPage,
     shortcutsOpen,
+    getFocus: () => currentRouteFocus(focus),
+    toggleFocus,
+    setShortcutsOpen,
+    hasStudy: Boolean(study),
+    toggleStudyBookmark,
+    toggleSlideshow,
+    toggleFullscreen,
+    setMode,
     spreadCapable,
     spread,
+    setSpread,
     theme,
     setTheme,
-    study,
-    toggleStudyBookmark,
-  ]);
-  useSwipe(
+    turnPage,
+    go,
+    pageCount: issue.pages,
+  });
+  const swipeGestures = useSwipeGestures(
     canvas,
     (delta) => {
       dismissTouchHint();
@@ -759,20 +462,6 @@ function ReaderView({
     },
     mode === "text" || zoom === 100,
   );
-  const openSettings = (open: boolean) => {
-    setSettings(open);
-    if (open) {
-      try {
-        if (!localStorage.getItem("portrait-edit-keys-hint")) {
-          setHint(true);
-          localStorage.setItem("portrait-edit-keys-hint", "shown");
-        }
-      } catch {
-        setHint(true);
-      }
-    }
-  };
-  const commit = () => go(Number(preview));
   return (
     <section
       className={`reader ${focus ? "is-focus" : ""} ${idle ? "chrome-idle" : ""}`}
@@ -794,325 +483,47 @@ function ReaderView({
         aria-valuemax={issue.pages}
         style={{ width: `${(page / issue.pages) * 100}%` }}
       />
-      <header className="reader-top">
-        <div className="reader-controls">
-          <Link className="reader-issue" to={`/issues/${issue.slug}`}>
-            Issue {issue.number}
-          </Link>
-          {!small && (
-            <label className="chapter-control">
-              <span className="sr-only">Chapter</span>
-              <select
-                aria-label="Chapter"
-                value={chapter.startPage}
-                onChange={(e) => go(Number(e.target.value))}
-              >
-                <option value="1">Front matter (p. 1)</option>
-                {issue.chapters.map((c) => (
-                  <option key={c.startPage} value={c.startPage}>
-                    {c.title} (p. {c.startPage})
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <div className="pager" role="group" aria-label="Page navigation">
-            <Button
-              className="top-turn"
-              variant="ghost"
-              aria-label="Previous page"
-              disabled={firstVisible === 1}
-              onClick={() => turnPage(-1)}
-            >
-              ←
-            </Button>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                go(Number(input));
-              }}
-            >
-              <input
-                aria-label="Page number"
-                type="number"
-                inputMode="numeric"
-                min={1}
-                max={issue.pages}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onBlur={() => {
-                  if (Number(input) !== page) go(Number(input));
-                }}
-              />
-              <span>/ {issue.pages}</span>
-            </form>
-            <Button
-              className="top-turn"
-              variant="ghost"
-              aria-label="Next page"
-              disabled={lastVisible === issue.pages}
-              onClick={() => turnPage(1)}
-            >
-              →
-            </Button>
-          </div>
-          <Dialog open={settings} onOpenChange={openSettings}>
-            <DialogTrigger asChild>
-              <Button variant="ghost">Display</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <div className="settings-grid">
-                <label>
-                  Theme
-                  <select
-                    aria-label="Color theme"
-                    value={theme}
-                    onChange={(e) => setTheme(e.target.value as Theme)}
-                  >
-                    <option value="system">System (default)</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="paper">Warm Paper / Sepia</option>
-                  </select>
-                </label>
-                <label>
-                  Chapter
-                  <select
-                    aria-label="Jump to chapter"
-                    value={chapter.startPage}
-                    onChange={(e) => go(Number(e.target.value))}
-                  >
-                    <option value="1">Front matter</option>
-                    {issue.chapters.map((c) => (
-                      <option key={c.startPage} value={c.startPage}>
-                        {c.title}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  View
-                  <select
-                    aria-label="Reading mode"
-                    value={mode}
-                    onChange={(e) => setMode(e.target.value as "page" | "text")}
-                  >
-                    <option value="page">Original page</option>
-                    <option value="text">Reading view</option>
-                  </select>
-                </label>
-                {mode === "page" ? (
-                  <>
-                    <label>
-                      Zoom
-                      <select
-                        aria-label="Zoom"
-                        value={zoom}
-                        onChange={(e) => setZoom(Number(e.target.value))}
-                      >
-                        {[100, 125, 150, 200].map((n) => (
-                          <option key={n} value={n}>
-                            {n === 100 ? "Fit" : `${n}%`}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label
-                      className={`spread-toggle-row ${!spreadCapable ? "is-disabled" : ""}`}
-                    >
-                      <span>Two-page spread</span>
-                      <input
-                        type="checkbox"
-                        aria-label="Two-page spread"
-                        checked={spread && spreadCapable}
-                        disabled={!spreadCapable}
-                        onChange={(e) => setSpread(e.target.checked)}
-                      />
-                      {!spreadCapable && (
-                        <small className="control-note">
-                          Available on screens 1150px+
-                        </small>
-                      )}
-                    </label>
-                  </>
-                ) : (
-                  <fieldset>
-                    <legend>Text size</legend>
-                    <div className="text-stepper">
-                      {[16, 18, 20].map((n) => (
-                        <Button
-                          key={n}
-                          aria-pressed={size === n}
-                          onClick={() => setSize(n)}
-                        >
-                          {n} px
-                        </Button>
-                      ))}
-                    </div>
-                  </fieldset>
-                )}
-                <label className="sound-toggle-row">
-                  <span>Paper turn sound</span>
-                  <input
-                    type="checkbox"
-                    aria-label="Paper turn sound (Web Audio)"
-                    checked={soundEnabled}
-                    onChange={toggleSound}
-                  />
-                </label>
-                <label>
-                  Slideshow speed
-                  <select
-                    aria-label="Slideshow timing"
-                    value={slideshowInterval}
-                    onChange={(e) =>
-                      setSlideshowInterval(Number(e.target.value))
-                    }
-                  >
-                    <option value={4000}>4 seconds</option>
-                    <option value={6000}>6 seconds (default)</option>
-                    <option value={10000}>10 seconds</option>
-                  </select>
-                </label>
-                <label className="loop-toggle-row">
-                  <span>Loop presentation</span>
-                  <input
-                    type="checkbox"
-                    aria-label="Loop presentation slideshow"
-                    checked={loopSlideshow}
-                    onChange={(e) => setLoopSlideshow(e.target.checked)}
-                  />
-                </label>
-              </div>
-              <div className="keyboard-guide">
-                <h3>Keyboard</h3>
-                <p>
-                  ← / K previous · → / J next
-                  <br />
-                  Home / End first and last page
-                  <br />P Play / Pause presentation slideshow
-                  <br />F Fullscreen reading / Focus
-                  <br />B Bookmark / save current study
-                </p>
-                {hint && (
-                  <p className="keys-hint">
-                    Use ← → arrow keys to turn pages{" "}
-                    <Button
-                      variant="ghost"
-                      aria-label="Dismiss keyboard shortcut hint"
-                      onClick={() => setHint(false)}
-                    >
-                      ×
-                    </Button>
-                  </p>
-                )}
-              </div>
-              <a href={issue.pdfUrl}>Download original PDF ↗</a>
-            </DialogContent>
-          </Dialog>
-          <Button
-            variant="ghost"
-            className="focus-button"
-            aria-pressed={focus}
-            aria-keyshortcuts="F"
-            onClick={() => toggleFocus(!currentRouteFocus(focus))}
-          >
-            {focus ? "Exit Focus" : "Focus"}
-          </Button>
-
-          {/* Presentation Slideshow Play/Pause Button */}
-          <Button
-            variant="ghost"
-            className={`reader-slideshow-btn ${isPlaying ? "is-playing" : ""}`}
-            aria-label="Toggle presentation slideshow"
-            aria-pressed={isPlaying}
-            aria-keyshortcuts="P"
-            title={
-              isPlaying
-                ? "Pause slideshow (P)"
-                : "Play presentation slideshow (P)"
-            }
-            onClick={toggleSlideshow}
-          >
-            {isPlaying ? (
-              <Icon name="pause" />
-            ) : (
-              <Icon name="play" />
-            )}
-            <span className="slideshow-label">
-              {isPlaying ? "Pause" : "Play"}
-            </span>
-          </Button>
-
-          {/* Fullscreen Button */}
-          <Button
-            variant="ghost"
-            className="reader-fullscreen-btn"
-            aria-label="Toggle fullscreen"
-            title="Toggle fullscreen (F)"
-            aria-keyshortcuts="F"
-            onClick={toggleFullscreen}
-          >
-            <Icon name={isFullscreen ? "fullscreen-exit" : "fullscreen"} />
-            <span className="sr-only">Fullscreen</span>
-          </Button>
-          <Button
-            variant="ghost"
-            className={`sound-fx-toggle-btn ${soundEnabled ? "is-active" : ""}`}
-            aria-label={`Sound FX: ${soundEnabled ? "On" : "Off"}`}
-            title={`Sound FX: ${soundEnabled ? "On" : "Off"}`}
-            onClick={toggleSound}
-          >
-            {soundEnabled ? (
-              <Icon name="speaker" />
-            ) : (
-              <Icon name="speaker-muted" />
-            )}
-            <span className="sound-fx-label">
-              {soundEnabled ? "Sound: On" : "Sound: Off"}
-            </span>
-          </Button>
-          {study && (
-            <Button
-              variant="ghost"
-              className={`reader-bookmark-btn ${isSaved(study.id) ? "is-saved" : ""}`}
-              aria-label={
-                isSaved(study.id)
-                  ? "Remove study from saved bookmarks"
-                  : "Save study to bookmarks"
-              }
-              aria-pressed={isSaved(study.id)}
-              aria-keyshortcuts="B"
-              title="Bookmark study (B)"
-              onClick={toggleStudyBookmark}
-            >
-              <Icon
-                name={isSaved(study.id) ? "bookmark-straight-filled" : "bookmark-straight"}
-                size={18}
-              />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            className="shortcuts-trigger-btn"
-            aria-label="Keyboard shortcuts"
-            title="Keyboard shortcuts (?)"
-            onClick={(event) => {
-              event.currentTarget.focus();
-              setShortcutsOpen(true);
-            }}
-          >
-            ?
-          </Button>
-        </div>
-        <p className="chapter-progress">
-          {chapter.title}{" "}
-          <span>
-            · {page - chapter.startPage + 1} of{" "}
-            {chapter.endPage - chapter.startPage + 1}
-          </span>
-        </p>
-      </header>
+      <ReaderToolbar
+        {...{
+          issue,
+          page,
+          small,
+          chapter,
+          firstVisible,
+          lastVisible,
+          go,
+          turnPage,
+          settings,
+          setSettings,
+          theme,
+          setTheme,
+          mode,
+          setMode,
+          zoom,
+          setZoom,
+          spreadCapable,
+          spread,
+          setSpread,
+          size,
+          setSize,
+          soundEnabled,
+          toggleSound,
+          slideshowSpeed,
+          setSlideshowSpeed,
+          loopSlideshow,
+          setLoopSlideshow,
+          focus,
+          isPlaying,
+          toggleSlideshow,
+          isFullscreen,
+          toggleFullscreen,
+          study,
+          isSaved,
+          toggleStudyBookmark,
+          setShortcutsOpen,
+        }}
+        onToggleFocus={() => toggleFocus(!currentRouteFocus(focus))}
+      />
       {showTouchHint && (
         <div
           className="touch-swipe-hint"
@@ -1154,6 +565,7 @@ function ReaderView({
       <div
         id="page-viewport"
         ref={canvas}
+        {...swipeGestures}
         data-zoomed={nativeZoomed || (mode === "page" && zoom > 100)}
         className={`reader-canvas ${turning ? "page-turn-anim" : ""}`}
         tabIndex={-1}
@@ -1218,122 +630,18 @@ function ReaderView({
           </>
         )}
       </div>
-      <div className="scrubber">
-        <div className="scrubber-header">
-          <div className="scrubber-label">
-            <label htmlFor="page-range">Browse the issue</label>
-            <output htmlFor="page-range" aria-live="off">
-              Page {preview} of {issue.pages}
-            </output>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            className="filmstrip-toggle-btn"
-            aria-expanded={showThumbnails}
-            aria-label="Toggle page thumbnails"
-            onClick={() => setShowThumbnails((v) => !v)}
-          >
-            {showThumbnails ? "Hide thumbnails" : "Thumbnails"}
-          </Button>
-        </div>
-        {showThumbnails && (
-          <div
-            ref={filmstripRef}
-            className="thumbnails-filmstrip-drawer"
-            role="region"
-            aria-label="Thumbnails filmstrip"
-          >
-            <div className="filmstrip-scroll">
-              {Array.from({ length: issue.pages }, (_, i) => i + 1).map(
-                (pNum) => (
-                  <button
-                    key={pNum}
-                    type="button"
-                    className={`filmstrip-thumb-btn ${pNum === page ? "is-active" : ""}`}
-                    aria-label={`Jump to page ${pNum}`}
-                    aria-current={pNum === page ? "page" : undefined}
-                    onClick={() => go(pNum)}
-                  >
-                    <img
-                      src={assetUrl(
-                        `${issue.pageDirectory}/${String(pNum).padStart(3, "0")}.webp`,
-                      )}
-                      alt={`Page ${pNum}`}
-                      loading="lazy"
-                      decoding="async"
-                      width={56}
-                      height={72}
-                    />
-                    <span className="filmstrip-thumb-number">{pNum}</span>
-                  </button>
-                ),
-              )}
-            </div>
-          </div>
-        )}
-        <div className="range-track">
-          <input
-            id="page-range"
-            aria-label="Browse pages"
-            type="range"
-            min={1}
-            max={issue.pages}
-            value={preview}
-            aria-valuetext={`Page ${preview} of ${issue.pages}`}
-            onChange={(e) => setPreview(Number(e.target.value))}
-            onPointerUp={(e) => {
-              go(Number(e.currentTarget.value));
-            }}
-            onPointerCancel={() => setPreview(page)}
-            onKeyUp={(e) => {
-              if (
-                [
-                  "ArrowLeft",
-                  "ArrowRight",
-                  "ArrowUp",
-                  "ArrowDown",
-                  "Home",
-                  "End",
-                  "PageUp",
-                  "PageDown",
-                ].includes(e.key)
-              )
-                commit();
-            }}
-            onBlur={() => {
-              if (preview !== page) commit();
-            }}
-          />
-          <div className="chapter-ticks" aria-hidden="true">
-            {issue.chapters.map((c) => (
-              <i
-                key={c.startPage}
-                style={{
-                  left: `${(100 * (c.startPage - 1)) / (issue.pages - 1)}%`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-        <div className="quick-steps">
-          <Button
-            variant="ghost"
-            disabled={firstVisible === 1}
-            onClick={() => go(currentRoutePage(page) - 10)}
-          >
-            −10 pages
-          </Button>
-          <span>Marks show chapter openings</span>
-          <Button
-            variant="ghost"
-            disabled={lastVisible === issue.pages}
-            onClick={() => go(currentRoutePage(page) + 10)}
-          >
-            +10 pages
-          </Button>
-        </div>
-      </div>
+      <ReaderScrubber
+        {...{
+          issue,
+          page,
+          firstVisible,
+          lastVisible,
+          go,
+          showThumbnails,
+          setShowThumbnails,
+        }}
+        getCurrentPage={() => currentRoutePage(page)}
+      />
       {mode === "page" && !focus && (
         <details
           className="extracted-text"
