@@ -1,3 +1,4 @@
+import { Icon } from "@/components/ui/Icon";
 import { useState, useEffect, useLayoutEffect, useRef, useId, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -386,21 +387,7 @@ export function CommandPalette({
           >
             <Dialog.Title className="sr-only">Command palette</Dialog.Title>
         <div className="palette-input-wrap">
-          <svg
-            className="palette-search-icon"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+          <Icon name="search" size={20} className="palette-search-icon" />
           <input
             ref={inputRef}
             id={titleId}
