@@ -1526,6 +1526,17 @@ select:hover {
   display: flex;
   flex-direction: column;
 }
+.study-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.study-card button,
+.study-card [role="button"],
+.study-card .card-selection-checkbox {
+  position: relative;
+  z-index: 1;
+}
 .study-card-media {
   position: relative;
   display: block;
