@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { assetUrl, prompts, readerPath } from "@/content";
 import type { Prompt } from "@/content/schema";
@@ -10,7 +11,7 @@ export function RelatedStudies({
   prompt: Prompt;
   context: "detail" | "reader";
 }) {
-  const related = getRelatedStudies(prompt, prompts);
+  const related = useMemo(() => getRelatedStudies(prompt, prompts), [prompt.id]);
   if (!related.length) return null;
   const tags = new Set(prompt.tags.map((tag) => tag.trim().toLowerCase()));
   return (
