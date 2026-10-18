@@ -9,8 +9,17 @@ import {
 import { currentIssue, readerPath } from "./content/issues";
 import { useTheme, type Theme } from "./hooks/useTheme";
 import { usePageMeta } from "./hooks/usePageMeta";
-import { CommandPalette } from "./components/CommandPalette";
-import { ShortcutsModal } from "./components/ShortcutsModal";
+
+const CommandPalette = lazy(() =>
+  import("./components/CommandPalette").then((m) => ({
+    default: m.CommandPalette,
+  })),
+);
+const ShortcutsModal = lazy(() =>
+  import("./components/ShortcutsModal").then((m) => ({
+    default: m.ShortcutsModal,
+  })),
+);
 
 const Home = lazy(() =>
   import("./components/SitePages").then((m) => ({ default: m.Home })),
@@ -226,21 +235,29 @@ export default function App() {
       )}
 
       {/* Global Command Palette */}
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-        currentTheme={theme}
-        onToggleTheme={cycleTheme}
-        onToggleSpread={toggleSpreadAction}
-        onToggleFocus={toggleFocusAction}
-        onOpenShortcuts={() => setShortcutsOpen(true)}
-      />
+      {commandPaletteOpen && (
+        <Suspense fallback={null}>
+          <CommandPalette
+            isOpen={commandPaletteOpen}
+            onClose={() => setCommandPaletteOpen(false)}
+            currentTheme={theme}
+            onToggleTheme={cycleTheme}
+            onToggleSpread={toggleSpreadAction}
+            onToggleFocus={toggleFocusAction}
+            onOpenShortcuts={() => setShortcutsOpen(true)}
+          />
+        </Suspense>
+      )}
 
       {/* Global Keyboard Shortcuts Modal */}
-      <ShortcutsModal
-        isOpen={shortcutsOpen}
-        onClose={() => setShortcutsOpen(false)}
-      />
+      {shortcutsOpen && (
+        <Suspense fallback={null}>
+          <ShortcutsModal
+            isOpen={shortcutsOpen}
+            onClose={() => setShortcutsOpen(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

@@ -1,12 +1,24 @@
-import { useState } from "react";
-import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { lazy, Suspense, useState } from "react";
+import {
+  Link,
+  Navigate,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { assetUrl, currentIssue, issues, prompts, readerPath } from "@/content";
 import { Button } from "./ui/button";
 import { Study } from "./Study";
 import { StudyCard } from "./StudyCard";
 import { useBookmarks } from "@/hooks/useBookmarks";
-import { CompareLab } from "./CompareLab";
-import { ImageLightbox } from "./ImageLightbox";
+
+const CompareLab = lazy(() =>
+  import("./CompareLab").then((m) => ({ default: m.CompareLab })),
+);
+const ImageLightbox = lazy(() =>
+  import("./ImageLightbox").then((m) => ({ default: m.ImageLightbox })),
+);
+
 export function Home() {
   const legacy = window.location.hash.match(/^#page=(\d+)$/);
   if (window.location.hash === "#reader")
@@ -489,25 +501,31 @@ export function Archive() {
 
       {/* Compare Lab Modal */}
       {compareOpen && studyA && studyB && (
-        <CompareLab
-          studyA={studyA}
-          studyB={studyB}
-          isOpen={compareOpen}
-          onClose={() => setCompareOpen(false)}
-          onSwap={() => setCompareIds([compareIds[1], compareIds[0]])}
-          onInspectImage={(src, alt, title) => setLightbox({ src, alt, title })}
-        />
+        <Suspense fallback={null}>
+          <CompareLab
+            studyA={studyA}
+            studyB={studyB}
+            isOpen={compareOpen}
+            onClose={() => setCompareOpen(false)}
+            onSwap={() => setCompareIds([compareIds[1], compareIds[0]])}
+            onInspectImage={(src, alt, title) =>
+              setLightbox({ src, alt, title })
+            }
+          />
+        </Suspense>
       )}
 
       {/* Lightbox for inspect triggers */}
       {lightbox && (
-        <ImageLightbox
-          src={lightbox.src}
-          alt={lightbox.alt}
-          title={lightbox.title}
-          isOpen={Boolean(lightbox)}
-          onClose={() => setLightbox(null)}
-        />
+        <Suspense fallback={null}>
+          <ImageLightbox
+            src={lightbox.src}
+            alt={lightbox.alt}
+            title={lightbox.title}
+            isOpen={Boolean(lightbox)}
+            onClose={() => setLightbox(null)}
+          />
+        </Suspense>
       )}
     </section>
   );

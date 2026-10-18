@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useRef,
@@ -15,9 +17,14 @@ import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Study } from "./Study";
 import { NotFound } from "./SitePages";
 import { useTheme, type Theme } from "@/hooks/useTheme";
-import { ImageLightbox } from "./ImageLightbox";
-import { ShortcutsModal } from "./ShortcutsModal";
 import { useSoundEffect } from "@/utils/audio";
+
+const ImageLightbox = lazy(() =>
+  import("./ImageLightbox").then((m) => ({ default: m.ImageLightbox })),
+);
+const ShortcutsModal = lazy(() =>
+  import("./ShortcutsModal").then((m) => ({ default: m.ShortcutsModal })),
+);
 
 // BrowserRouter updates history before a transition finishes rendering. Read the
 // latest address for consecutive gestures so rapid turns never reuse stale props.
@@ -1166,18 +1173,24 @@ function ReaderView({
         </Button>
       </nav>
       {lightbox && (
-        <ImageLightbox
-          src={lightbox.src}
-          alt={lightbox.alt}
-          title={lightbox.title}
-          isOpen={Boolean(lightbox)}
-          onClose={() => setLightbox(null)}
-        />
+        <Suspense fallback={null}>
+          <ImageLightbox
+            src={lightbox.src}
+            alt={lightbox.alt}
+            title={lightbox.title}
+            isOpen={Boolean(lightbox)}
+            onClose={() => setLightbox(null)}
+          />
+        </Suspense>
       )}
-      <ShortcutsModal
-        isOpen={shortcutsOpen}
-        onClose={() => setShortcutsOpen(false)}
-      />
+      {shortcutsOpen && (
+        <Suspense fallback={null}>
+          <ShortcutsModal
+            isOpen={shortcutsOpen}
+            onClose={() => setShortcutsOpen(false)}
+          />
+        </Suspense>
+      )}
     </section>
   );
 }
