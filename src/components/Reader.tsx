@@ -363,6 +363,7 @@ function ReaderView({
     loopSlideshow,
     setLoopSlideshow,
     slideshowProgress,
+    isHoverPaused,
     setIsHoverPaused,
   } = useSlideshow({
     page,
@@ -598,6 +599,13 @@ function ReaderView({
             style={{ width: `${slideshowProgress}%` }}
           />
         )}
+        <div
+          className={`reader-hover-paused-indicator ${isPlaying && isHoverPaused ? "is-visible" : ""}`}
+          role="status"
+          aria-hidden={!(isPlaying && isHoverPaused)}
+        >
+          Paused
+        </div>
         {mode === "page" ? (
           isSpread && rightPage <= issue.pages ? (
             <SpreadPage

@@ -60,6 +60,7 @@ export function useSlideshow(options: SlideshowOptions) {
     loopSlideshow,
     setLoopSlideshow,
     slideshowProgress,
+    isHoverPaused,
     setIsHoverPaused,
   };
 }

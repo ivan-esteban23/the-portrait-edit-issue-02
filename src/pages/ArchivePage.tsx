@@ -30,7 +30,15 @@ export function ArchivePage() {
   });
   const archive = useRef<HTMLElement>(null);
   const [preparingPrint, setPreparingPrint] = useState(false);
+  const [printProgress, setPrintProgress] = useState<{
+    loaded: number;
+    total: number;
+    opening: boolean;
+  } | null>(null);
+  const printAttempt = useRef(0);
   async function printSelection() {
+    const attempt = ++printAttempt.current;
+    const isCurrentAttempt = () => printAttempt.current === attempt;
     setPreparingPrint(true);
     try {
       const images = Array.from(
@@ -41,12 +49,53 @@ export function ArchivePage() {
       images.forEach((image) => {
         image.loading = "eager";
       });
-      await Promise.allSettled(images.map((image) => image.decode?.()));
+      setPrintProgress({ loaded: 0, total: images.length, opening: false });
+      await Promise.allSettled(
+        images.map((image) => {
+          const updateProgress = () => {
+            if (isCurrentAttempt()) {
+              setPrintProgress((progress) =>
+                progress
+                  ? { ...progress, loaded: progress.loaded + 1 }
+                  : progress,
+              );
+            }
+          };
+          try {
+            const decoding = image.decode?.();
+            if (!decoding) {
+              updateProgress();
+              return undefined;
+            }
+            return decoding.then(updateProgress, updateProgress);
+          } catch {
+            /* Continue printing even if an image cannot be decoded. */
+            updateProgress();
+            return undefined;
+          }
+        }),
+      );
+      if (!isCurrentAttempt()) return;
       await document.fonts?.ready;
+      if (!isCurrentAttempt()) return;
+      setPrintProgress((progress) =>
+        progress ? { ...progress, opening: true } : progress,
+      );
+      await new Promise((resolve) => window.setTimeout(resolve, 350));
+      if (!isCurrentAttempt()) return;
       window.print();
     } finally {
-      setPreparingPrint(false);
+      if (isCurrentAttempt()) {
+        setPreparingPrint(false);
+        setPrintProgress(null);
+      }
     }
+  }
+
+  function cancelPrint() {
+    printAttempt.current += 1;
+    setPreparingPrint(false);
+    setPrintProgress(null);
   }
   const [search, setSearch] = useSearchParams();
   const {
@@ -647,6 +696,29 @@ export function ArchivePage() {
             onClose={() => setLightbox(null)}
           />
         </Suspense>
+      )}
+
+      {printProgress && (
+        <div
+          className="print-progress-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="print-progress-title"
+          aria-live="polite"
+        >
+          <div className="w-full max-w-sm rounded-lg bg-white px-5 py-4 text-neutral-900 shadow-lg">
+            <p id="print-progress-title" className="mb-3 font-medium">
+              {printProgress.opening
+                ? "Opening print dialog..."
+                : `Loading images... ${printProgress.loaded}/${printProgress.total}`}
+            </p>
+            {!printProgress.opening && (
+              <Button type="button" variant="ghost" onClick={cancelPrint}>
+                Cancel
+              </Button>
+            )}
+          </div>
+        </div>
       )}
     </section>
   );

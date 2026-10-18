@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { CommandPalette } from "../src/components/CommandPalette";
@@ -316,7 +316,7 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
 
       // Printing waits until the selected images and fonts are ready.
       await act(async () => { fireEvent.click(printBtn); });
-      expect(window.print).toHaveBeenCalled();
+      await waitFor(() => expect(window.print).toHaveBeenCalled());
     });
 
     it("renders Print Contact Sheet button and print container on IssueOverview", () => {
