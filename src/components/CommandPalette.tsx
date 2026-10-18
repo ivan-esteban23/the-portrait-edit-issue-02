@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef, useId, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import * as Dialog from "@radix-ui/react-dialog";
 import { currentIssue, prompts, readerPath } from "@/content";
 import type { Theme } from "@/hooks/useTheme";
 
@@ -36,6 +37,7 @@ export function CommandPalette({
 }: CommandPaletteProps) {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -350,18 +352,39 @@ export function CommandPalette({
   let lastSection = "";
 
   return (
-    <div
-      className="command-palette-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      onClick={onClose}
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div
-        className="command-palette-card"
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={handleKeyDown}
-      >
+      <Dialog.Portal>
+        <Dialog.Overlay className="command-palette-overlay" onClick={onClose}>
+          <Dialog.Content
+            className="command-palette-card"
+            aria-modal="true"
+            aria-describedby={undefined}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={handleKeyDown}
+            onEscapeKeyDown={(event) => {
+              // The existing keyboard handler owns Escape dismissal.
+              event.preventDefault();
+            }}
+            onOpenAutoFocus={() => {
+              opener.current =
+                document.activeElement instanceof HTMLElement
+                  ? document.activeElement
+                  : null;
+            }}
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+              const target = opener.current?.isConnected
+                ? opener.current
+                : document.getElementById("main");
+              target?.focus({ preventScroll: true });
+            }}
+          >
+            <Dialog.Title className="sr-only">Command palette</Dialog.Title>
         <div className="palette-input-wrap">
           <svg
             className="palette-search-icon"
@@ -471,7 +494,9 @@ export function CommandPalette({
             {items.length} {items.length === 1 ? "result" : "results"}
           </div>
         </footer>
-      </div>
-    </div>
+          </Dialog.Content>
+        </Dialog.Overlay>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
