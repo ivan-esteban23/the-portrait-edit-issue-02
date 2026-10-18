@@ -1,4 +1,6 @@
 import { z } from "zod";
+// Build-time content validation via scripts/validate-content.ts.
+// App modules import only the inferred types to keep Zod out of the runtime bundle.
 const text = z.string().min(1);
 const asset = text.refine(
   (p) => !p.startsWith("/") && !p.includes("..") && !p.includes(":"),

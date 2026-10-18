@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { assetUrl, chapterAt, issues, prompts, readerPath } from "@/content";
-import { pageSchema, type Issue } from "@/content/schema";
+import type { Issue } from "@/content/schema";
 import { editable, lightHaptic } from "@/lib/utils";
 import { useIdleChrome, useMedia, useSwipe } from "@/hooks/useReader";
 import { Button } from "./ui/button";
@@ -76,7 +76,17 @@ function RawText({
         if (!r.ok) throw Error("Text unavailable");
         return r.json();
       })
-      .then((data) => setText(pageSchema.parse(data).text))
+      .then((data: unknown) => {
+        if (
+          typeof data !== "object" ||
+          data === null ||
+          !("text" in data) ||
+          typeof data.text !== "string"
+        ) {
+          throw new Error("Text unavailable");
+        }
+        setText(data.text);
+      })
       .catch((e) => {
         if (e.name !== "AbortError") {
           setError(true);

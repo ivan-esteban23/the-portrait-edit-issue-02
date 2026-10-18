@@ -1,7 +1,10 @@
-import { issueSchema } from "./schema";
+import type { Issue } from "./schema";
 export const issues = Object.values(
-  import.meta.glob("./issues/*/issue.json", { eager: true, import: "default" }),
-).map((data) => issueSchema.parse(data));
+  import.meta.glob<Issue>("./issues/*/issue.json", {
+    eager: true,
+    import: "default",
+  }),
+);
 const requiredIssue = issues.find((issue) => issue.slug === "the-prompt-issue");
 if (!requiredIssue) {
   throw new Error(
