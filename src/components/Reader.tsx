@@ -10,13 +10,15 @@ import {
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { assetUrl, chapterAt, issues, prompts, readerPath } from "@/content";
 import { pageSchema, type Issue } from "@/content/schema";
-import { editable } from "@/lib/utils";
+import { editable, lightHaptic } from "@/lib/utils";
 import { useIdleChrome, useMedia, useSwipe } from "@/hooks/useReader";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Study } from "./Study";
 import { NotFound } from "./SitePages";
 import { useTheme, type Theme } from "@/hooks/useTheme";
+import { useBookmarks } from "@/hooks/useBookmarks";
+import { saveReadingProgress } from "@/hooks/useReadingProgress";
 import { useSoundEffect } from "@/utils/audio";
 
 const ImageLightbox = lazy(() =>
@@ -224,6 +226,8 @@ function ReaderView({
     window.matchMedia("(max-width: 767px)").matches ? "text" : "page",
   );
   const { theme, setTheme } = useTheme();
+  const { isSaved, toggleSaved } = useBookmarks();
+  useEffect(() => saveReadingProgress(issue.slug, page), [issue.slug, page]);
   const spreadCapable = useMedia("(min-width: 1150px)");
   const [spread, setSpreadState] = useState(() => {
     try {
@@ -341,8 +345,7 @@ function ReaderView({
   const activeChapter = useRef<HTMLButtonElement>(null);
   const strip = useRef<HTMLElement>(null);
   const idle = useIdleChrome(focus && desktop && !settings);
-  const chapter = chapterAt(issue, page),
-    study = prompts.find((p) => p.issueSlug === issue.slug && p.page === page);
+  const chapter = chapterAt(issue, page);
   const handleInspect = useCallback(
     (targetPage: number) => {
       setLightbox({
@@ -360,11 +363,28 @@ function ReaderView({
   const rightPage = leftPage + 1;
   const firstVisible = isSpread ? leftPage : page;
   const lastVisible = isSpread ? Math.min(rightPage, issue.pages) : page;
+  const study =
+    prompts.find((p) => p.issueSlug === issue.slug && p.page === page) ??
+    prompts.find(
+      (p) =>
+        p.issueSlug === issue.slug &&
+        p.page >= firstVisible &&
+        p.page <= lastVisible,
+    );
   const pageLabel =
     firstVisible === lastVisible
       ? String(firstVisible)
       : `${firstVisible}–${lastVisible}`;
   const [announcement, setAnnouncement] = useState("");
+  const toggleStudyBookmark = useCallback(() => {
+    if (!study) return;
+    const saved = isSaved(study.id);
+    toggleSaved(study.id);
+    lightHaptic();
+    setAnnouncement(
+      `Study ${String(study.studyNumber).padStart(3, "0")} ${saved ? "removed from saved bookmarks" : "saved to bookmarks"}.`,
+    );
+  }, [study, isSaved, toggleSaved]);
   const announced = useRef<{ pageKey: string; focus: boolean } | null>(null);
   useEffect(() => {
     const pageKey = `${issue.slug}:${firstVisible}:${lastVisible}`;
@@ -561,6 +581,10 @@ function ReaderView({
       }
 
       const k = e.key.toLowerCase();
+      if (k === "b" && !e.repeat && study) {
+        e.preventDefault();
+        toggleStudyBookmark();
+      }
       if (k === "f" && !e.repeat) {
         e.preventDefault();
         toggleFocus(!currentRouteFocus(focus));
@@ -617,6 +641,8 @@ function ReaderView({
     spread,
     theme,
     setTheme,
+    study,
+    toggleStudyBookmark,
   ]);
   useSwipe(
     canvas,
@@ -839,6 +865,7 @@ function ReaderView({
                   <br />
                   Home / End first and last page
                   <br />F Focus · Escape exit Focus
+                  <br />B Bookmark / save current study
                 </p>
                 {hint && (
                   <p className="keys-hint">
@@ -909,6 +936,34 @@ function ReaderView({
               {soundEnabled ? "Sound: On" : "Sound: Off"}
             </span>
           </Button>
+          {study && (
+            <Button
+              variant="ghost"
+              className={`reader-bookmark-btn ${isSaved(study.id) ? "is-saved" : ""}`}
+              aria-label={
+                isSaved(study.id)
+                  ? "Remove study from saved bookmarks"
+                  : "Save study to bookmarks"
+              }
+              aria-pressed={isSaved(study.id)}
+              aria-keyshortcuts="B"
+              title="Bookmark study (B)"
+              onClick={toggleStudyBookmark}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill={isSaved(study.id) ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M6 3h12v18l-6-4-6 4z" />
+              </svg>
+            </Button>
+          )}
           <Button
             variant="ghost"
             className="shortcuts-trigger-btn"

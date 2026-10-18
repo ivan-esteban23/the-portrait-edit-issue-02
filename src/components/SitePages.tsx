@@ -10,6 +10,7 @@ import { assetUrl, currentIssue, issues, prompts, readerPath } from "@/content";
 import { Button } from "./ui/button";
 import { Study } from "./Study";
 import { StudyCard } from "./StudyCard";
+import { useLastReadPage } from "@/hooks/useReadingProgress";
 import { useBookmarks } from "@/hooks/useBookmarks";
 
 const CompareLab = lazy(() =>
@@ -20,6 +21,9 @@ const ImageLightbox = lazy(() =>
 );
 
 export function Home() {
+  const lastReadPage = useLastReadPage(currentIssue);
+  const navigate = useNavigate();
+  const { isSaved, toggleSaved } = useBookmarks();
   const legacy = window.location.hash.match(/^#page=(\d+)$/);
   if (window.location.hash === "#reader")
     return (
@@ -40,8 +44,6 @@ export function Home() {
         }
       />
     );
-  const navigate = useNavigate();
-  const { isSaved, toggleSaved } = useBookmarks();
   const featured = currentIssue.featured.map((id) =>
     prompts.find((p) => p.id === id)!,
   );
@@ -64,14 +66,21 @@ export function Home() {
           </p>
           <div className="hero-actions">
             <Button asChild variant="default">
-              <Link to={readerPath(currentIssue.slug)}>Start reading ↗</Link>
+              <Link to={readerPath(currentIssue.slug, lastReadPage)}>
+                {lastReadPage > 1 ? `Resume reading · Page ${lastReadPage} ↗` : "Start reading ↗"}
+              </Link>
             </Button>
+            {lastReadPage > 1 && (
+              <Button asChild variant="outline">
+                <Link to={readerPath(currentIssue.slug)}>Start from beginning</Link>
+              </Button>
+            )}
             <Link to={`/issues/${currentIssue.slug}`}>Inside the issue</Link>
           </div>
         </div>
         <Link
           className="hero-cover"
-          to={readerPath(currentIssue.slug)}
+          to={readerPath(currentIssue.slug, lastReadPage)}
           aria-label="Read The Prompt Issue"
         >
           <img
@@ -108,9 +117,10 @@ export function Home() {
 export function IssueOverview() {
   const { slug } = useParams();
   const issue = issues.find((i) => i.slug === slug);
+  const lastReadPage = useLastReadPage(issue);
+  const { isSaved, toggleSaved } = useBookmarks();
   if (!issue) return <NotFound />;
   const issueStudies = prompts.filter((p) => p.issueSlug === issue.slug);
-  const { isSaved, toggleSaved } = useBookmarks();
 
   return (
     <section className="overview">
@@ -128,8 +138,15 @@ export function IssueOverview() {
           />
           <div className="hero-actions">
             <Button asChild variant="default">
-              <Link to={readerPath(issue.slug)}>Start reading</Link>
+              <Link to={readerPath(issue.slug, lastReadPage)}>
+                {lastReadPage > 1 ? `Resume reading (Page ${lastReadPage}) ↗` : "Start reading"}
+              </Link>
             </Button>
+            {lastReadPage > 1 && (
+              <Button asChild variant="outline">
+                <Link to={readerPath(issue.slug)}>Start from beginning</Link>
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"
