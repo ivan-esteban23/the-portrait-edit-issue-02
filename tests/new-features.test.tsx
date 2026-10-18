@@ -362,16 +362,14 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
       }
     });
 
-    it("formats prompt as Midjourney, FLUX, and Plain Text", () => {
-      const plainText = formatPromptText(promptA, "plain");
-      expect(plainText).toEqual(promptA.prompt.trim().replace(/\s+/g, " "));
-
-      const mjText = formatPromptText(promptA, "midjourney");
-      expect(mjText).toContain(promptA.prompt.trim().replace(/\s+/g, " "));
-
-      const fluxText = formatPromptText(promptA, "flux");
-      expect(fluxText).not.toContain("--v 6");
-      expect(fluxText.length).toBeGreaterThan(0);
+    it("formats the supported raw, params, and Markdown copies", () => {
+      expect(formatPromptText(promptA, "raw")).toBe(promptA.prompt);
+      expect(formatPromptText(promptA, "params")).toContain(
+        promptA.prompt.trim().replace(/\s+/g, " "),
+      );
+      const markdown = formatPromptText(promptA, "markdown");
+      expect(markdown).toContain(`### ${promptA.title}`);
+      expect(markdown).toContain(`> ${promptA.prompt}`);
     });
   });
 });

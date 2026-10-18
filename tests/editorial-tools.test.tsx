@@ -35,7 +35,7 @@ it("merges inline and recorded flags without duplicates, preserving multiword an
     getCommandParameters(flagged).map((parameter) => parameter.key),
   ).toEqual(["ar", "s", "tile", "no", "v", "q"]);
   expect(formatPromptText(flagged, "raw")).toBe(flagged.prompt);
-  expect(formatPromptText(flagged, "flux")).toBe("A portrait");
+  expect(formatPromptText(flagged, "params", ["v"])).toBe("A portrait --v 6.1");
 });
 it("omits deselected inline flags and can copy a command with no parameters", () => {
   expect(formatPromptText(flagged, "discord", ["v"])).toBe(
@@ -53,8 +53,16 @@ it("uses the card's selected parameters for Discord while keeping raw copying ex
   );
   expect(writeText.mock.calls[0][0]).not.toContain("--ar");
   expect(writeText.mock.calls[0][0]).toContain("--s 250");
+  await act(async () =>
+    fireEvent.click(
+      screen.getByRole("button", { name: "Midjourney (+ Params)" }),
+    ),
+  );
+  expect(writeText.mock.calls[1][0]).not.toContain("--ar");
+  expect(writeText.mock.calls[1][0]).not.toContain("/imagine");
+  expect(writeText.mock.calls[1][0]).toContain("--s 250");
   expect(screen.getByRole("status")).toHaveTextContent(
-    "Discord /imagine command copied.",
+    "Midjourney prompt copied.",
   );
   await act(async () =>
     fireEvent.click(screen.getByRole("button", { name: "Copy prompt" })),

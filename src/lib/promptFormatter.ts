@@ -1,7 +1,6 @@
 import type { Prompt } from "@/content/schema";
 
-export type CopyFormat =
-  "raw" | "plain" | "params" | "midjourney" | "discord" | "flux" | "markdown";
+export type CopyFormat = "raw" | "params" | "markdown" | "discord";
 
 function cleanPromptText(text: string): string {
   return text.replace(/\s+/g, " ").trim();
@@ -79,7 +78,6 @@ export function formatPromptText(
     return prompt.prompt;
   }
 
-  const cleaned = cleanPromptText(prompt.prompt);
   const command = () =>
     formatCommand(
       prompt.prompt,
@@ -87,19 +85,11 @@ export function formatPromptText(
       enabledParameters,
     );
 
-  if (format === "plain") {
-    return cleaned;
-  }
-
   if (format === "discord") {
     return `/imagine prompt: ${command()}`;
   }
 
-  if (format === "midjourney" || format === "params") return command();
-
-  if (format === "flux") {
-    return cleanPromptText(splitPromptParameters(prompt.prompt).text);
-  }
+  if (format === "params") return command();
 
   if (format === "markdown") {
     const tags = prompt.tags.map((t) => `#${t}`).join(" ");

@@ -71,18 +71,15 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
       const text =
         format === "discord"
           ? `/imagine prompt: ${command}`
-          : format === "midjourney"
+          : format === "params"
             ? command
             : formatPromptText(prompt, format);
       await copyText(text);
       if (!alive.current) return;
       let msg = "Prompt copied.";
       if (format === "discord") msg = "Discord /imagine command copied.";
-      else if (format === "midjourney" || format === "params")
-        msg = "Midjourney prompt copied.";
-      else if (format === "flux") msg = "FLUX prompt copied.";
+      else if (format === "params") msg = "Midjourney prompt copied.";
       else if (format === "markdown") msg = "Markdown card copied.";
-      else if (format === "plain") msg = "Plain text prompt copied.";
       setFeedback(msg);
       timer.current = setTimeout(() => setFeedback(""), 1600);
     } catch {
@@ -141,23 +138,13 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
             <Button
               variant="outline"
               className="format-sub-btn mj-copy-btn"
-              onClick={() => copyFormat("midjourney")}
+              onClick={() => copyFormat("params")}
               disabled={busy}
               title="Copy Midjourney prompt with parameters"
               aria-label="Midjourney (+ Params)"
             >
               <span className="btn-label-long">+ Params</span>
               <span className="btn-label-short">+ Params</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="format-sub-btn flux-copy-btn"
-              onClick={() => copyFormat("flux")}
-              disabled={busy}
-              title="Copy FLUX prompt"
-              aria-label="FLUX"
-            >
-              FLUX
             </Button>
             <Button
               variant="outline"
