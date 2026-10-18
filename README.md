@@ -25,7 +25,7 @@ Open `/the-portrait-edit-issue-02/` on the Vite server. `npm run build` runs con
 - `src/App.tsx`: BrowserRouter routes, publication shell, persistent Focus preference and compatibility with old hash links.
 - `src/components/Reader.tsx`: original-page and flowing reading modes, URL navigation, chapter controls, scrubber, ±10-page steps, lazy raw text, loading/retry and adjacent image prefetch.
 - `src/components/Study.tsx`: original study text and references, editorial prompt card, exact-copy feedback and clipboard fallback.
-- `src/components/SitePages.tsx`: homepage, issue overview, searchable archive, study records, About and 404.
+- `src/pages/`: homepage, issue overview, searchable archive, study records, About and 404, split into route-level page modules.
 - `src/components/ui/`: source-owned shadcn/ui-style Button and Dialog compositions using Radix primitives, CVA and Tailwind utilities. `components.json` configures further shadcn components; no hosted UI service is required.
 - `src/hooks/useReader.ts`: media queries, 3.5-second desktop Focus dimming and passive swipe handling for both canvases.
 - `src/content/schema.ts`: shared Zod schemas. `scripts/validate-content.ts` validates records, paths, chapter boundaries, study numbering, featured IDs and source preservation.

@@ -24,22 +24,24 @@ const ShortcutsModal = lazy(() =>
 );
 
 const Home = lazy(() =>
-  import("./components/SitePages").then((m) => ({ default: m.Home })),
+  import("./pages/HomePage").then((m) => ({ default: m.HomePage })),
 );
 const IssueOverview = lazy(() =>
-  import("./components/SitePages").then((m) => ({ default: m.IssueOverview })),
+  import("./pages/IssueOverviewPage").then((m) => ({
+    default: m.IssueOverviewPage,
+  })),
 );
 const Archive = lazy(() =>
-  import("./components/SitePages").then((m) => ({ default: m.Archive })),
+  import("./pages/ArchivePage").then((m) => ({ default: m.ArchivePage })),
 );
 const StudyPage = lazy(() =>
-  import("./components/SitePages").then((m) => ({ default: m.StudyPage })),
+  import("./pages/StudyPage").then((m) => ({ default: m.StudyPage })),
 );
 const About = lazy(() =>
-  import("./components/SitePages").then((m) => ({ default: m.About })),
+  import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })),
 );
 const NotFound = lazy(() =>
-  import("./components/SitePages").then((m) => ({ default: m.NotFound })),
+  import("./pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
 );
 const Reader = lazy(() =>
   import("./components/Reader").then((m) => ({ default: m.Reader })),
@@ -180,26 +182,26 @@ export default function App() {
       )}
       <main id="main" tabIndex={-1}>
         <ErrorBoundary>
-        <Suspense
-          fallback={
-            <p className="route-loading" role="status">
-              Opening the archive…
-            </p>
-          }
-        >
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/issues/:slug" element={<IssueOverview />} />
-            <Route
-              path="/issues/:slug/pages/:page"
-              element={<Reader focus={focus} setFocus={setFocus} />}
-            />
-            <Route path="/prompts" element={<Archive />} />
-            <Route path="/prompts/:id" element={<StudyPage />} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+          <Suspense
+            fallback={
+              <p className="route-loading" role="status">
+                Opening the archive…
+              </p>
+            }
+          >
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/issues/:slug" element={<IssueOverview />} />
+              <Route
+                path="/issues/:slug/pages/:page"
+                element={<Reader focus={focus} setFocus={setFocus} />}
+              />
+              <Route path="/prompts" element={<Archive />} />
+              <Route path="/prompts/:id" element={<StudyPage />} />
+              <Route path="/about" element={<About />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </ErrorBoundary>
       </main>
       {!focused && (

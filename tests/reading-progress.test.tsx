@@ -3,7 +3,8 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
 import { Reader } from "../src/components/Reader";
-import { Home, IssueOverview } from "../src/components/SitePages";
+import { HomePage as Home } from "../src/pages/HomePage";
+import { IssueOverviewPage as IssueOverview } from "../src/pages/IssueOverviewPage";
 import { currentIssue, prompts, readerPath } from "../src/content";
 
 // Resume actions do not need the full 174-card print contact sheet.

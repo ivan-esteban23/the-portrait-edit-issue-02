@@ -10,7 +10,8 @@ import {
   setSoundEnabled,
   playPaperTurnSound,
 } from "../src/utils/audio";
-import { Archive, IssueOverview } from "../src/components/SitePages";
+import { ArchivePage as Archive } from "../src/pages/ArchivePage";
+import { IssueOverviewPage as IssueOverview } from "../src/pages/IssueOverviewPage";
 import { formatPromptText } from "../src/lib/promptFormatter";
 import promptA from "../src/content/prompts/issue-02-study-005.json";
 import promptB from "../src/content/prompts/issue-02-study-006.json";
