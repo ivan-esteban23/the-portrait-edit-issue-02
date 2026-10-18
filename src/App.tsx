@@ -9,6 +9,7 @@ import {
 import { currentIssue, readerPath } from "./content/issues";
 import { useTheme, type Theme } from "./hooks/useTheme";
 import { usePageMeta } from "./hooks/usePageMeta";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const CommandPalette = lazy(() =>
   import("./components/CommandPalette").then((m) => ({
@@ -190,6 +191,7 @@ export default function App() {
         </header>
       )}
       <main id="main" tabIndex={-1}>
+        <ErrorBoundary>
         <Suspense
           fallback={
             <p className="route-loading" role="status">
@@ -210,6 +212,7 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        </ErrorBoundary>
       </main>
       {!focused && (
         <footer className="site-footer">
