@@ -16,6 +16,8 @@ import { splitPromptParameters } from "@/lib/promptFormatter";
 import { copyText } from "@/lib/utils";
 import { generateMarkdownDossier, downloadFile } from "@/lib/dossier";
 
+type ParsedParameters = ReturnType<typeof splitPromptParameters>;
+
 const CompareLab = lazy(() =>
   import("./CompareLab").then((m) => ({ default: m.CompareLab })),
 );
@@ -316,19 +318,27 @@ export function Archive() {
       .map(([name, count]) => ({ name, count }));
   }, []);
 
+  const parsedParameters = useMemo(
+    () =>
+      new Map<string, ParsedParameters>(
+        prompts.map((p) => [p.id, splitPromptParameters(p.prompt)]),
+      ),
+    [],
+  );
+
   const aspectRatios = useMemo(() => {
     const set = new Set<string>(["1:1", "4:5", "16:9"]);
     prompts.forEach((p) => {
       const rawAr =
         p.parameters?.["ar"] ||
         p.parameters?.["--ar"] ||
-        splitPromptParameters(p.prompt).parameters.get("ar");
+        parsedParameters.get(p.id)?.parameters.get("ar");
       if (rawAr && rawAr !== "Unspecified") {
         set.add(String(rawAr).trim());
       }
     });
     return Array.from(set).sort();
-  }, []);
+  }, [parsedParameters]);
 
   const models = useMemo(
     () => [...new Set(prompts.map((p) => p.model ?? "Unspecified"))].sort(),
@@ -344,7 +354,7 @@ export function Archive() {
         const pAr =
           p.parameters?.["ar"] ||
           p.parameters?.["--ar"] ||
-          splitPromptParameters(p.prompt).parameters.get("ar") ||
+          parsedParameters.get(p.id)?.parameters.get("ar") ||
           "4:5";
         if (String(pAr).trim() !== aspectRatio) return false;
       }
@@ -358,7 +368,7 @@ export function Archive() {
       }
       return true;
     });
-  }, [savedOnly, isSaved, tag, model, aspectRatio, query]);
+  }, [savedOnly, isSaved, tag, model, aspectRatio, query, parsedParameters]);
 
   function filter(key: string, value: string) {
     const next = new URLSearchParams(search);

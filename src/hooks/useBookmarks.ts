@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { prompts, assetUrl } from "@/content";
 
 const BOOKMARKS_CHANGED = "portrait-edit-bookmarks-changed";
@@ -53,7 +53,10 @@ export function useBookmarks() {
   collectionsRef.current = collections;
 
   // Current active collection's saved IDs
-  const savedIds = collections[activeCollection] || collections["Default"] || [];
+  const savedIds = useMemo(
+    () => collections[activeCollection] || collections["Default"] || [],
+    [collections, activeCollection],
+  );
 
   const persistCollections = useCallback(
     (nextCols: Record<string, string[]>, nextActive: string) => {
