@@ -36,3 +36,11 @@ export async function copyText(text: string) {
     ranges.forEach((r) => selection?.addRange(r));
   }
 }
+
+export function lightHaptic() {
+  try {
+    navigator.vibrate?.(10);
+  } catch {
+    // Haptics are optional, including on browsers that restrict vibration.
+  }
+}

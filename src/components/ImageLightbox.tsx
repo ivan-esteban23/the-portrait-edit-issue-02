@@ -6,6 +6,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type TouchEvent as ReactTouchEvent,
 } from "react";
+import { lightHaptic } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { ModalContent, ModalTitle } from "./ui/dialog";
 
@@ -25,144 +26,286 @@ export function ImageLightbox({
   onClose,
 }: ImageLightboxProps) {
   const closeButton = useRef<HTMLButtonElement>(null);
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const viewport = useRef<HTMLDivElement>(null);
+  const [transform, setTransform] = useState({ zoom: 1, pan: { x: 0, y: 0 } });
+  const current = useRef(transform);
+  const { zoom, pan } = transform;
   const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
-  const panStart = useRef({ x: 0, y: 0 });
-  const lastTouchDistance = useRef<number | null>(null);
-  const lastTapTime = useRef(0);
+  type Point = { x: number; y: number };
+  const drag = useRef<{ point: Point; pan: Point } | null>(null);
+  const pinch = useRef<{
+    distance: number;
+    midpoint: Point;
+    zoom: number;
+    pan: Point;
+  } | null>(null);
+  const touch = useRef<{
+    point: Point;
+    latest: Point;
+    time: number;
+    moved: boolean;
+    allowTap: boolean;
+    dismiss: boolean;
+  } | null>(null);
+  const lastTap = useRef<{ point: Point; time: number } | null>(null);
+  const lastTouchTime = useRef(0);
 
-  // Reset transform when opened or image changes
+  const bounds = useCallback(() => {
+    const rect = viewport.current?.getBoundingClientRect();
+    return {
+      width: rect?.width || window.innerWidth,
+      height: rect?.height || window.innerHeight,
+      left: rect?.left || 0,
+      top: rect?.top || 0,
+    };
+  }, []);
+  const apply = useCallback(
+    (requestedZoom: number, nextPan: Point, feedback = true) => {
+      const nextZoom = Math.max(1, Math.min(4, requestedZoom));
+      const { width, height } = bounds();
+      const maxX = Math.max(0, (width * (nextZoom - 1)) / 2);
+      const maxY = Math.max(0, (height * (nextZoom - 1)) / 2);
+      if (
+        feedback &&
+        (nextZoom === 1 || nextZoom === 4) &&
+        current.current.zoom !== nextZoom
+      )
+        lightHaptic();
+      const next = {
+        zoom: nextZoom,
+        pan: {
+          x: Math.max(-maxX, Math.min(maxX, nextPan.x)),
+          y: Math.max(-maxY, Math.min(maxY, nextPan.y)),
+        },
+      };
+      current.current = next;
+      setTransform(next);
+    },
+    [bounds],
+  );
+  const changeZoom = useCallback(
+    (nextZoom: number) => {
+      const { zoom, pan } = current.current;
+      const ratio = Math.max(1, Math.min(4, nextZoom)) / zoom;
+      apply(nextZoom, { x: pan.x * ratio, y: pan.y * ratio });
+    },
+    [apply],
+  );
+
   useEffect(() => {
-    if (isOpen) {
-      setZoom(1);
-      setPan({ x: 0, y: 0 });
-    }
-  }, [isOpen, src]);
-
-  // Keyboard controls
+    if (!isOpen) return;
+    apply(1, { x: 0, y: 0 }, false);
+    drag.current = pinch.current = touch.current = lastTap.current = null;
+    setIsDragging(false);
+  }, [isOpen, src, apply]);
+  useEffect(() => {
+    if (!isOpen) return;
+    const resize = () =>
+      apply(current.current.zoom, current.current.pan, false);
+    window.addEventListener("resize", resize);
+    window.visualViewport?.addEventListener("resize", resize);
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(resize);
+    if (viewport.current) observer?.observe(viewport.current);
+    return () => {
+      window.removeEventListener("resize", resize);
+      window.visualViewport?.removeEventListener("resize", resize);
+      observer?.disconnect();
+    };
+  }, [isOpen, apply]);
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "+" || e.key === "=") {
+      if (e.key === "+" || e.key === "=" || e.key === "-" || e.key === "0") {
         e.preventDefault();
-        setZoom((z) => Math.min(z + 0.5, 4));
-      } else if (e.key === "-") {
-        e.preventDefault();
-        setZoom((z) => {
-          const next = Math.max(z - 0.5, 1);
-          if (next === 1) setPan({ x: 0, y: 0 });
-          return next;
-        });
-      } else if (e.key === "0") {
-        e.preventDefault();
-        setZoom(1);
-        setPan({ x: 0, y: 0 });
+        changeZoom(
+          e.key === "0"
+            ? 1
+            : current.current.zoom + (e.key === "-" ? -0.5 : 0.5),
+        );
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, changeZoom]);
 
-  // Double tap / double click zoom toggle
-  const handleDoubleTap = useCallback(
-    (clientX: number, clientY: number) => {
-      if (zoom > 1) {
-        setZoom(1);
-        setPan({ x: 0, y: 0 });
-      } else {
-        setZoom(2.5);
-        // Center zoom around tap point if desired or reset pan
-        setPan({ x: 0, y: 0 });
-      }
-    },
-    [zoom],
-  );
-
+  const handleDoubleTap = (clientX: number, clientY: number) => {
+    lightHaptic();
+    if (current.current.zoom > 1) apply(1, { x: 0, y: 0 }, false);
+    else {
+      const rect = bounds();
+      // Translate the tapped image point toward the viewport center as it grows.
+      apply(
+        2.5,
+        {
+          x: (rect.left + rect.width / 2 - clientX) * 1.5,
+          y: (rect.top + rect.height / 2 - clientY) * 1.5,
+        },
+        false,
+      );
+    }
+  };
   const onDoubleClick = (e: ReactMouseEvent) => {
     e.preventDefault();
-    handleDoubleTap(e.clientX, e.clientY);
+    // Mobile browsers may synthesize dblclick after our touch double-tap.
+    if (Date.now() - lastTouchTime.current > 500)
+      handleDoubleTap(e.clientX, e.clientY);
   };
-
-  // Mouse drag handlers
   const handleMouseDown = (e: ReactMouseEvent) => {
-    if (zoom <= 1) return;
+    if (current.current.zoom <= 1 || e.button !== 0) return;
     e.preventDefault();
+    drag.current = {
+      point: { x: e.clientX, y: e.clientY },
+      pan: current.current.pan,
+    };
     setIsDragging(true);
-    dragStart.current = { x: e.clientX, y: e.clientY };
-    panStart.current = { ...pan };
   };
-
   const handleMouseMove = (e: ReactMouseEvent) => {
-    if (!isDragging || zoom <= 1) return;
+    if (!drag.current) return;
     e.preventDefault();
-    const dx = e.clientX - dragStart.current.x;
-    const dy = e.clientY - dragStart.current.y;
-    setPan({
-      x: panStart.current.x + dx,
-      y: panStart.current.y + dy,
+    apply(current.current.zoom, {
+      x: drag.current.pan.x + e.clientX - drag.current.point.x,
+      y: drag.current.pan.y + e.clientY - drag.current.point.y,
     });
   };
-
   const handleMouseUp = () => {
+    drag.current = null;
     setIsDragging(false);
   };
 
-  // Touch handlers for mobile pan, pinch-to-zoom, and double tap
+  const beginPinch = (touches: ReactTouchEvent["touches"]) => {
+    const a = touches[0],
+      b = touches[1];
+    pinch.current = {
+      distance: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
+      midpoint: {
+        x: (a.clientX + b.clientX) / 2,
+        y: (a.clientY + b.clientY) / 2,
+      },
+      ...current.current,
+    };
+    touch.current = null;
+    lastTap.current = null;
+    setIsDragging(true);
+  };
+  const beginTouch = (point: Point, allowTap: boolean) => {
+    touch.current = {
+      point,
+      latest: point,
+      time: Date.now(),
+      moved: false,
+      allowTap,
+      dismiss: allowTap && current.current.zoom === 1,
+    };
+    drag.current = { point, pan: current.current.pan };
+    setIsDragging(current.current.zoom > 1);
+  };
   const handleTouchStart = (e: ReactTouchEvent) => {
-    if (e.touches.length === 1) {
-      const now = Date.now();
-      if (now - lastTapTime.current < 300) {
-        // Double tap detected
-        handleDoubleTap(e.touches[0].clientX, e.touches[0].clientY);
-        lastTapTime.current = 0;
-        return;
-      }
-      lastTapTime.current = now;
-
-      if (zoom > 1) {
-        setIsDragging(true);
-        dragStart.current = {
-          x: e.touches[0].clientX,
-          y: e.touches[0].clientY,
-        };
-        panStart.current = { ...pan };
-      }
-    } else if (e.touches.length === 2) {
-      // Pinch started
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      lastTouchDistance.current = Math.hypot(dx, dy);
+    lastTouchTime.current = Date.now();
+    if (e.touches.length === 2) beginPinch(e.touches);
+    else if (e.touches.length === 1)
+      beginTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY }, true);
+    else {
+      touch.current = pinch.current = drag.current = null;
+      lastTap.current = null;
     }
   };
-
   const handleTouchMove = (e: ReactTouchEvent) => {
-    if (e.touches.length === 1 && isDragging && zoom > 1) {
-      const dx = e.touches[0].clientX - dragStart.current.x;
-      const dy = e.touches[0].clientY - dragStart.current.y;
-      setPan({
-        x: panStart.current.x + dx,
-        y: panStart.current.y + dy,
+    if (e.touches.length === 2 && pinch.current) {
+      const a = e.touches[0],
+        b = e.touches[1],
+        start = pinch.current;
+      if (start.distance <= 0) return;
+      const nextZoom = Math.max(
+        1,
+        Math.min(
+          4,
+          (start.zoom *
+            Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)) /
+            start.distance,
+        ),
+      );
+      const ratio = nextZoom / start.zoom;
+      const rect = bounds();
+      const center = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+      apply(nextZoom, {
+        x:
+          (a.clientX + b.clientX) / 2 -
+          center.x -
+          (start.midpoint.x - center.x - start.pan.x) * ratio,
+        y:
+          (a.clientY + b.clientY) / 2 -
+          center.y -
+          (start.midpoint.y - center.y - start.pan.y) * ratio,
       });
-    } else if (e.touches.length === 2 && lastTouchDistance.current !== null) {
-      // Pinch zooming
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const currentDist = Math.hypot(dx, dy);
-      const ratio = currentDist / lastTouchDistance.current;
-      setZoom((z) => {
-        const next = Math.max(1, Math.min(4, z * ratio));
-        if (next === 1) setPan({ x: 0, y: 0 });
-        return next;
-      });
-      lastTouchDistance.current = currentDist;
+    } else if (e.touches.length === 1 && touch.current && drag.current) {
+      const point = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      touch.current.latest = point;
+      const dx = point.x - touch.current.point.x,
+        dy = point.y - touch.current.point.y;
+      if (Math.hypot(dx, dy) > 8) {
+        touch.current.moved = true;
+        lastTap.current = null;
+      }
+      if (current.current.zoom > 1)
+        apply(current.current.zoom, {
+          x: drag.current.pan.x + dx,
+          y: drag.current.pan.y + dy,
+        });
     }
   };
-
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: ReactTouchEvent) => {
+    lastTouchTime.current = Date.now();
+    const wasPinch = Boolean(pinch.current);
+    pinch.current = null;
+    if (e.touches.length === 2) {
+      beginPinch(e.touches);
+      return;
+    }
+    if (e.touches.length === 1) {
+      beginTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY }, false);
+      return;
+    }
+    const gesture = touch.current;
+    if (gesture && !wasPinch) {
+      const end = e.changedTouches[0];
+      const point = end ? { x: end.clientX, y: end.clientY } : gesture.latest;
+      const dx = point.x - gesture.point.x,
+        dy = point.y - gesture.point.y;
+      if (
+        gesture.dismiss &&
+        current.current.zoom === 1 &&
+        dy > 70 &&
+        dy > Math.abs(dx)
+      )
+        onClose();
+      else if (
+        gesture.allowTap &&
+        !gesture.moved &&
+        Math.hypot(dx, dy) <= 8 &&
+        Date.now() - gesture.time < 300
+      ) {
+        const previous = lastTap.current;
+        if (
+          previous &&
+          Date.now() - previous.time < 300 &&
+          Math.hypot(point.x - previous.point.x, point.y - previous.point.y) <
+            40
+        ) {
+          handleDoubleTap(point.x, point.y);
+          lastTap.current = null;
+        } else lastTap.current = { point, time: Date.now() };
+      }
+    }
+    touch.current = drag.current = null;
     setIsDragging(false);
-    lastTouchDistance.current = null;
+  };
+  const handleTouchCancel = () => {
+    touch.current = pinch.current = drag.current = lastTap.current = null;
+    setIsDragging(false);
   };
 
   if (!isOpen) return null;
@@ -182,20 +325,20 @@ export function ImageLightbox({
               {title || "Image detail inspector"}
             </h2>
           </ModalTitle>
-          <span className="lightbox-zoom-level">{Math.round(zoom * 100)}%</span>
+          <span
+            className="lightbox-zoom-level"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {Math.round(zoom * 100)}%
+          </span>
         </div>
         <div className="lightbox-controls">
           <Button
             variant="ghost"
             aria-label="Zoom out"
             disabled={zoom <= 1}
-            onClick={() =>
-              setZoom((z) => {
-                const next = Math.max(z - 0.5, 1);
-                if (next === 1) setPan({ x: 0, y: 0 });
-                return next;
-              })
-            }
+            onClick={() => changeZoom(current.current.zoom - 0.5)}
           >
             −
           </Button>
@@ -203,10 +346,7 @@ export function ImageLightbox({
             variant="ghost"
             aria-label="Reset zoom"
             disabled={zoom === 1 && pan.x === 0 && pan.y === 0}
-            onClick={() => {
-              setZoom(1);
-              setPan({ x: 0, y: 0 });
-            }}
+            onClick={() => changeZoom(1)}
           >
             Reset
           </Button>
@@ -214,7 +354,7 @@ export function ImageLightbox({
             variant="ghost"
             aria-label="Zoom in"
             disabled={zoom >= 4}
-            onClick={() => setZoom((z) => Math.min(z + 0.5, 4))}
+            onClick={() => changeZoom(current.current.zoom + 0.5)}
           >
             +
           </Button>
@@ -231,10 +371,16 @@ export function ImageLightbox({
       </header>
 
       <div
+        ref={viewport}
         onClick={(event) => {
-          if (event.target === event.currentTarget && zoom === 1) onClose();
+          if (
+            event.target === event.currentTarget &&
+            zoom === 1 &&
+            Date.now() - lastTouchTime.current > 500
+          )
+            onClose();
         }}
-        className={`lightbox-viewport ${zoom > 1 ? "is-zoomed" : ""}`}
+        className={`lightbox-viewport ${zoom > 1 ? "is-zoomed" : ""} ${isDragging ? "is-dragging" : ""}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -242,6 +388,7 @@ export function ImageLightbox({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
         onDoubleClick={onDoubleClick}
       >
         <img
@@ -257,9 +404,8 @@ export function ImageLightbox({
       </div>
 
       <footer className="lightbox-hint">
-        {zoom === 1
-          ? "Click or tap to zoom · Double-tap for quick zoom · Drag when zoomed"
-          : "Drag to pan · Double-click to reset"}
+        Double-tap or double-click to zoom · Drag to pan · Swipe down to close
+        at 100%
       </footer>
     </ModalContent>
   );

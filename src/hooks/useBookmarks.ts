@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { prompts, assetUrl } from "@/content";
 
+const BOOKMARKS_CHANGED = "portrait-edit-bookmarks-changed";
 const STORAGE_KEY = "portrait-edit-saved";
 const COLLECTIONS_KEY = "portrait-edit-collections";
 const ACTIVE_COLLECTION_KEY = "portrait-edit-active-collection";
@@ -48,12 +49,19 @@ export function useBookmarks() {
     };
   });
 
+  const collectionsRef = useRef(collections);
+  collectionsRef.current = collections;
+
   // Current active collection's saved IDs
   const savedIds = collections[activeCollection] || collections["Default"] || [];
 
   const persistCollections = useCallback(
     (nextCols: Record<string, string[]>, nextActive: string) => {
+      collectionsRef.current = nextCols;
       setCollections(nextCols);
+      window.dispatchEvent(new CustomEvent(BOOKMARKS_CHANGED, {
+        detail: { collections: nextCols, activeCollection: nextActive },
+      }));
       try {
         localStorage.setItem(COLLECTIONS_KEY, JSON.stringify(nextCols));
         localStorage.setItem(ACTIVE_COLLECTION_KEY, nextActive);
@@ -72,6 +80,9 @@ export function useBookmarks() {
   const setActiveCollection = useCallback(
     (name: string) => {
       setActiveCollectionState(name);
+      window.dispatchEvent(new CustomEvent(BOOKMARKS_CHANGED, {
+        detail: { collections, activeCollection: name },
+      }));
       try {
         localStorage.setItem(ACTIVE_COLLECTION_KEY, name);
         localStorage.setItem(
@@ -98,23 +109,14 @@ export function useBookmarks() {
 
   const toggleSaved = useCallback(
     (id: string) => {
-      setCollections((prevCols) => {
-        const currentList = prevCols[activeCollection] || [];
-        const nextList = currentList.includes(id)
-          ? currentList.filter((item) => item !== id)
-          : [...currentList, id];
-
-        const nextCols = { ...prevCols, [activeCollection]: nextList };
-        try {
-          localStorage.setItem(COLLECTIONS_KEY, JSON.stringify(nextCols));
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(nextList));
-        } catch {
-          /* storage error */
-        }
-        return nextCols;
-      });
+      const latest = collectionsRef.current;
+      const currentList = latest[activeCollection] || [];
+      const nextList = currentList.includes(id)
+        ? currentList.filter((item) => item !== id)
+        : [...currentList, id];
+      persistCollections({ ...latest, [activeCollection]: nextList }, activeCollection);
     },
-    [activeCollection],
+    [activeCollection, persistCollections],
   );
 
   const isSaved = useCallback(
@@ -195,7 +197,7 @@ export function useBookmarks() {
     URL.revokeObjectURL(url);
   }, [savedIds, activeCollection]);
 
-  // Synchronize across multiple tabs
+  // Synchronize reader, study cards, and other tabs.
   useEffect(() => {
     const sync = (e: StorageEvent) => {
       if (e.key === COLLECTIONS_KEY && e.newValue) {
@@ -210,8 +212,18 @@ export function useBookmarks() {
         setActiveCollectionState(e.newValue);
       }
     };
+    const syncLocal = (event: Event) => {
+      const detail = (event as CustomEvent<{ collections: Record<string, string[]>; activeCollection: string }>).detail;
+      collectionsRef.current = detail.collections;
+      setCollections(detail.collections);
+      setActiveCollectionState(detail.activeCollection);
+    };
     window.addEventListener("storage", sync);
-    return () => window.removeEventListener("storage", sync);
+    window.addEventListener(BOOKMARKS_CHANGED, syncLocal);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener(BOOKMARKS_CHANGED, syncLocal);
+    };
   }, []);
 
   return {

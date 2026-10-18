@@ -18,6 +18,7 @@ export function ShortcutsModal({ isOpen, onClose }: ShortcutsModalProps) {
     { key: "F", label: "Toggle Focus Mode" },
     { key: "T", label: "Toggle Reading View / Original Page" },
     { key: "S", label: "Toggle Two-Page Spread (Desktop)" },
+    { key: "B", label: "Bookmark / save current study" },
     { key: "M", label: "Cycle Theme (Light / Warm Paper / Dark)" },
     { key: "?", label: "Open / Close this cheatsheet" },
     { key: "Esc", label: "Close overlays / Exit Focus Mode" },

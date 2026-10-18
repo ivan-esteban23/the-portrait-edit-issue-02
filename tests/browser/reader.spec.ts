@@ -807,11 +807,17 @@ test("accessibility: coarse-pointer reader and modal controls have 44px targets"
   await page
     .getByRole("button", { name: "Keyboard shortcuts", exact: true })
     .click();
+  await expect(
+    page.getByRole("dialog", { name: "Keyboard Shortcuts", exact: true }),
+  ).toBeVisible();
   await checkTargets(".shortcuts-modal-card button");
   await noOverflow(page);
   await page.keyboard.press("Escape");
   await mode(page, "page");
   await page.getByRole("button", { name: "Inspect page 60 in detail" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Issue 02 · Page 60", exact: true }),
+  ).toBeVisible();
   await checkTargets(".lightbox-controls button");
   await noOverflow(page);
   await page.screenshot({

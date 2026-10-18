@@ -1780,6 +1780,8 @@ select:hover {
   overflow: hidden;
   user-select: none;
   touch-action: none;
+  overscroll-behavior: contain;
+  min-height: 0;
   padding: 16px;
 }
 .lightbox-image {
@@ -1789,6 +1791,9 @@ select:hover {
   transition: transform 80ms ease-out;
   transform-origin: center center;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+.lightbox-viewport.is-dragging .lightbox-image {
+  transition: none;
 }
 .lightbox-hint {
   padding: 8px 24px calc(8px + env(safe-area-inset-bottom));
@@ -3296,5 +3301,30 @@ select:hover {
     outline: 2px solid Highlight;
     outline-offset: 2px;
     box-shadow: none;
+  }
+}
+
+/* Reader bookmarks share the toolbar's coarse-pointer target sizing. */
+.reader-bookmark-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.reader-bookmark-btn.is-saved {
+  color: var(--accent, var(--text));
+  background: var(--surface);
+}
+.hero-actions > a {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+@media (pointer: coarse) {
+  .hero-actions > a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
   }
 }
