@@ -7,6 +7,7 @@ import {
   type TouchEvent as ReactTouchEvent,
 } from "react";
 import { Button } from "./ui/button";
+import { ModalContent, ModalTitle } from "./ui/dialog";
 
 interface ImageLightboxProps {
   src: string;
@@ -23,6 +24,7 @@ export function ImageLightbox({
   isOpen,
   onClose,
 }: ImageLightboxProps) {
+  const closeButton = useRef<HTMLButtonElement>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -36,12 +38,6 @@ export function ImageLightbox({
     if (isOpen) {
       setZoom(1);
       setPan({ x: 0, y: 0 });
-      // Prevent background scrolling while open
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
     }
   }, [isOpen, src]);
 
@@ -49,10 +45,7 @@ export function ImageLightbox({
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      } else if (e.key === "+" || e.key === "=") {
+      if (e.key === "+" || e.key === "=") {
         e.preventDefault();
         setZoom((z) => Math.min(z + 0.5, 4));
       } else if (e.key === "-") {
@@ -70,7 +63,7 @@ export function ImageLightbox({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   // Double tap / double click zoom toggle
   const handleDoubleTap = useCallback(
@@ -175,23 +168,21 @@ export function ImageLightbox({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="lightbox-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Image detail inspector"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && zoom === 1) {
-          onClose();
-        }
-      }}
+    <ModalContent
+      isOpen={isOpen}
+      onClose={onClose}
+      overlayClassName="lightbox-overlay"
+      className="lightbox-content"
+      initialFocus={closeButton}
     >
       <header className="lightbox-toolbar">
         <div className="lightbox-info">
-          {title && <span className="lightbox-title">{title}</span>}
-          <span className="lightbox-zoom-level">
-            {Math.round(zoom * 100)}%
-          </span>
+          <ModalTitle asChild>
+            <h2 className="lightbox-title">
+              {title || "Image detail inspector"}
+            </h2>
+          </ModalTitle>
+          <span className="lightbox-zoom-level">{Math.round(zoom * 100)}%</span>
         </div>
         <div className="lightbox-controls">
           <Button
@@ -229,6 +220,7 @@ export function ImageLightbox({
           </Button>
           <Button
             variant="ghost"
+            ref={closeButton}
             className="lightbox-close"
             aria-label="Close image lightbox"
             onClick={onClose}
@@ -239,6 +231,9 @@ export function ImageLightbox({
       </header>
 
       <div
+        onClick={(event) => {
+          if (event.target === event.currentTarget && zoom === 1) onClose();
+        }}
         className={`lightbox-viewport ${zoom > 1 ? "is-zoomed" : ""}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -266,6 +261,6 @@ export function ImageLightbox({
           ? "Click or tap to zoom · Double-tap for quick zoom · Drag when zoomed"
           : "Drag to pan · Double-click to reset"}
       </footer>
-    </div>
+    </ModalContent>
   );
 }

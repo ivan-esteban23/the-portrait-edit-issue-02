@@ -466,7 +466,10 @@ export function Archive() {
                 type="button"
                 variant="default"
                 disabled={compareIds.length < 2}
-                onClick={() => setCompareOpen(true)}
+                onClick={(event) => {
+                  event.currentTarget.focus();
+                  setCompareOpen(true);
+                }}
                 className="dock-compare-btn"
               >
                 Compare 2 studies ⇄

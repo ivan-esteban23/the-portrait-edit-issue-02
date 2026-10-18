@@ -17,7 +17,7 @@ const buttonVariants = cva(
     defaultVariants: { variant: "outline" },
   },
 );
-export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+export type ButtonProps = React.ComponentPropsWithRef<"button"> &
   VariantProps<typeof buttonVariants> & { asChild?: boolean };
 export function Button({
   className,

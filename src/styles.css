@@ -99,6 +99,7 @@
   box-sizing: border-box;
 }
 html {
+  scroll-behavior: smooth;
   scroll-padding-top: 120px;
   scroll-padding-bottom: calc(var(--reader-bottom-height) + 24px);
   scrollbar-gutter: stable;
@@ -162,10 +163,6 @@ a {
 a:hover {
   color: var(--muted);
 }
-:where(a, button, input, select, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--text);
-  outline-offset: 4px;
-}
 img {
   display: block;
   max-width: 100%;
@@ -212,13 +209,15 @@ h3,
   position: fixed;
   left: 16px;
   top: -100px;
-  z-index: 100;
+  z-index: 300;
   background: var(--text);
   color: var(--bg);
   padding: 12px;
 }
 .skip-link:focus {
-  top: 12px;
+  top: max(12px, env(safe-area-inset-top));
+  color: var(--bg);
+  text-decoration: underline;
 }
 .publication {
   min-height: 100dvh;
@@ -662,7 +661,6 @@ select:hover {
   background: var(--text);
 }
 .reader-canvas {
-  outline: none;
   min-width: 0;
   touch-action: pan-y pinch-zoom;
 }
@@ -1708,14 +1706,23 @@ select:hover {
 
 /* Image Lightbox Modal */
 .lightbox-overlay {
+  --focus-ring: #f4f4f0;
+  --focus-ring-surface: #0a0a0a;
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: 260;
   background: rgba(10, 10, 10, 0.94);
   backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   animation: lightbox-fade 150ms ease-out;
+}
+.lightbox-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 @keyframes lightbox-fade {
   from {
@@ -1742,6 +1749,8 @@ select:hover {
   font-size: 0.8125rem;
 }
 .lightbox-title {
+  font: inherit;
+  letter-spacing: normal;
   color: #f4f4f0;
   font-weight: 500;
 }
@@ -2440,7 +2449,6 @@ select:hover {
 .palette-search-input {
   flex: 1;
   border: 0;
-  outline: 0;
   background: transparent;
   color: var(--text);
   font-size: 1.0625rem;
@@ -2675,7 +2683,6 @@ select:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  outline: none;
 }
 .split-handle-line {
   position: absolute;
@@ -3239,5 +3246,55 @@ select:hover {
 @media (min-width: 1101px) {
   .touch-swipe-hint {
     display: none;
+  }
+}
+
+/* Actual control boxes grow on touch devices; targets never overlap neighbors. */
+@media (pointer: coarse) {
+  :is(
+      .reader-top,
+      .reader-bottom,
+      .scrubber,
+      .chapter-strip,
+      .display-sheet,
+      .shortcuts-modal-card,
+      .lightbox-content,
+      .compare-lab-container
+    )
+    :is(button, a, input, select, [role="slider"]) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .reader-issue {
+    display: inline-flex;
+    align-items: center;
+  }
+  .lightbox-toolbar {
+    flex-wrap: wrap;
+    padding-inline: 12px;
+  }
+  .lightbox-controls {
+    flex-wrap: wrap;
+  }
+  .scrubber-header {
+    flex-wrap: wrap;
+  }
+}
+
+/* Text tokens exceed 3:1 against every theme surface. The backing ring also
+   keeps focus legible over image content and filled buttons. */
+:focus-visible {
+  /* Theme changes must update rings immediately, without a low-contrast fade. */
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke;
+  outline: 2px solid var(--focus-ring, var(--text));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--focus-ring-surface, var(--bg));
+}
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
   }
 }
