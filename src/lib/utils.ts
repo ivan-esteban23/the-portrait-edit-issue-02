@@ -12,8 +12,11 @@ export function editable(target: EventTarget | null) {
   );
 }
 export async function copyText(text: string) {
-  if (navigator.clipboard?.writeText)
+  if (navigator.clipboard?.writeText) {
     return navigator.clipboard.writeText(text);
+  }
+
+  // Fallback: use an off-screen textarea so we can select + copy.
   const active = document.activeElement as HTMLElement | null;
   const selection = window.getSelection();
   const ranges = selection
@@ -28,6 +31,16 @@ export async function copyText(text: string) {
   document.body.append(area);
   try {
     area.select();
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch {
+        // Clipboard API failed; fall through to execCommand
+      }
+    }
+    // execCommand("copy") is deprecated but remains the only synchronous
+    // clipboard fallback for older browsers and non-secure contexts.
     if (!document.execCommand("copy")) throw Error("Copy unavailable");
   } finally {
     area.remove();

@@ -27,7 +27,13 @@ const PromptStudioDrawer = lazy(() =>
   })),
 );
 
-export function PromptCard({ prompt }: { prompt: Prompt }) {
+export function PromptCard({
+  prompt,
+  onOpenStudio,
+}: {
+  prompt: Prompt;
+  onOpenStudio?: () => void;
+}) {
   const recordedParameters = getCommandParameters(prompt);
   const parameters = recordedParameters.length
     ? recordedParameters
@@ -42,7 +48,6 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
   const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
   const [exportingCard, setExportingCard] = useState(false);
-  const [studioOpen, setStudioOpen] = useState(false);
   useEffect(() => {
     setEnabledParameters(
       getCommandParameters(prompt).map((parameter) => parameter.key),
@@ -161,7 +166,7 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
             <Button
               variant="outline"
               className="card-tool-btn adjust-params-btn"
-              onClick={() => setStudioOpen(true)}
+              onClick={() => onOpenStudio?.()}
               title="Open Prompt Studio parameter tweaker"
               aria-label="Adjust Parameters"
             >
@@ -203,16 +208,6 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
       </p>
       <p className="source-note">Text checked against the published study.</p>
 
-      {/* Interactive Prompt Studio / Parameter Tweaker Drawer */}
-      {studioOpen && (
-        <Suspense fallback={null}>
-          <PromptStudioDrawer
-            prompt={prompt}
-            isOpen={studioOpen}
-            onClose={() => setStudioOpen(false)}
-          />
-        </Suspense>
-      )}
     </section>
   );
 }
@@ -352,7 +347,11 @@ export function Study({
         </Suspense>
       )}
 
-      <PromptCard key={prompt.id} prompt={prompt} />
+      <PromptCard
+        key={prompt.id}
+        prompt={prompt}
+        onOpenStudio={() => setStudioOpen(true)}
+      />
       <section className="article-section">
         <h3>Working notes</h3>
         <p className="preserve-text">{prompt.workingNotes}</p>

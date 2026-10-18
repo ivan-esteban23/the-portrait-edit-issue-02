@@ -94,13 +94,21 @@ function ReaderView({
     }
   }, []);
   useEffect(() => {
-    const syncSpread = (event: StorageEvent) => {
+    const syncSpreadCustom = (event: Event) => {
+      const { spread } = (event as CustomEvent<{ spread: boolean }>).detail;
+      setSpreadState(spread);
+    };
+    const syncSpreadStorage = (event: StorageEvent) => {
       if (event.key === "portrait-edit-spread") {
         setSpreadState(event.newValue === "true");
       }
     };
-    window.addEventListener("storage", syncSpread);
-    return () => window.removeEventListener("storage", syncSpread);
+    window.addEventListener("spread-toggle-change", syncSpreadCustom);
+    window.addEventListener("storage", syncSpreadStorage);
+    return () => {
+      window.removeEventListener("spread-toggle-change", syncSpreadCustom);
+      window.removeEventListener("storage", syncSpreadStorage);
+    };
   }, []);
   // Keep the cover in single-page mode even when spreads are enabled.
   const isSpread = spreadCapable && spread && mode === "page" && page > 1;

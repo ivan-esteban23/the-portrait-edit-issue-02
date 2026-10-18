@@ -111,6 +111,19 @@ export function useBookmarks() {
     [collections, persistCollections],
   );
 
+  const deleteCollection = useCallback(
+    (name: string) => {
+      if (name === "Default" || !collections[name]) return;
+      const nextCols = { ...collections };
+      delete nextCols[name];
+      const nextActive =
+        activeCollection === name ? "Default" : activeCollection;
+      setActiveCollectionState(nextActive);
+      persistCollections(nextCols, nextActive);
+    },
+    [collections, activeCollection, persistCollections],
+  );
+
   const toggleSaved = useCallback(
     (id: string) => {
       const latest = collectionsRef.current;
@@ -262,6 +275,7 @@ export function useBookmarks() {
     activeCollection,
     setActiveCollection,
     createCollection,
+    deleteCollection,
     collections: Object.keys(collections),
   };
 }

@@ -134,11 +134,11 @@ export default function App() {
   const toggleSpreadAction = useCallback(() => {
     try {
       const cur = localStorage.getItem("portrait-edit-spread") === "true";
-      localStorage.setItem("portrait-edit-spread", String(!cur));
+      const next = !cur;
+      localStorage.setItem("portrait-edit-spread", String(next));
       window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: "portrait-edit-spread",
-          newValue: String(!cur),
+        new CustomEvent("spread-toggle-change", {
+          detail: { spread: next },
         }),
       );
     } catch {
