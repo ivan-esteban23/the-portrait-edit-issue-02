@@ -1,6 +1,13 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import study from "../src/content/prompts/issue-02-study-005.json";
+import issue from "../src/content/issues/the-prompt-issue/issue.json";
 
 beforeEach(() => vi.resetModules());
+afterEach(() => {
+  vi.doUnmock("../src/content/prompts/issue-02-study-005.json");
+  vi.doUnmock("../src/content/issues/the-prompt-issue/issue.json");
+  vi.doUnmock("../src/content/schema");
+});
 
 it("loads every valid study with no content errors", async () => {
   const { prompts, promptLoadErrors, currentIssue } =
@@ -11,14 +18,9 @@ it("loads every valid study with no content errors", async () => {
 });
 
 it("skips a malformed study, records its file and validation error, and keeps other studies sorted", async () => {
-  const { promptSchema } = await import("../src/content/schema");
-  const parse = promptSchema.parse.bind(promptSchema);
-  vi.spyOn(promptSchema, "parse").mockImplementation((data) => {
-    const record = data as Record<string, unknown>;
-    return parse(
-      record.id === "issue-02-study-005" ? { ...record, prompt: "" } : data,
-    );
-  });
+  vi.doMock("../src/content/prompts/issue-02-study-005.json", () => ({
+    default: { ...study, prompt: "" },
+  }));
   const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
   const { prompts, promptLoadErrors } = await import("../src/content");
   expect(prompts).toHaveLength(173);
@@ -42,13 +44,19 @@ it("skips a malformed study, records its file and validation error, and keeps ot
 });
 
 it("reports a descriptive error when the required issue is missing", async () => {
-  const { issueSchema } = await import("../src/content/schema");
-  const parse = issueSchema.parse.bind(issueSchema);
-  vi.spyOn(issueSchema, "parse").mockImplementation((data) => ({
-    ...parse(data),
-    slug: "another-issue",
+  vi.doMock("../src/content/issues/the-prompt-issue/issue.json", () => ({
+    default: { ...issue, slug: "another-issue" },
   }));
   await expect(import("../src/content/issues")).rejects.toThrow(
     'required issue "the-prompt-issue" is missing',
   );
+});
+
+it("loads content without importing the build-time Zod schemas", async () => {
+  vi.doMock("../src/content/schema", () => {
+    throw new Error("Build-time schemas must not be imported at runtime");
+  });
+  const { prompts, currentIssue } = await import("../src/content");
+  expect(prompts).toHaveLength(174);
+  expect(currentIssue.slug).toBe("the-prompt-issue");
 });
