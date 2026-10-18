@@ -172,3 +172,63 @@ it.each(["detail", "reader"] as const)(
     );
   },
 );
+
+const storedRemix = {
+  id: "stored-remix",
+  promptId: original.id,
+  title: original.title,
+  prompt: "A saved portrait",
+  parameters: {
+    aspectRatio: "16:9",
+    stylize: 500,
+    chaos: 5,
+    keywords: ["film grain"],
+  },
+  timestamp: 1700000000000,
+};
+
+it.each([
+  ["malformed JSON", "{broken"],
+  ["null", "null"],
+  ["an object", "{}"],
+  ["a null record", "[null]"],
+  [
+    "invalid nested parameters",
+    JSON.stringify([{ ...storedRemix, parameters: { keywords: {} } }]),
+  ],
+])("falls back to empty remix history and warns for %s", (_label, raw) => {
+  localStorage.setItem("the-portrait-edit:remixes", raw);
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  render(<PromptStudioDrawer prompt={original} isOpen onClose={() => {}} />);
+  expect(screen.getByText("Recent Remixes (0)")).toBeInTheDocument();
+  expect(warn).toHaveBeenCalledWith(
+    expect.stringContaining("the-portrait-edit:remixes"),
+  );
+});
+
+it("keeps valid stored remixes usable", () => {
+  localStorage.setItem(
+    "the-portrait-edit:remixes",
+    JSON.stringify([storedRemix]),
+  );
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  render(<PromptStudioDrawer prompt={original} isOpen onClose={() => {}} />);
+  expect(screen.getByText("Recent Remixes (1)")).toBeInTheDocument();
+  fireEvent.click(screen.getByText("Recent Remixes (1)"));
+  fireEvent.click(screen.getByRole("button", { name: "Re-apply settings" }));
+  const preview = screen.getByLabelText("Live Prompt Preview");
+  expect(preview).toHaveTextContent("--ar 16:9");
+  expect(preview).toHaveTextContent("--s 500");
+  expect(preview).toHaveTextContent("film grain");
+  expect(warn).not.toHaveBeenCalled();
+});
+
+it("falls back to empty remix history when storage access is denied", () => {
+  vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+    throw new Error("Storage denied");
+  });
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  render(<PromptStudioDrawer prompt={original} isOpen onClose={() => {}} />);
+  expect(screen.getByText("Recent Remixes (0)")).toBeInTheDocument();
+  expect(warn).toHaveBeenCalledWith(expect.stringContaining("Storage denied"));
+});
