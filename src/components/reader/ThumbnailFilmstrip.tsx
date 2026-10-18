@@ -20,6 +20,7 @@ export function ThumbnailFilmstrip({
   const [metrics, setMetrics] = useState({ width: 64, gap: 10 });
   const [viewport, setViewport] = useState({ left: 0, width: 0 });
   const [focusedPage, setFocusedPage] = useState<number | null>(null);
+  const [keyboardTarget, setKeyboardTarget] = useState<number | null>(null);
   const [range, setRange] = useState({
     start: 0,
     end: Math.min(pages.length, BUFFER + 1),
@@ -81,6 +82,18 @@ export function ThumbnailFilmstrip({
     );
   }, [pages.length, metrics, viewport]);
 
+  useLayoutEffect(() => {
+    if (keyboardTarget === null) return;
+    const button =
+      scroll.current?.children[
+        keyboardTarget
+      ]?.querySelector<HTMLButtonElement>("button");
+    if (button) {
+      button.focus();
+      setKeyboardTarget(null);
+    }
+  }, [keyboardTarget]);
+
   return (
     <div
       className="thumbnails-filmstrip-drawer"
@@ -100,7 +113,9 @@ export function ThumbnailFilmstrip({
         {pages.map((pNum, index) => {
           // Keep the focused control mounted if the user scrolls it out of view.
           const visible =
-            (index >= range.start && index < range.end) || focusedPage === pNum;
+            (index >= range.start && index < range.end) ||
+            focusedPage === pNum ||
+            keyboardTarget === index;
           return (
             // Stable slots preserve native scroll-snap targets as thumbnails mount and unmount.
             <div
@@ -120,6 +135,21 @@ export function ThumbnailFilmstrip({
                   aria-current={index === currentPageIndex ? "page" : undefined}
                   onFocus={() => setFocusedPage(pNum)}
                   onBlur={() => setFocusedPage(null)}
+                  onKeyDown={(event) => {
+                    if (
+                      event.key !== "Tab" ||
+                      event.defaultPrevented ||
+                      event.altKey ||
+                      event.ctrlKey ||
+                      event.metaKey
+                    )
+                      return;
+                    const next = index + (event.shiftKey ? -1 : 1);
+                    if (next < 0 || next >= pages.length) return;
+                    // Mount the next control before focusing it, even when Tab outruns scrolling.
+                    event.preventDefault();
+                    setKeyboardTarget(next);
+                  }}
                   onClick={() => onPageSelect(pNum)}
                 >
                   <img

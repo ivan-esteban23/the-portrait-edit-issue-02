@@ -144,3 +144,41 @@ it("virtualizes filmstrip images with a three-item buffer and updates after scro
   ).toBeInTheDocument();
   expect(container.querySelectorAll("img").length).toBeLessThan(20);
 });
+
+it("keeps rapid Tab and Shift+Tab traversal inside the virtualized sequence and releases focus at its edges", () => {
+  vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(1000);
+  const pages = Array.from({ length: 20 }, (_, index) => index + 1);
+  render(
+    <ThumbnailFilmstrip
+      pages={pages}
+      currentPageIndex={0}
+      pageDirectory="pages"
+      onPageSelect={vi.fn()}
+    />,
+  );
+  const first = screen.getByRole("button", { name: "Jump to page 1" });
+  act(() => first.focus());
+  expect(fireEvent.keyDown(first, { key: "Tab", shiftKey: true })).toBe(true);
+  for (let index = 1; index < 20; index++) {
+    const focused = document.activeElement!;
+    expect(fireEvent.keyDown(focused, { key: "Tab" })).toBe(false);
+    expect(
+      screen.getByRole("button", { name: `Jump to page ${index + 1}` }),
+    ).toHaveFocus();
+    expect(
+      screen.getByRole("button", { name: "Jump to page 10" }),
+    ).toBeInTheDocument();
+  }
+  expect(fireEvent.keyDown(document.activeElement!, { key: "Tab" })).toBe(true);
+  for (let index = 19; index > 0; index--) {
+    expect(
+      fireEvent.keyDown(document.activeElement!, {
+        key: "Tab",
+        shiftKey: true,
+      }),
+    ).toBe(false);
+    expect(
+      screen.getByRole("button", { name: `Jump to page ${index}` }),
+    ).toHaveFocus();
+  }
+});
