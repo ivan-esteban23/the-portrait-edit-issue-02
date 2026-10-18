@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { prompts, assetUrl } from "@/content";
 
 const BOOKMARKS_CHANGED = "portrait-edit-bookmarks-changed";
+export const BOOKMARK_REMOVED = "portrait-edit-bookmark-removed";
 const STORAGE_KEY = "portrait-edit-saved";
 const COLLECTIONS_KEY = "portrait-edit-collections";
 const ACTIVE_COLLECTION_KEY = "portrait-edit-active-collection";
@@ -114,10 +115,31 @@ export function useBookmarks() {
     (id: string) => {
       const latest = collectionsRef.current;
       const currentList = latest[activeCollection] || [];
-      const nextList = currentList.includes(id)
+      const removing = currentList.includes(id);
+      const nextList = removing
         ? currentList.filter((item) => item !== id)
         : [...currentList, id];
       persistCollections({ ...latest, [activeCollection]: nextList }, activeCollection);
+      if (removing) {
+        window.dispatchEvent(
+          new CustomEvent(BOOKMARK_REMOVED, {
+            detail: { id, collection: activeCollection },
+          }),
+        );
+      }
+    },
+    [activeCollection, persistCollections],
+  );
+
+  const restoreSaved = useCallback(
+    (id: string, collection: string) => {
+      const latest = collectionsRef.current;
+      const currentList = latest[collection] || [];
+      if (currentList.includes(id)) return;
+      persistCollections(
+        { ...latest, [collection]: [...currentList, id] },
+        activeCollection,
+      );
     },
     [activeCollection, persistCollections],
   );
@@ -233,6 +255,7 @@ export function useBookmarks() {
     savedIds,
     isSaved,
     toggleSaved,
+    restoreSaved,
     exportSaved,
     exportMarkdown,
     savedCount: savedIds.length,

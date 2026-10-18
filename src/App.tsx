@@ -10,6 +10,8 @@ import {
 import { currentIssue, readerPath } from "./content/issues";
 import { useTheme, type Theme } from "./hooks/useTheme";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { Toast } from "./components/ui/Toast";
+import { BOOKMARK_REMOVED, useBookmarks } from "./hooks/useBookmarks";
 
 const CommandPalette = lazy(() =>
   import("./components/CommandPalette").then((m) => ({
@@ -52,6 +54,36 @@ export default function App() {
     navigate = useNavigate();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [bookmarkToast, setBookmarkToast] = useState<{
+    id: string;
+    collection: string;
+    token: number;
+  } | null>(null);
+  const { restoreSaved } = useBookmarks();
+
+  useEffect(() => {
+    const handleBookmarkRemoved = (event: Event) => {
+      const { id, collection } = (
+        event as CustomEvent<{ id: string; collection: string }>
+      ).detail;
+      setBookmarkToast((previous) => ({
+        id,
+        collection,
+        token: (previous?.token ?? 0) + 1,
+      }));
+    };
+    window.addEventListener(BOOKMARK_REMOVED, handleBookmarkRemoved);
+    return () =>
+      window.removeEventListener(BOOKMARK_REMOVED, handleBookmarkRemoved);
+  }, []);
+
+  const dismissBookmarkToast = useCallback(() => setBookmarkToast(null), []);
+  const undoBookmarkRemoval = useCallback(() => {
+    if (bookmarkToast) {
+      restoreSaved(bookmarkToast.id, bookmarkToast.collection);
+      setBookmarkToast(null);
+    }
+  }, [bookmarkToast, restoreSaved]);
 
   const [focus, setFocusState] = useState(() => {
     try {
@@ -223,6 +255,14 @@ export default function App() {
           </nav>
         </footer>
       )}
+
+      <Toast
+        key={bookmarkToast?.token ?? "bookmark-toast"}
+        message={`Study removed from ${bookmarkToast?.collection ?? "collection"}`}
+        visible={Boolean(bookmarkToast)}
+        onUndo={undoBookmarkRemoval}
+        onDismiss={dismissBookmarkToast}
+      />
 
       {/* Global Command Palette */}
       {commandPaletteOpen && (
