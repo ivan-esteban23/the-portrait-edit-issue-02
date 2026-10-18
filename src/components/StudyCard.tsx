@@ -14,6 +14,9 @@ interface StudyCardProps {
   onTagClick?: (tag: string) => void;
   isComparing?: boolean;
   onToggleCompare?: (id: string) => void;
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
 export function StudyCard({
@@ -25,6 +28,9 @@ export function StudyCard({
   onTagClick,
   isComparing = false,
   onToggleCompare,
+  selectionMode = false,
+  isSelected = false,
+  onToggleSelect,
 }: StudyCardProps) {
   const [copied, setCopied] = useState(false);
   const [copiedFormat, setCopiedFormat] = useState<string>("Copied!");
@@ -68,8 +74,35 @@ export function StudyCard({
   const Heading = headingLevel;
 
   return (
-    <Link className="study-card" to={to}>
+    <Link
+      className={`study-card ${selectionMode ? "is-selection-mode" : ""} ${isSelected ? "is-selected" : ""}`}
+      to={to}
+      onClick={(e) => {
+        if (selectionMode) {
+          e.preventDefault();
+          onToggleSelect?.(prompt.id);
+        }
+      }}
+    >
       <div className="study-card-media">
+        {selectionMode && (
+          <div
+            className="card-selection-toggle"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleSelect?.(prompt.id);
+            }}
+          >
+            <input
+              type="checkbox"
+              className="card-selection-checkbox"
+              checked={isSelected}
+              onChange={() => onToggleSelect?.(prompt.id)}
+              aria-label={`Select Study #${prompt.studyNumber}: ${prompt.title}`}
+            />
+          </div>
+        )}
         <img
           src={assetUrl(prompt.referenceImage)}
           alt={prompt.title}

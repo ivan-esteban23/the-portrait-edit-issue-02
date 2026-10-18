@@ -3028,7 +3028,7 @@ select:hover {
     font-size: 10pt !important;
   }
   .masthead, .site-footer, .archive-filters, .archive > header, .overview > header,
-  .overview-grid, .results-count, .compare-floating-dock, .card-actions,
+  .overview-grid, .results-count, .compare-floating-dock, .batch-floating-toolbar, .card-actions,
   .skip-link, .scrubber, .reader-top, .reader-bottom, .extracted-text,
   .reading-progress-bar, .shortcuts-modal-overlay, .command-palette-overlay,
   .prompt-studio-overlay, .compare-lab-overlay, .lightbox-overlay,
@@ -3283,3 +3283,265 @@ select:hover {
   .related-studies-grid li { scroll-snap-align: start; }
   .related-studies-grid img { height: 200px; }
 }
+
+/* ==========================================================================
+   Reader Presentation / Slideshow Mode & Fullscreen
+   ========================================================================== */
+.reader-slideshow-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--text);
+  z-index: 10;
+  transition: width 60ms linear;
+  pointer-events: none;
+}
+.reader-slideshow-btn.is-playing {
+  color: var(--accent, var(--text));
+  background: var(--surface-hover);
+}
+.slideshow-label {
+  margin-left: 4px;
+}
+.loop-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   Archive Multi-Select Batch Actions & Toolbar
+   ========================================================================== */
+.card-selection-toggle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 15;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.card-selection-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--text);
+}
+.study-card.is-selected {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.batch-floating-toolbar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 125;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.22);
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: min(640px, calc(100vw - 32px));
+  animation: dock-slide-up 180ms ease-out;
+}
+.batch-toolbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.batch-toolbar-count {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.batch-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.batch-copy-btn,
+.batch-dossier-btn,
+.batch-json-btn,
+.batch-clear-btn {
+  font-size: 0.8125rem;
+  border-radius: 999px;
+  min-height: 34px;
+  padding: 4px 12px;
+}
+
+/* ==========================================================================
+   Prompt Studio Presets & Local Remix History
+   ========================================================================== */
+.studio-presets-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.studio-preset-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+.studio-preset-chip:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+.studio-remixes-details {
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 12px;
+}
+.studio-remixes-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+  user-select: none;
+}
+.clear-remixes-btn {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+.clear-remixes-btn:hover {
+  color: var(--text);
+}
+.studio-remixes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.no-remixes-note {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 6px 0;
+}
+.remix-card {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+.remix-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.remix-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.remix-date {
+  font-size: 0.6875rem;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+.remix-prompt-snippet {
+  font-size: 0.75rem;
+  color: var(--text);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0 0 8px;
+}
+.remix-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.remix-apply-btn {
+  font-size: 0.6875rem;
+  padding: 2px 8px;
+  height: 26px;
+}
+
+/* ==========================================================================
+   Aspect Ratio & Tag Filtering in Archive
+   ========================================================================== */
+.archive-tag-pills {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 16px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+}
+.tag-pills-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tag-pills-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+.tag-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font: 0.75rem var(--mono);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 120ms ease;
+}
+.tag-pill:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+.tag-pill.is-active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.tag-pill-count {
+  opacity: 0.75;
+  font-size: 0.6875rem;
+}
+.reset-filters-btn {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.reset-filters-btn:hover {
+  color: var(--text);
+}
+

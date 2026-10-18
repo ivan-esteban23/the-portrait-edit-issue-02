@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
   Navigate,
@@ -12,6 +12,9 @@ import { Study } from "./Study";
 import { StudyCard } from "./StudyCard";
 import { useLastReadPage } from "@/hooks/useReadingProgress";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { splitPromptParameters } from "@/lib/promptFormatter";
+import { copyText } from "@/lib/utils";
+import { generateMarkdownDossier, downloadFile } from "@/lib/dossier";
 
 const CompareLab = lazy(() =>
   import("./CompareLab").then((m) => ({ default: m.CompareLab })),
@@ -274,23 +277,88 @@ export function Archive() {
   const [newColName, setNewColName] = useState("");
   const [showNewCol, setShowNewCol] = useState(false);
 
+  // Multi-select batch actions state
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [batchCopied, setBatchCopied] = useState(false);
+  const batchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (batchTimer.current) clearTimeout(batchTimer.current);
+    };
+  }, []);
+
   const query = search.get("q") ?? "",
     tag = search.get("tag") ?? "",
     model = search.get("model") ?? "",
+    aspectRatio = search.get("ar") ?? "",
     savedOnly = search.get("saved") === "1";
-  const tags = [...new Set(prompts.flatMap((p) => p.tags))].sort();
-  const models = [
-    ...new Set(prompts.map((p) => p.model ?? "Unspecified")),
-  ].sort();
-  const filtered = prompts.filter(
-    (p) =>
-      (!savedOnly || isSaved(p.id)) &&
-      (!tag || p.tags.includes(tag)) &&
-      (!model || (p.model ?? "Unspecified") === model) &&
-      `${p.title} ${p.prompt} ${p.style} ${p.studyNumber}`
-        .toLowerCase()
-        .includes(query.toLowerCase()),
+
+  const hasActiveFilters = Boolean(
+    query || tag || model || aspectRatio || savedOnly,
   );
+
+  const tags = useMemo(
+    () => [...new Set(prompts.flatMap((p) => p.tags))].sort(),
+    [],
+  );
+
+  const tagCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    prompts.forEach((p) => {
+      p.tags.forEach((t) => {
+        counts[t] = (counts[t] || 0) + 1;
+      });
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([name, count]) => ({ name, count }));
+  }, []);
+
+  const aspectRatios = useMemo(() => {
+    const set = new Set<string>(["1:1", "4:5", "16:9"]);
+    prompts.forEach((p) => {
+      const rawAr =
+        p.parameters?.["ar"] ||
+        p.parameters?.["--ar"] ||
+        splitPromptParameters(p.prompt).parameters.get("ar");
+      if (rawAr && rawAr !== "Unspecified") {
+        set.add(String(rawAr).trim());
+      }
+    });
+    return Array.from(set).sort();
+  }, []);
+
+  const models = useMemo(
+    () => [...new Set(prompts.map((p) => p.model ?? "Unspecified"))].sort(),
+    [],
+  );
+
+  const filtered = useMemo(() => {
+    return prompts.filter((p) => {
+      if (savedOnly && !isSaved(p.id)) return false;
+      if (tag && !p.tags.includes(tag)) return false;
+      if (model && (p.model ?? "Unspecified") !== model) return false;
+      if (aspectRatio) {
+        const pAr =
+          p.parameters?.["ar"] ||
+          p.parameters?.["--ar"] ||
+          splitPromptParameters(p.prompt).parameters.get("ar") ||
+          "4:5";
+        if (String(pAr).trim() !== aspectRatio) return false;
+      }
+      if (
+        query &&
+        !`${p.title} ${p.prompt} ${p.style} ${p.studyNumber}`
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [savedOnly, isSaved, tag, model, aspectRatio, query]);
 
   function filter(key: string, value: string) {
     const next = new URLSearchParams(search);
@@ -298,6 +366,50 @@ export function Archive() {
     else next.delete(key);
     setSearch(next, { replace: true });
   }
+
+  const toggleSelectPrompt = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
+  const selectAllFiltered = () => {
+    setSelectedIds(filtered.map((p) => p.id));
+  };
+
+  const clearSelection = () => {
+    setSelectedIds([]);
+  };
+
+  const copySelectedPrompts = async () => {
+    const selectedPrompts = prompts.filter((p) => selectedIds.includes(p.id));
+    const combined = selectedPrompts.map((p) => p.prompt).join("\n\n");
+    await copyText(combined);
+    setBatchCopied(true);
+    if (batchTimer.current) clearTimeout(batchTimer.current);
+    batchTimer.current = setTimeout(() => setBatchCopied(false), 2000);
+  };
+
+  const exportSelectedDossier = () => {
+    const selectedPrompts = prompts.filter((p) => selectedIds.includes(p.id));
+    const markdown = generateMarkdownDossier(selectedPrompts);
+    const date = new Date().toISOString().split("T")[0];
+    downloadFile(
+      `portrait-edit-dossier-${date}.md`,
+      markdown,
+      "text/markdown;charset=utf-8",
+    );
+  };
+
+  const exportSelectedJson = () => {
+    const selectedPrompts = prompts.filter((p) => selectedIds.includes(p.id));
+    const date = new Date().toISOString().split("T")[0];
+    downloadFile(
+      `portrait-edit-selection-${date}.json`,
+      JSON.stringify(selectedPrompts, null, 2),
+      "application/json",
+    );
+  };
 
   const toggleCompare = (id: string) => {
     setCompareIds((prev) => {
@@ -350,6 +462,20 @@ export function Archive() {
             ))}
           </select>
         </label>
+        <label>
+          Aspect Ratio
+          <select
+            value={aspectRatio}
+            onChange={(e) => filter("ar", e.target.value)}
+          >
+            <option value="">All aspect ratios</option>
+            {aspectRatios.map((ar) => (
+              <option key={ar} value={ar}>
+                {ar}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="archive-actions-group">
           <Button
             type="button"
@@ -360,6 +486,46 @@ export function Archive() {
           >
             ★ Saved ({savedCount})
           </Button>
+
+          {/* Multi-Select Batch Mode Toggle */}
+          <Button
+            type="button"
+            variant="ghost"
+            className={`selection-mode-toggle-btn ${selectionMode ? "is-active" : ""}`}
+            aria-pressed={selectionMode}
+            aria-label={selectionMode ? "Cancel Selection" : "Select Prompts"}
+            onClick={() => {
+              setSelectionMode((prev) => {
+                if (prev) setSelectedIds([]);
+                return !prev;
+              });
+            }}
+          >
+            {selectionMode ? "Cancel Selection" : "Select Prompts"}
+          </Button>
+
+          {selectionMode && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={selectAllFiltered}
+                aria-label="Select All Filtered"
+              >
+                Select All ({filtered.length})
+              </Button>
+              {selectedIds.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={clearSelection}
+                  aria-label="Clear Selection"
+                >
+                  Clear Selection
+                </Button>
+              )}
+            </>
+          )}
 
           {/* Collection Moodboard Selector */}
           <label className="moodboard-select-label">
@@ -459,11 +625,48 @@ export function Archive() {
               </Button>
             </>
           )}
+          {hasActiveFilters && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="reset-filters-btn"
+              onClick={() => setSearch({})}
+              aria-label="Reset all filters"
+            >
+              Reset all filters ✕
+            </Button>
+          )}
           <Button variant="ghost" onClick={() => setSearch({})}>
             Clear filters
           </Button>
         </div>
       </form>
+
+      {/* Interactive Tag Pills */}
+      <div
+        className="archive-tag-pills"
+        role="region"
+        aria-label="Tag filters"
+      >
+        <span className="tag-pills-label">Tags:</span>
+        <div className="tag-pills-scroll">
+          {tagCounts.slice(0, 16).map(({ name, count }) => {
+            const isActive = tag === name;
+            return (
+              <button
+                key={name}
+                type="button"
+                className={`tag-pill ${isActive ? "is-active" : ""}`}
+                aria-pressed={isActive}
+                onClick={() => filter("tag", isActive ? "" : name)}
+              >
+                #{name} <span className="tag-pill-count">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <p role="status" className="results-count">
         {filtered.length} {filtered.length === 1 ? "study" : "studies"}
       </p>
@@ -485,6 +688,7 @@ export function Archive() {
             )}
             {tag && ` · #${tag}`}
             {model && ` · ${model}`}
+            {aspectRatio && ` · ${aspectRatio}`}
             {query && ` · “${query}”`}
           </p>
           <p>
@@ -512,6 +716,9 @@ export function Archive() {
             onTagClick={(t) => filter("tag", t)}
             isComparing={compareIds.includes(p.id)}
             onToggleCompare={toggleCompare}
+            selectionMode={selectionMode}
+            isSelected={selectedIds.includes(p.id)}
+            onToggleSelect={toggleSelectPrompt}
           />
         ))}
       </div>
@@ -551,6 +758,62 @@ export function Archive() {
                 variant="ghost"
                 onClick={() => setCompareIds([])}
                 className="dock-clear-btn"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </aside>
+      )}
+
+      {/* Floating Batch Selection Toolbar */}
+      {selectedIds.length > 0 && (
+        <aside
+          className="batch-floating-toolbar"
+          role="region"
+          aria-label="Batch actions toolbar"
+        >
+          <div className="batch-toolbar-content">
+            <span className="batch-toolbar-count">
+              {selectedIds.length}{" "}
+              {selectedIds.length === 1 ? "prompt" : "prompts"} selected
+            </span>
+            <div className="batch-toolbar-actions">
+              <Button
+                type="button"
+                variant="default"
+                className="batch-copy-btn"
+                onClick={copySelectedPrompts}
+                aria-label="Copy Prompts"
+              >
+                {batchCopied ? "Copied!" : "Copy Prompts"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="batch-dossier-btn"
+                onClick={exportSelectedDossier}
+                aria-label="Export Markdown Dossier"
+                title="Download curated Markdown dossier (.md)"
+              >
+                Export Markdown Dossier ↗
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="batch-json-btn"
+                onClick={exportSelectedJson}
+                aria-label="Export JSON"
+                title="Download selection as JSON (.json)"
+              >
+                Export JSON ↗
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="batch-clear-btn"
+                onClick={clearSelection}
+                aria-label="Clear"
               >
                 Clear
               </Button>

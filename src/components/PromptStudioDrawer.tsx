@@ -29,6 +29,73 @@ const MODEL_PRESETS = [
 
 const STYLIZE_PRESETS = [50, 100, 250, 500, 750];
 
+export interface QuickStylePreset {
+  id: string;
+  label: string;
+  aspectRatio: string;
+  stylize: number;
+  modelPreset: string;
+}
+
+export const QUICK_STYLE_PRESETS: QuickStylePreset[] = [
+  {
+    id: "high-fashion",
+    label: "High Fashion 4:5",
+    aspectRatio: "4:5",
+    stylize: 750,
+    modelPreset: "--v 6.1 --style raw",
+  },
+  {
+    id: "cinematic",
+    label: "Cinematic 16:9",
+    aspectRatio: "16:9",
+    stylize: 250,
+    modelPreset: "--v 6.1",
+  },
+  {
+    id: "square-studio",
+    label: "Square Studio 1:1",
+    aspectRatio: "1:1",
+    stylize: 100,
+    modelPreset: "--v 6.1",
+  },
+];
+
+export interface RemixRecord {
+  id: string;
+  promptId: string;
+  title: string;
+  prompt: string;
+  parameters: {
+    ar?: string;
+    aspectRatio?: string;
+    stylize?: number;
+    chaos?: number;
+    modelPreset?: string;
+    keywords?: string[];
+  };
+  timestamp: number;
+}
+
+const REMIX_STORAGE_KEY = "the-portrait-edit:remixes";
+
+function loadRemixes(): RemixRecord[] {
+  try {
+    const raw = localStorage.getItem(REMIX_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRemixes(remixes: RemixRecord[]) {
+  try {
+    localStorage.setItem(REMIX_STORAGE_KEY, JSON.stringify(remixes.slice(0, 20)));
+  } catch {
+    /* localStorage full or denied */
+  }
+}
+
 const LIGHTING_FILM_KEYWORDS = [
   "35mm photograph",
   "dramatic chiaroscuro",
@@ -160,15 +227,70 @@ export function PromptStudioDrawer({
       ? `[FLUX.1 Dev] ${cleanBasePrompt}${keywordsString}`
       : commandText;
 
+  const [remixes, setRemixes] = useState<RemixRecord[]>(loadRemixes);
+
+  useEffect(() => {
+    if (isOpen) {
+      setRemixes(loadRemixes());
+    }
+  }, [isOpen]);
+
+  const addRemixToHistory = (textToSave: string) => {
+    const record: RemixRecord = {
+      id: `${prompt.id}-${Date.now()}`,
+      promptId: prompt.id,
+      title: prompt.title,
+      prompt: textToSave,
+      parameters: {
+        ar: aspectRatio,
+        aspectRatio,
+        stylize,
+        chaos,
+        modelPreset,
+        keywords: selectedKeywords,
+      },
+      timestamp: Date.now(),
+    };
+    setRemixes((prev) => {
+      const next = [
+        record,
+        ...prev.filter((r) => r.prompt !== textToSave),
+      ].slice(0, 20);
+      saveRemixes(next);
+      return next;
+    });
+  };
+
+  const applyRemix = (remix: RemixRecord) => {
+    if (remix.parameters.aspectRatio)
+      setAspectRatio(remix.parameters.aspectRatio);
+    if (remix.parameters.stylize !== undefined)
+      setStylize(remix.parameters.stylize);
+    if (remix.parameters.chaos !== undefined) setChaos(remix.parameters.chaos);
+    if (remix.parameters.modelPreset)
+      setModelPreset(remix.parameters.modelPreset);
+    if (remix.parameters.keywords) setSelectedKeywords(remix.parameters.keywords);
+  };
+
+  const clearRemixes = () => {
+    try {
+      localStorage.removeItem(REMIX_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+    setRemixes([]);
+  };
+
   const handleCopy = async (format: "plain" | "discord" = "plain") => {
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+    const textToCopy =
+      format === "discord"
+        ? `/imagine prompt: ${commandText}`
+        : modifiedPrompt;
     try {
-      await copyText(
-        format === "discord"
-          ? `/imagine prompt: ${commandText}`
-          : modifiedPrompt,
-      );
+      await copyText(textToCopy);
       if (!alive.current) return;
+      addRemixToHistory(textToCopy);
       setCopied(
         format === "discord"
           ? "Discord /imagine command copied."
@@ -227,6 +349,33 @@ export function PromptStudioDrawer({
               </header>
 
               <div className="prompt-studio-body">
+                {/* Section: Quick Style Presets */}
+                <div className="studio-group studio-presets-group">
+                  <span className="studio-group-label">
+                    Quick Style Presets <span>(Fast Apply)</span>
+                  </span>
+                  <div
+                    className="studio-presets-row"
+                    role="group"
+                    aria-label="Quick style presets"
+                  >
+                    {QUICK_STYLE_PRESETS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        className="studio-preset-chip"
+                        onClick={() => {
+                          setAspectRatio(preset.aspectRatio);
+                          setStylize(preset.stylize);
+                          setModelPreset(preset.modelPreset);
+                        }}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Section: Aspect Ratio Presets */}
                 <div className="studio-group">
                   <label className="studio-group-label">
@@ -418,6 +567,59 @@ export function PromptStudioDrawer({
                     <p className="preview-text">{modifiedPrompt}</p>
                   </div>
                 </div>
+
+                {/* Section: Recent Remixes (Collapsible) */}
+                <details className="studio-remixes-details" open={false}>
+                  <summary className="studio-remixes-summary">
+                    <span>Recent Remixes ({remixes.length})</span>
+                    {remixes.length > 0 && (
+                      <button
+                        type="button"
+                        className="clear-remixes-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          clearRemixes();
+                        }}
+                        aria-label="Clear history"
+                      >
+                        Clear history
+                      </button>
+                    )}
+                  </summary>
+                  <div className="studio-remixes-list">
+                    {remixes.length === 0 ? (
+                      <p className="no-remixes-note">
+                        No saved remixes yet. Copy a tweaked prompt to save it here.
+                      </p>
+                    ) : (
+                      remixes.map((remix) => (
+                        <div key={remix.id} className="remix-card">
+                          <div className="remix-header">
+                            <span className="remix-title">{remix.title}</span>
+                            <span className="remix-date">
+                              {new Date(remix.timestamp).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+                          <p className="remix-prompt-snippet">{remix.prompt}</p>
+                          <div className="remix-actions">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="remix-apply-btn"
+                              onClick={() => applyRemix(remix)}
+                            >
+                              Re-apply settings
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </details>
               </div>
 
               <footer className="prompt-studio-footer">

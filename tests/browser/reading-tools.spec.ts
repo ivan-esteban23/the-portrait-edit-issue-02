@@ -169,3 +169,55 @@ test("lightbox touch gestures anchor, clamp, cancel safely, and dismiss with foc
   await expect(opener).toBeFocused();
   expect(errors).toEqual([]);
 });
+
+test("reader slideshow toggle and keyboard shortcut p control presentation playback", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  const slideshowBtn = page.getByRole("button", {
+    name: "Toggle presentation slideshow",
+    exact: true,
+  });
+  await expect(slideshowBtn).toBeVisible();
+  await expect(slideshowBtn).toHaveAttribute("aria-pressed", "false");
+
+  // Press 'p' to start slideshow
+  await page.locator(".reader-canvas").focus();
+  await page.keyboard.press("p");
+  await expect(slideshowBtn).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".reader-slideshow-progress")).toBeVisible();
+
+  // Press 'p' again to pause
+  await page.keyboard.press("p");
+  await expect(slideshowBtn).toHaveAttribute("aria-pressed", "false");
+});
+
+test("Archive multi-select mode and floating batch actions toolbar", async ({
+  page,
+}) => {
+  await page.goto("prompts?q=Frost%20Fantasy%20Portrait");
+  const selectModeBtn = page.getByRole("button", {
+    name: "Select Prompts",
+    exact: true,
+  });
+  await expect(selectModeBtn).toBeVisible();
+  await selectModeBtn.click();
+  await expect(
+    page.getByRole("button", { name: "Cancel Selection", exact: true }),
+  ).toBeVisible();
+
+  // Select all filtered
+  await page
+    .getByRole("button", { name: "Select All Filtered", exact: true })
+    .click();
+
+  // Floating batch toolbar should appear
+  const toolbar = page.locator(".batch-floating-toolbar");
+  await expect(toolbar).toBeVisible();
+  await expect(toolbar).toContainText("1 prompt selected");
+
+  // Clear selection
+  await toolbar.getByRole("button", { name: "Clear", exact: true }).click();
+  await expect(toolbar).toBeHidden();
+});
+

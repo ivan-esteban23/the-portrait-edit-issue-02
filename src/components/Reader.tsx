@@ -279,6 +279,25 @@ function ReaderView({
   const [showTouchHint, setShowTouchHint] = useState(false);
   const touchHintDismissed = useRef(false);
 
+  // Slideshow (presentation mode) & Fullscreen state
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [slideshowInterval, setSlideshowInterval] = useState(6000);
+  const [loopSlideshow, setLoopSlideshow] = useState(false);
+  const [slideshowProgress, setSlideshowProgress] = useState(0);
+  const [isHoverPaused, setIsHoverPaused] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(() =>
+    typeof document !== "undefined" ? Boolean(document.fullscreenElement) : false,
+  );
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
   useEffect(() => {
     try {
       const isTouch =
@@ -472,6 +491,74 @@ function ReaderView({
     },
     [navigate, issue.slug, page],
   );
+
+  const toggleFullscreen = useCallback(() => {
+    try {
+      if (document.fullscreenElement) {
+        const exit = document.exitFullscreen?.();
+        if (exit && typeof exit.catch === "function") exit.catch(() => {});
+      } else if (document.documentElement.requestFullscreen) {
+        const req = document.documentElement.requestFullscreen();
+        if (req && typeof req.catch === "function") req.catch(() => {});
+      }
+    } catch {
+      /* fullscreen unsupported or denied in tests */
+    }
+    toggleFocus(!currentRouteFocus(focus));
+  }, [focus, toggleFocus]);
+
+  const toggleSlideshow = useCallback(() => {
+    setIsPlaying((prev) => !prev);
+  }, []);
+
+  const isModalOpen =
+    settings ||
+    rawOpen ||
+    shortcutsOpen ||
+    Boolean(lightbox) ||
+    showThumbnails;
+  const isEffectivelyPlaying = isPlaying && !isHoverPaused && !isModalOpen;
+
+  useEffect(() => {
+    setSlideshowProgress(0);
+  }, [page]);
+
+  useEffect(() => {
+    if (!isEffectivelyPlaying) return;
+    const stepMs = 50;
+    const intervalId = setInterval(() => {
+      setSlideshowProgress((prev) => {
+        const next = prev + (stepMs / slideshowInterval) * 100;
+        if (next >= 100) {
+          const curr = currentRoutePage(page);
+          if (curr >= issue.pages) {
+            if (loopSlideshow) {
+              go(1);
+              return 0;
+            } else {
+              setIsPlaying(false);
+              setAnnouncement("Reached end of issue");
+              return 0;
+            }
+          } else {
+            turnPage(1);
+            return 0;
+          }
+        }
+        return next;
+      });
+    }, stepMs);
+
+    return () => clearInterval(intervalId);
+  }, [
+    isEffectivelyPlaying,
+    slideshowInterval,
+    loopSlideshow,
+    page,
+    issue.pages,
+    go,
+    turnPage,
+  ]);
   useEffect(() => {
     const value = new URLSearchParams(location.search).get("focus");
     if (value === "1" || value === "0") setFocus(value === "1");
@@ -585,9 +672,13 @@ function ReaderView({
         e.preventDefault();
         toggleStudyBookmark();
       }
+      if (k === "p" && !e.repeat) {
+        e.preventDefault();
+        setIsPlaying((playing) => !playing);
+      }
       if (k === "f" && !e.repeat) {
         e.preventDefault();
-        toggleFocus(!currentRouteFocus(focus));
+        toggleFullscreen();
       }
       if (k === "t" && !e.repeat) {
         e.preventDefault();
@@ -635,6 +726,7 @@ function ReaderView({
     settings,
     go,
     toggleFocus,
+    toggleFullscreen,
     turnPage,
     shortcutsOpen,
     spreadCapable,
@@ -857,6 +949,29 @@ function ReaderView({
                     onChange={toggleSound}
                   />
                 </label>
+                <label>
+                  Slideshow speed
+                  <select
+                    aria-label="Slideshow timing"
+                    value={slideshowInterval}
+                    onChange={(e) =>
+                      setSlideshowInterval(Number(e.target.value))
+                    }
+                  >
+                    <option value={4000}>4 seconds</option>
+                    <option value={6000}>6 seconds (default)</option>
+                    <option value={10000}>10 seconds</option>
+                  </select>
+                </label>
+                <label className="loop-toggle-row">
+                  <span>Loop presentation</span>
+                  <input
+                    type="checkbox"
+                    aria-label="Loop presentation slideshow"
+                    checked={loopSlideshow}
+                    onChange={(e) => setLoopSlideshow(e.target.checked)}
+                  />
+                </label>
               </div>
               <div className="keyboard-guide">
                 <h3>Keyboard</h3>
@@ -864,7 +979,8 @@ function ReaderView({
                   ← / K previous · → / J next
                   <br />
                   Home / End first and last page
-                  <br />F Focus · Escape exit Focus
+                  <br />P Play / Pause presentation slideshow
+                  <br />F Fullscreen reading / Focus
                   <br />B Bookmark / save current study
                 </p>
                 {hint && (
@@ -891,6 +1007,76 @@ function ReaderView({
             onClick={() => toggleFocus(!currentRouteFocus(focus))}
           >
             {focus ? "Exit Focus" : "Focus"}
+          </Button>
+
+          {/* Presentation Slideshow Play/Pause Button */}
+          <Button
+            variant="ghost"
+            className={`reader-slideshow-btn ${isPlaying ? "is-playing" : ""}`}
+            aria-label="Toggle presentation slideshow"
+            aria-pressed={isPlaying}
+            aria-keyshortcuts="P"
+            title={
+              isPlaying
+                ? "Pause slideshow (P)"
+                : "Play presentation slideshow (P)"
+            }
+            onClick={toggleSlideshow}
+          >
+            {isPlaying ? (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </svg>
+            ) : (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            )}
+            <span className="slideshow-label">
+              {isPlaying ? "Pause" : "Play"}
+            </span>
+          </Button>
+
+          {/* Fullscreen Button */}
+          <Button
+            variant="ghost"
+            className="reader-fullscreen-btn"
+            aria-label="Toggle fullscreen"
+            title="Toggle fullscreen (F)"
+            aria-keyshortcuts="F"
+            onClick={toggleFullscreen}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              {isFullscreen ? (
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+              ) : (
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+              )}
+            </svg>
+            <span className="sr-only">Fullscreen</span>
           </Button>
           <Button
             variant="ghost"
@@ -1033,7 +1219,24 @@ function ReaderView({
           mode === "text" ? "Study reading view" : "Original page canvas"
         }
         style={{ "--reading-size": `${size}px` } as CSSProperties}
+        onMouseEnter={() => {
+          if (isPlaying) setIsHoverPaused(true);
+        }}
+        onMouseLeave={() => {
+          setIsHoverPaused(false);
+        }}
       >
+        {isPlaying && (
+          <div
+            className="reader-slideshow-progress"
+            role="progressbar"
+            aria-label="Slideshow slide progress"
+            aria-valuenow={Math.round(slideshowProgress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            style={{ width: `${slideshowProgress}%` }}
+          />
+        )}
         {mode === "page" ? (
           isSpread && rightPage <= issue.pages ? (
             <SpreadPage

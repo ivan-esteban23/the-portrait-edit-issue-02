@@ -11,6 +11,8 @@ export interface CommandPaletteProps {
   onToggleSpread?: () => void;
   onToggleFocus?: () => void;
   onOpenShortcuts?: () => void;
+  onToggleSlideshow?: () => void;
+  onToggleFullscreen?: () => void;
 }
 
 interface PaletteItem {
@@ -29,6 +31,8 @@ export function CommandPalette({
   onToggleSpread,
   onToggleFocus,
   onOpenShortcuts,
+  onToggleSlideshow,
+  onToggleFullscreen,
 }: CommandPaletteProps) {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -84,6 +88,62 @@ export function CommandPalette({
       },
     },
     {
+      id: "act-slideshow",
+      section: "Actions",
+      title: "Play / Pause Presentation Slideshow",
+      subtitle: "Autoplay magazine pages with smooth transition timing",
+      badge: "P",
+      action: () => {
+        onToggleSlideshow?.();
+        onClose();
+      },
+    },
+    {
+      id: "act-fullscreen",
+      section: "Actions",
+      title: "Toggle Fullscreen Reading",
+      subtitle: "Switch to borderless distraction-free reading canvas",
+      badge: "F",
+      action: () => {
+        if (onToggleFullscreen) onToggleFullscreen();
+        else onToggleFocus?.();
+        onClose();
+      },
+    },
+    {
+      id: "act-filter-ar-4-5",
+      section: "Actions",
+      title: "Filter Archive: 4:5 Portrait Aspect Ratio",
+      subtitle: "Show prompts composed in vertical editorial 4:5 format",
+      badge: "AR 4:5",
+      action: () => {
+        navigate("/prompts?ar=4:5");
+        onClose();
+      },
+    },
+    {
+      id: "act-filter-ar-16-9",
+      section: "Actions",
+      title: "Filter Archive: 16:9 Cinematic Aspect Ratio",
+      subtitle: "Show prompts composed in widescreen cinematic 16:9 format",
+      badge: "AR 16:9",
+      action: () => {
+        navigate("/prompts?ar=16:9");
+        onClose();
+      },
+    },
+    {
+      id: "act-filter-ar-1-1",
+      section: "Actions",
+      title: "Filter Archive: 1:1 Square Aspect Ratio",
+      subtitle: "Show prompts composed in square 1:1 format",
+      badge: "AR 1:1",
+      action: () => {
+        navigate("/prompts?ar=1:1");
+        onClose();
+      },
+    },
+    {
       id: "act-saved",
       section: "Actions",
       title: "View Saved Studies",
@@ -116,7 +176,16 @@ export function CommandPalette({
         onOpenShortcuts?.();
       },
     },
-  ], [navigate, onClose, onOpenShortcuts, onToggleFocus, onToggleSpread, onToggleTheme]);
+  ], [
+    navigate,
+    onClose,
+    onOpenShortcuts,
+    onToggleFocus,
+    onToggleFullscreen,
+    onToggleSlideshow,
+    onToggleSpread,
+    onToggleTheme,
+  ]);
 
   // Compute matched items
   const items: PaletteItem[] = useMemo(() => {
