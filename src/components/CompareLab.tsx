@@ -1,7 +1,8 @@
-import { useEffect, useState, useRef, useCallback, type MouseEvent } from "react";
+import { useState, useRef, useCallback, type MouseEvent } from "react";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
 import { Button } from "./ui/button";
+import { ModalContent, ModalTitle } from "./ui/dialog";
 import { copyText } from "@/lib/utils";
 import { formatPromptText, type CopyFormat } from "@/lib/promptFormatter";
 
@@ -28,17 +29,7 @@ export function CompareLab({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const sliderFrameRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  const closeButton = useRef<HTMLButtonElement>(null);
 
   const updateSplitFromClientX = useCallback((clientX: number) => {
     if (!sliderFrameRef.current) return;
@@ -76,7 +67,11 @@ export function CompareLab({
 
   if (!isOpen) return null;
 
-  const handleCopy = async (prompt: Prompt, format: CopyFormat, e: MouseEvent) => {
+  const handleCopy = async (
+    prompt: Prompt,
+    format: CopyFormat,
+    e: MouseEvent,
+  ) => {
     e.preventDefault();
     try {
       const text = formatPromptText(prompt, format);
@@ -187,13 +182,14 @@ export function CompareLab({
           <button
             type="button"
             className="compare-inspect-btn"
-            onClick={() =>
+            onClick={(event) => {
+              event.currentTarget.focus();
               onInspectImage?.(
                 assetUrl(prompt.referenceImage),
                 prompt.title,
                 `Study #${prompt.studyNumber}: ${prompt.title}`,
-              )
-            }
+              );
+            }}
             title="Click to inspect image fullscreen"
           >
             <img
@@ -210,162 +206,167 @@ export function CompareLab({
   };
 
   return (
-    <div
-      className="compare-lab-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Prompt comparison lab"
+    <ModalContent
+      isOpen={isOpen}
+      onClose={onClose}
+      overlayClassName="compare-lab-overlay"
+      className="compare-lab-container"
+      initialFocus={closeButton}
     >
-      <div className="compare-lab-container">
-        <header className="compare-lab-toolbar">
-          <div className="compare-lab-title">
+      <header className="compare-lab-toolbar">
+        <div className="compare-lab-title">
+          <ModalTitle asChild>
             <h2>Compare Lab</h2>
-            <p>Evaluating prompt variations, camera notes, and visual outputs</p>
+          </ModalTitle>
+          <p>Evaluating prompt variations, camera notes, and visual outputs</p>
+        </div>
+
+        <div className="compare-toolbar-controls">
+          {/* Segmented Control: Side by Side | Split Curtain */}
+          <div
+            className="compare-mode-segmented"
+            role="radiogroup"
+            aria-label="Comparison layout"
+          >
+            <button
+              type="button"
+              role="radio"
+              aria-checked={mode === "side-by-side"}
+              className={`segmented-mode-btn ${mode === "side-by-side" ? "is-active" : ""}`}
+              onClick={() => setMode("side-by-side")}
+            >
+              Side by Side
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={mode === "split"}
+              className={`segmented-mode-btn ${mode === "split" ? "is-active" : ""}`}
+              onClick={() => setMode("split")}
+            >
+              Split Curtain
+            </button>
           </div>
 
-          <div className="compare-toolbar-controls">
-            {/* Segmented Control: Side by Side | Split Curtain */}
-            <div
-              className="compare-mode-segmented"
-              role="radiogroup"
-              aria-label="Comparison layout"
-            >
-              <button
-                type="button"
-                role="radio"
-                aria-checked={mode === "side-by-side"}
-                className={`segmented-mode-btn ${mode === "side-by-side" ? "is-active" : ""}`}
-                onClick={() => setMode("side-by-side")}
-              >
-                Side by Side
-              </button>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={mode === "split"}
-                className={`segmented-mode-btn ${mode === "split" ? "is-active" : ""}`}
-                onClick={() => setMode("split")}
-              >
-                Split Curtain
-              </button>
+          <Button
+            variant="outline"
+            onClick={onSwap}
+            title="Swap left and right studies"
+          >
+            ⇄ Swap Studies
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            ref={closeButton}
+            aria-label="Close compare lab"
+            className="compare-close-btn"
+          >
+            Close ✕
+          </Button>
+        </div>
+      </header>
+
+      {mode === "side-by-side" ? (
+        <div className="compare-stage">
+          {renderSideBySideColumn(studyA, "Study A")}
+          <div className="compare-divider" aria-hidden="true" />
+          {renderSideBySideColumn(studyB, "Study B")}
+        </div>
+      ) : (
+        <div className="split-curtain-container">
+          {/* Split Curtain Frame */}
+          <div
+            ref={sliderFrameRef}
+            className={`split-curtain-frame ${isDragging ? "is-dragging" : ""}`}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+          >
+            {/* Study B (Background / Right) */}
+            <div className="split-layer split-layer-b">
+              <img
+                src={assetUrl(studyB.referenceImage)}
+                alt={`Study B: ${studyB.title}`}
+                className="split-layer-img"
+                draggable={false}
+              />
+              <span className="split-side-badge badge-right">
+                Study B: #{studyB.studyNumber}
+              </span>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={onSwap}
-              title="Swap left and right studies"
+            {/* Study A (Foreground / Left, clipped by percentage) */}
+            <div
+              className="split-layer split-layer-a"
+              style={{ clipPath: `inset(0 ${100 - splitPos}% 0 0)` }}
             >
-              ⇄ Swap Studies
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={onClose}
-              aria-label="Close compare lab"
-              className="compare-close-btn"
-            >
-              Close ✕
-            </Button>
-          </div>
-        </header>
+              <img
+                src={assetUrl(studyA.referenceImage)}
+                alt={`Study A: ${studyA.title}`}
+                className="split-layer-img"
+                draggable={false}
+              />
+              <span className="split-side-badge badge-left">
+                Study A: #{studyA.studyNumber}
+              </span>
+            </div>
 
-        {mode === "side-by-side" ? (
-          <div className="compare-stage">
-            {renderSideBySideColumn(studyA, "Study A")}
+            {/* Draggable Divider Handle */}
+            <div
+              className="split-curtain-handle"
+              style={{ left: `${splitPos}%` }}
+              role="slider"
+              aria-label="Curtain comparison slider"
+              aria-valuenow={Math.round(splitPos)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  setSplitPos((p) => Math.max(0, p - 4));
+                } else if (e.key === "ArrowRight") {
+                  e.preventDefault();
+                  setSplitPos((p) => Math.min(100, p + 4));
+                } else if (e.key === "Home") {
+                  e.preventDefault();
+                  setSplitPos(0);
+                } else if (e.key === "End") {
+                  e.preventDefault();
+                  setSplitPos(100);
+                }
+              }}
+            >
+              <div className="split-handle-line" />
+              <div className="split-handle-thumb">
+                <span className="thumb-arrow">‹</span>
+                <span className="thumb-arrow">›</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="split-slider-instructions">
+            <span>Drag handle or swipe to compare details</span>
+            <span>
+              Study A ({Math.round(splitPos)}%) ⇄ Study B (
+              {Math.round(100 - splitPos)}%)
+            </span>
+          </div>
+
+          {/* Split Details Below Slider */}
+          <div className="split-meta-stage">
+            <div className="split-meta-col">
+              {renderPromptDetails(studyA, "Study A (Left)")}
+            </div>
             <div className="compare-divider" aria-hidden="true" />
-            {renderSideBySideColumn(studyB, "Study B")}
-          </div>
-        ) : (
-          <div className="split-curtain-container">
-            {/* Split Curtain Frame */}
-            <div
-              ref={sliderFrameRef}
-              className={`split-curtain-frame ${isDragging ? "is-dragging" : ""}`}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-            >
-              {/* Study B (Background / Right) */}
-              <div className="split-layer split-layer-b">
-                <img
-                  src={assetUrl(studyB.referenceImage)}
-                  alt={`Study B: ${studyB.title}`}
-                  className="split-layer-img"
-                  draggable={false}
-                />
-                <span className="split-side-badge badge-right">
-                  Study B: #{studyB.studyNumber}
-                </span>
-              </div>
-
-              {/* Study A (Foreground / Left, clipped by percentage) */}
-              <div
-                className="split-layer split-layer-a"
-                style={{ clipPath: `inset(0 ${100 - splitPos}% 0 0)` }}
-              >
-                <img
-                  src={assetUrl(studyA.referenceImage)}
-                  alt={`Study A: ${studyA.title}`}
-                  className="split-layer-img"
-                  draggable={false}
-                />
-                <span className="split-side-badge badge-left">
-                  Study A: #{studyA.studyNumber}
-                </span>
-              </div>
-
-              {/* Draggable Divider Handle */}
-              <div
-                className="split-curtain-handle"
-                style={{ left: `${splitPos}%` }}
-                role="slider"
-                aria-label="Curtain comparison slider"
-                aria-valuenow={Math.round(splitPos)}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowLeft") {
-                    e.preventDefault();
-                    setSplitPos((p) => Math.max(0, p - 4));
-                  } else if (e.key === "ArrowRight") {
-                    e.preventDefault();
-                    setSplitPos((p) => Math.min(100, p + 4));
-                  } else if (e.key === "Home") {
-                    e.preventDefault();
-                    setSplitPos(0);
-                  } else if (e.key === "End") {
-                    e.preventDefault();
-                    setSplitPos(100);
-                  }
-                }}
-              >
-                <div className="split-handle-line" />
-                <div className="split-handle-thumb">
-                  <span className="thumb-arrow">‹</span>
-                  <span className="thumb-arrow">›</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="split-slider-instructions">
-              <span>Drag handle or swipe to compare details</span>
-              <span>Study A ({Math.round(splitPos)}%) ⇄ Study B ({Math.round(100 - splitPos)}%)</span>
-            </div>
-
-            {/* Split Details Below Slider */}
-            <div className="split-meta-stage">
-              <div className="split-meta-col">
-                {renderPromptDetails(studyA, "Study A (Left)")}
-              </div>
-              <div className="compare-divider" aria-hidden="true" />
-              <div className="split-meta-col">
-                {renderPromptDetails(studyB, "Study B (Right)")}
-              </div>
+            <div className="split-meta-col">
+              {renderPromptDetails(studyB, "Study B (Right)")}
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </ModalContent>
   );
 }

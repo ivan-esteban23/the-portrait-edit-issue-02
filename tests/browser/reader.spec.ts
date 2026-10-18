@@ -629,3 +629,269 @@ test("unavailable web fonts preserve readable layout and navigation", async ({
   await expect(page).toHaveURL(/pages\/61$/);
   await noOverflow(page);
 });
+
+test("accessibility: shortcuts and lightbox trap focus and restore external triggers", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  const opener = page.getByRole("button", {
+    name: "Keyboard shortcuts",
+    exact: true,
+  });
+  for (const dismissal of ["Escape", "button", "overlay"]) {
+    await opener.click();
+    const dialog = page.getByRole("dialog", {
+      name: "Keyboard Shortcuts",
+      exact: true,
+    });
+    await expect(dialog).toHaveAttribute("aria-modal", "true");
+    const close = dialog.getByRole("button", {
+      name: "Close shortcuts cheatsheet",
+    });
+    await expect(close).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(close).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(close).toBeFocused();
+    await page.keyboard.press("j");
+    await expect(page).toHaveURL(/pages\/60$/);
+    if (dismissal === "Escape") await page.keyboard.press("Escape");
+    else if (dismissal === "button") await close.click();
+    else
+      await page
+        .locator(".shortcuts-modal-overlay")
+        .click({ position: { x: 2, y: 2 } });
+    await expect(dialog).toHaveCount(0);
+    await expect(opener).toBeFocused();
+  }
+  await mode(page, "page");
+  const inspect = page.getByRole("button", {
+    name: "Inspect page 60 in detail",
+  });
+  await inspect.focus();
+  await page.keyboard.press("Enter");
+  const lightbox = page.getByRole("dialog", { name: "Issue 02 · Page 60" });
+  const close = lightbox.getByRole("button", { name: "Close image lightbox" });
+  await expect(close).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(lightbox.getByRole("button", { name: "Zoom in" })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(close).toBeFocused();
+  await lightbox.getByRole("button", { name: "Zoom in" }).click();
+  await close.focus();
+  await page.keyboard.press("Tab");
+  await expect(
+    lightbox.getByRole("button", { name: "Zoom out" }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(lightbox).toHaveCount(0);
+  await expect(inspect).toBeFocused();
+  await noOverflow(page);
+});
+
+test("accessibility: reader announces navigation, palette jumps, and Focus changes", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  const live = page.locator(".reader-announcer");
+  await expect(live).toHaveAttribute("aria-live", "polite");
+  await expect(live).toHaveAttribute("aria-atomic", "true");
+  await expect(live).toHaveText(
+    "Page 60 of 196: Study 005 - Frost Fantasy Portrait",
+  );
+  await page
+    .locator(".reader-bottom")
+    .getByRole("button", { name: "Next →", exact: true })
+    .click();
+  await expect(live).toHaveText(/Page 61 of 196: Study \d{3} - .+/);
+  await page.keyboard.press("Control+k");
+  await page.locator(".palette-search-input").fill("62");
+  await page.getByRole("option", { name: /Jump to Page 62/ }).click();
+  await expect(live).toHaveText(/Page 62 of 196: Study \d{3} - .+/);
+  const range = page.getByRole("slider", { name: "Browse pages" });
+  await range.focus();
+  await range.press("End");
+  await expect(live).toHaveText(/Page 196 of 196: Study \d{3} - .+/);
+  await page.locator(".reader-canvas").focus();
+  await page.keyboard.press("f");
+  await expect(live).toHaveText("Focus mode activated");
+  await page.keyboard.press("f");
+  await expect(live).toHaveText("Focus mode deactivated");
+  await page.locator(".reader-canvas").focus();
+  await page.keyboard.press("End");
+  await expect(live).toHaveText("Focus mode deactivated");
+});
+
+test("accessibility: focus rings meet theme contrast and respect forced colors; skip link reaches main", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  await expect(page.locator(".reader-announcer")).toContainText(
+    "Page 60 of 196:",
+  );
+  const skip = page.getByRole("link", { name: "Skip to content" });
+  await skip.focus();
+  await expect(skip).toBeInViewport();
+  await skip.press("Enter");
+  await expect(page.locator("#main")).toBeFocused();
+  await expect(page).toHaveURL(/#main$/);
+  const theme = page.locator(".masthead").getByLabel("Color theme");
+  const display = page.getByRole("button", { name: "Display", exact: true });
+  for (const value of ["light", "paper", "dark"]) {
+    await theme.selectOption(value);
+    await display.focus();
+    const contrast = await display.evaluate((node) => {
+      const style = getComputedStyle(node);
+      const luminance = (color: string) => {
+        const rgb = color
+          .match(/\d+(?:\.\d+)?/g)!
+          .slice(0, 3)
+          .map(Number)
+          .map((v) => v / 255)
+          .map((v) =>
+            v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4,
+          );
+        return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+      };
+      const ring = luminance(style.outlineColor);
+      const background = luminance(
+        getComputedStyle(document.body).backgroundColor,
+      );
+      return (
+        (Math.max(ring, background) + 0.05) /
+        (Math.min(ring, background) + 0.05)
+      );
+    });
+    expect(contrast, value).toBeGreaterThanOrEqual(3);
+  }
+  await page.emulateMedia({ forcedColors: "active" });
+  await display.focus();
+  await expect(display).toHaveCSS("outline-style", "solid");
+  await expect(display).toHaveCSS("outline-width", "2px");
+  await expect(display).toHaveCSS("outline-offset", "2px");
+  const color = await display.evaluate((node) => {
+    const reference = document.createElement("span");
+    reference.style.color = "Highlight";
+    document.body.append(reference);
+    const expected = getComputedStyle(reference).color;
+    reference.remove();
+    return { actual: getComputedStyle(node).outlineColor, expected };
+  });
+  expect(color.actual).toBe(color.expected);
+});
+
+test("accessibility: coarse-pointer reader and modal controls have 44px targets", async ({
+  page,
+}) => {
+  test.skip(
+    !(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)),
+    "Touch devices only",
+  );
+  await page.goto(reader);
+  async function checkTargets(selector: string) {
+    for (const control of await page.locator(selector).all()) {
+      if (!(await control.isVisible())) continue;
+      const box = await control.boundingBox();
+      expect(
+        box!.width,
+        (await control.getAttribute("aria-label")) ||
+          (await control.textContent()) ||
+          selector,
+      ).toBeGreaterThanOrEqual(44);
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+    }
+  }
+  await checkTargets(
+    ".reader-top :is(button,a,input,select), .reader-bottom button, .scrubber :is(button,input)",
+  );
+  await page
+    .getByRole("button", { name: "Keyboard shortcuts", exact: true })
+    .click();
+  await checkTargets(".shortcuts-modal-card button");
+  await noOverflow(page);
+  await page.keyboard.press("Escape");
+  await mode(page, "page");
+  await page.getByRole("button", { name: "Inspect page 60 in detail" }).click();
+  await checkTargets(".lightbox-controls button");
+  await noOverflow(page);
+  await page.screenshot({
+    path: `test-results/accessibility-lightbox-${page.viewportSize()!.width}.png`,
+  });
+});
+
+test("accessibility: Compare Lab contains focus and restores it through a nested lightbox", async ({
+  page,
+}) => {
+  await page.goto("prompts");
+  await page
+    .getByRole("button", { name: /^Add Study \d+ to compare$/ })
+    .nth(0)
+    .click();
+  await page
+    .getByRole("button", { name: /^Add Study \d+ to compare$/ })
+    .nth(0)
+    .click();
+  const opener = page.getByRole("button", { name: "Compare 2 studies ⇄" });
+  await opener.click();
+  const compare = page.getByRole("dialog", {
+    name: "Compare Lab",
+    exact: true,
+  });
+  const close = compare.getByRole("button", { name: "Close compare lab" });
+  await expect(close).toBeFocused();
+  await compare
+    .getByRole("button", { name: "Markdown", exact: true })
+    .last()
+    .focus();
+  await page.keyboard.press("Tab");
+  await expect(
+    compare.getByRole("radio", { name: "Side by Side" }),
+  ).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(
+    compare.getByRole("button", { name: "Markdown", exact: true }).last(),
+  ).toBeFocused();
+  const inspect = compare.locator(".compare-inspect-btn").first();
+  await inspect.click();
+  const lightbox = page.getByRole("dialog", { name: /^Study #/ });
+  await expect(
+    lightbox.getByRole("button", { name: "Close image lightbox" }),
+  ).toBeFocused();
+  // The top layer receives pointer events, and Escape leaves the underlying dialog open.
+  await expect(lightbox).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(lightbox).toHaveCount(0);
+  await expect(compare).toBeVisible();
+  await expect(inspect).toBeFocused();
+  await compare.getByRole("radio", { name: "Split Curtain" }).click();
+  const slider = compare.getByRole("slider", {
+    name: "Curtain comparison slider",
+  });
+  await slider.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(slider).toHaveAttribute("aria-valuenow", "54");
+  await noOverflow(page);
+  await close.click();
+  await expect(compare).toHaveCount(0);
+  await expect(opener).toBeFocused();
+});
+
+test("accessibility: spread announcements describe both studies and the unpaired final page", async ({
+  page,
+}) => {
+  test.skip(
+    (page.viewportSize()?.width ?? 0) < 1150,
+    "Spread requires desktop width",
+  );
+  await page.addInitScript(() =>
+    localStorage.setItem("portrait-edit-spread", "true"),
+  );
+  await page.goto(reader);
+  const live = page.locator(".reader-announcer");
+  await expect(live).toHaveText(
+    /Pages 60 and 61 of 196: Study 005 - Frost Fantasy Portrait and Study \d{3} - .+/,
+  );
+  await page.locator(".reader-canvas").focus();
+  await page.keyboard.press("End");
+  await expect(live).toHaveText(/Page 196 of 196: Study \d{3} - .+/);
+});

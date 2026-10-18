@@ -274,7 +274,10 @@ export function Study({ prompt }: { prompt: Prompt }) {
         <button
           type="button"
           className="image-inspect-trigger"
-          onClick={() => setLightboxOpen(true)}
+          onClick={(event) => {
+            event.currentTarget.focus();
+            setLightboxOpen(true);
+          }}
           title="Click to inspect image in detail"
           aria-label={`Inspect high-resolution reference for ${prompt.title}`}
         >

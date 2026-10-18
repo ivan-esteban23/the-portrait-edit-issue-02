@@ -125,6 +125,20 @@ function OriginalPage({
         style={{ width: `${zoom}%`, maxWidth: zoom === 100 ? "950px" : "none" }}
       >
         <img
+          role="button"
+          tabIndex={0}
+          aria-label={`Inspect page ${page} in detail`}
+          onClick={(event) => {
+            event.currentTarget.focus();
+            onInspect?.(page);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onInspect?.(page);
+            }
+          }}
+          style={{ cursor: "zoom-in" }}
           key={retry}
           className={state === "ready" ? "page-art loaded" : "page-art"}
           src={assetUrl(
@@ -137,9 +151,7 @@ function OriginalPage({
           alt={`Issue ${issue.number}, page ${page}`}
           onLoad={() => setState("ready")}
           onError={() => setState("error")}
-          onClick={() => onInspect?.(page)}
           title="Click to inspect page in detail"
-          style={{ cursor: "zoom-in" }}
         />
       </div>
     </div>
@@ -345,6 +357,34 @@ function ReaderView({
     firstVisible === lastVisible
       ? String(firstVisible)
       : `${firstVisible}–${lastVisible}`;
+  const [announcement, setAnnouncement] = useState("");
+  const announced = useRef<{ pageKey: string; focus: boolean } | null>(null);
+  useEffect(() => {
+    const pageKey = `${issue.slug}:${firstVisible}:${lastVisible}`;
+    const messages: string[] = [];
+    if (announced.current?.pageKey !== pageKey) {
+      const titleAt = (number: number) => {
+        const prompt = prompts.find(
+          (p) => p.issueSlug === issue.slug && p.page === number,
+        );
+        return prompt
+          ? `Study ${String(prompt.studyNumber).padStart(3, "0")} - ${prompt.title}`
+          : number === 1
+            ? `${issue.title} cover`
+            : chapterAt(issue, number).title;
+      };
+      messages.push(
+        firstVisible === lastVisible
+          ? `Page ${firstVisible} of ${issue.pages}: ${titleAt(firstVisible)}`
+          : `Pages ${firstVisible} and ${lastVisible} of ${issue.pages}: ${titleAt(firstVisible)} and ${titleAt(lastVisible)}`,
+      );
+    }
+    if (announced.current && announced.current.focus !== focus) {
+      messages.push(`Focus mode ${focus ? "activated" : "deactivated"}`);
+    }
+    announced.current = { pageKey, focus };
+    if (messages.length) setAnnouncement(messages.join(". "));
+  }, [firstVisible, lastVisible, focus, issue]);
   const go = useCallback(
     (n: number) => {
       const target = Math.max(1, Math.min(issue.pages, Math.round(n) || 1));
@@ -416,7 +456,11 @@ function ReaderView({
   }, [page, issue.title]);
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
-    canvas.current?.focus({ preventScroll: true });
+    // A lazy-loaded reader must not steal focus from the skip link or another
+    // control that the user reached while the route was loading.
+    if (document.activeElement === document.body) {
+      canvas.current?.focus({ preventScroll: true });
+    }
   }, []);
   useEffect(() => {
     // A page turn starts the next article at its beginning without stealing
@@ -598,6 +642,13 @@ function ReaderView({
       className={`reader ${focus ? "is-focus" : ""} ${idle ? "chrome-idle" : ""}`}
       aria-label="Magazine reader"
     >
+      <div
+        className="sr-only reader-announcer"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcement}
+      </div>
       <div
         className="reading-progress-bar"
         role="progressbar"
@@ -856,12 +907,15 @@ function ReaderView({
             className="shortcuts-trigger-btn"
             aria-label="Keyboard shortcuts"
             title="Keyboard shortcuts (?)"
-            onClick={() => setShortcutsOpen(true)}
+            onClick={(event) => {
+              event.currentTarget.focus();
+              setShortcutsOpen(true);
+            }}
           >
             ?
           </Button>
         </div>
-        <p className="chapter-progress" aria-live="polite">
+        <p className="chapter-progress">
           {chapter.title}{" "}
           <span>
             · {page - chapter.startPage + 1} of{" "}
@@ -1100,7 +1154,7 @@ function ReaderView({
         >
           ← Previous
         </Button>
-        <span aria-live="polite">
+        <span>
           {pageLabel} / {issue.pages}
         </span>
         <Button

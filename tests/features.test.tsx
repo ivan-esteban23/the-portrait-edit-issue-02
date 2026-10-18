@@ -133,7 +133,10 @@ describe("Theme & Bookmarks features", () => {
     expect(screen.getByText("100%")).toBeInTheDocument();
 
     // Dismiss with Escape key
-    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.keyDown(
+      screen.getByRole("button", { name: "Close image lightbox" }),
+      { key: "Escape" },
+    );
     expect(onClose).toHaveBeenCalled();
 
     // Does not render when isOpen is false
