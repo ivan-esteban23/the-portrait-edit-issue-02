@@ -302,7 +302,13 @@ test("command palette spread changes update the current reader immediately", asy
       .click();
     const search = page.getByPlaceholder(/Type a command/);
     await search.fill("Toggle Two-Page Spread");
+    // Wait for filtering and selection before submitting the keyboard command.
+    await expect(page.getByRole("dialog").getByRole("option")).toHaveCount(1);
+    await expect(
+      page.getByRole("option", { name: /^Toggle Two-Page Spread/ }),
+    ).toHaveAttribute("aria-selected", "true");
     await search.press("Enter");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   };
   await toggle();
   await expect(page.locator(".spread-stage")).toBeVisible();
