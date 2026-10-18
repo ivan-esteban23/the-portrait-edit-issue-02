@@ -1,13 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
 import { copyText } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { useBookmarks } from "@/hooks/useBookmarks";
-import { ImageLightbox } from "./ImageLightbox";
-import { PromptStudioDrawer } from "./PromptStudioDrawer";
 import { exportStudyRecipeCard } from "@/lib/cardExport";
-import { formatPromptText, canShare, sharePrompt, type CopyFormat } from "@/lib/promptFormatter";
+import {
+  formatPromptText,
+  canShare,
+  sharePrompt,
+  type CopyFormat,
+} from "@/lib/promptFormatter";
+
+const ImageLightbox = lazy(() =>
+  import("./ImageLightbox").then((m) => ({ default: m.ImageLightbox })),
+);
+const PromptStudioDrawer = lazy(() =>
+  import("./PromptStudioDrawer").then((m) => ({
+    default: m.PromptStudioDrawer,
+  })),
+);
 
 export function PromptCard({ prompt }: { prompt: Prompt }) {
   const [feedback, setFeedback] = useState("");
@@ -169,11 +181,15 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
       <p className="source-note">Text checked against the published study.</p>
 
       {/* Interactive Prompt Studio / Parameter Tweaker Drawer */}
-      <PromptStudioDrawer
-        prompt={prompt}
-        isOpen={studioOpen}
-        onClose={() => setStudioOpen(false)}
-      />
+      {studioOpen && (
+        <Suspense fallback={null}>
+          <PromptStudioDrawer
+            prompt={prompt}
+            isOpen={studioOpen}
+            onClose={() => setStudioOpen(false)}
+          />
+        </Suspense>
+      )}
     </section>
   );
 }
@@ -296,19 +312,27 @@ export function Study({ prompt }: { prompt: Prompt }) {
         </figcaption>
       </figure>
 
-      <ImageLightbox
-        src={assetUrl(prompt.referenceImage)}
-        alt={`Reference for ${prompt.title}`}
-        title={`Study ${String(prompt.studyNumber).padStart(3, "0")} · ${prompt.title}`}
-        isOpen={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-      />
+      {lightboxOpen && (
+        <Suspense fallback={null}>
+          <ImageLightbox
+            src={assetUrl(prompt.referenceImage)}
+            alt={`Reference for ${prompt.title}`}
+            title={`Study ${String(prompt.studyNumber).padStart(3, "0")} · ${prompt.title}`}
+            isOpen={lightboxOpen}
+            onClose={() => setLightboxOpen(false)}
+          />
+        </Suspense>
+      )}
 
-      <PromptStudioDrawer
-        prompt={prompt}
-        isOpen={studioOpen}
-        onClose={() => setStudioOpen(false)}
-      />
+      {studioOpen && (
+        <Suspense fallback={null}>
+          <PromptStudioDrawer
+            prompt={prompt}
+            isOpen={studioOpen}
+            onClose={() => setStudioOpen(false)}
+          />
+        </Suspense>
+      )}
 
       <PromptCard key={prompt.id} prompt={prompt} />
       <section className="article-section">
