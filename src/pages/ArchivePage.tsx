@@ -1,16 +1,8 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Link,
-  Navigate,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
-import { assetUrl, currentIssue, issues, prompts, readerPath } from "@/content";
-import { Button } from "./ui/button";
-import { Study } from "./Study";
-import { StudyCard } from "./StudyCard";
-import { useLastReadPage } from "@/hooks/useReadingProgress";
+import { Link, useSearchParams } from "react-router-dom";
+import { prompts } from "@/content";
+import { Button } from "@/components/ui/button";
+import { StudyCard } from "@/components/StudyCard";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { splitPromptParameters } from "@/lib/promptFormatter";
 import { copyText } from "@/lib/utils";
@@ -19,223 +11,15 @@ import { generateMarkdownDossier, downloadFile } from "@/lib/dossier";
 type ParsedParameters = ReturnType<typeof splitPromptParameters>;
 
 const CompareLab = lazy(() =>
-  import("./CompareLab").then((m) => ({ default: m.CompareLab })),
+  import("@/components/CompareLab").then((m) => ({ default: m.CompareLab })),
 );
 const ImageLightbox = lazy(() =>
-  import("./ImageLightbox").then((m) => ({ default: m.ImageLightbox })),
+  import("@/components/ImageLightbox").then((m) => ({
+    default: m.ImageLightbox,
+  })),
 );
 
-export function Home() {
-  const lastReadPage = useLastReadPage(currentIssue);
-  const navigate = useNavigate();
-  const { isSaved, toggleSaved } = useBookmarks();
-  const legacy = window.location.hash.match(/^#page=(\d+)$/);
-  if (window.location.hash === "#reader")
-    return (
-      <Navigate
-        replace
-        to={readerPath(currentIssue.slug) + window.location.search}
-      />
-    );
-  if (legacy)
-    return (
-      <Navigate
-        replace
-        to={
-          readerPath(
-            currentIssue.slug,
-            Math.min(currentIssue.pages, Math.max(1, Number(legacy[1]))),
-          ) + window.location.search
-        }
-      />
-    );
-  const featured = currentIssue.featured.map((id) =>
-    prompts.find((p) => p.id === id)!,
-  );
-  return (
-    <>
-      <section className="home-hero">
-        <div>
-          <p className="eyebrow">
-            Issue {currentIssue.number} / A portrait archive
-          </p>
-          <h1>
-            The
-            <br />
-            <em>Prompt</em> Issue
-          </h1>
-          <p className="hero-deck">{currentIssue.description}</p>
-          <p className="issue-stats">
-            {currentIssue.studies} studies <span>·</span> {currentIssue.pages}{" "}
-            pages <span>·</span> {currentIssue.chapters.length} chapters
-          </p>
-          <div className="hero-actions">
-            <Button asChild variant="default">
-              <Link to={readerPath(currentIssue.slug, lastReadPage)}>
-                {lastReadPage > 1
-                  ? `Resume reading · Page ${lastReadPage} ↗`
-                  : "Start reading ↗"}
-              </Link>
-            </Button>
-            {lastReadPage > 1 && (
-              <Button asChild variant="outline">
-                <Link to={readerPath(currentIssue.slug)}>
-                  Start from beginning
-                </Link>
-              </Button>
-            )}
-            <Link to={`/issues/${currentIssue.slug}`}>Inside the issue</Link>
-          </div>
-        </div>
-        <Link
-          className="hero-cover"
-          to={readerPath(currentIssue.slug, lastReadPage)}
-          aria-label="Read The Prompt Issue"
-        >
-          <img
-            src={assetUrl(currentIssue.cover)}
-            width="480"
-            height="622"
-            alt="The Portrait Edit — Issue 02 cover"
-          />
-          <span>Issue 02 — The Prompt Issue</span>
-        </Link>
-      </section>
-      <section className="selected-section">
-        <div className="section-title">
-          <h2>From the archive</h2>
-          <Link to="/prompts">All studies ↗</Link>
-        </div>
-        <div className="selected-strip">
-          {featured.map((p) => (
-            <StudyCard
-              key={p.id}
-              prompt={p}
-              to={readerPath(p.issueSlug, p.page)}
-              headingLevel="h3"
-              isSaved={isSaved(p.id)}
-              onToggleSaved={toggleSaved}
-              onTagClick={(t) =>
-                navigate(`/prompts?tag=${encodeURIComponent(t)}`)
-              }
-            />
-          ))}
-        </div>
-      </section>
-    </>
-  );
-}
-export function IssueOverview() {
-  const { slug } = useParams();
-  const issue = issues.find((i) => i.slug === slug);
-  const lastReadPage = useLastReadPage(issue);
-  const { isSaved, toggleSaved } = useBookmarks();
-  if (!issue) return <NotFound />;
-  const issueStudies = prompts.filter((p) => p.issueSlug === issue.slug);
-
-  return (
-    <section className="overview">
-      <header>
-        <p className="eyebrow">Issue {issue.number}</p>
-        <h1>{issue.title}</h1>
-        <p className="editorial-intro">{issue.description}</p>
-      </header>
-      <div className="overview-grid">
-        <div>
-          <img
-            className="overview-cover"
-            src={assetUrl(issue.cover)}
-            alt={`${issue.title} cover`}
-          />
-          <div className="hero-actions">
-            <Button asChild variant="default">
-              <Link to={readerPath(issue.slug, lastReadPage)}>
-                {lastReadPage > 1
-                  ? `Resume reading (Page ${lastReadPage}) ↗`
-                  : "Start reading"}
-              </Link>
-            </Button>
-            {lastReadPage > 1 && (
-              <Button asChild variant="outline">
-                <Link to={readerPath(issue.slug)}>Start from beginning</Link>
-              </Button>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              className="print-contact-sheet-btn"
-              onClick={() => window.print()}
-              title="Print editorial contact sheet (@media print)"
-            >
-              Print Contact Sheet 🖨
-            </Button>
-            <a href={issue.pdfUrl}>
-              Download PDF · {(issue.pdfBytes / 1e6).toFixed(1)} MB ↗
-            </a>
-          </div>
-        </div>
-        <nav className="chapter-directory" aria-label="Issue chapters">
-          <Link to={readerPath(issue.slug)}>
-            <span>Front matter</span>
-            <span>1–{issue.chapters[0].startPage - 1}</span>
-          </Link>
-          {issue.chapters.map((c, i) => (
-            <Link key={c.startPage} to={readerPath(issue.slug, c.startPage)}>
-              <span>
-                <small>{String(i + 1).padStart(2, "0")}</small> {c.title}
-              </span>
-              <span>
-                {c.startPage}–{c.endPage}
-              </span>
-            </Link>
-          ))}
-        </nav>
-      </div>
-
-      {/* Printable Contact Sheet Header (@media print) */}
-      <div className="print-contact-sheet-header" aria-hidden="true">
-        <div className="print-header-masthead">
-          <h2>
-            THE PORTRAIT EDIT — ISSUE {issue.number}:{" "}
-            {issue.title.toUpperCase()}
-          </h2>
-          <span>EDITORIAL CONTACT SHEET</span>
-        </div>
-        <div className="print-header-details">
-          <p>
-            Publication Issue:{" "}
-            <strong>
-              Issue {issue.number} — {issue.title}
-            </strong>
-          </p>
-          <p>
-            {issueStudies.length}{" "}
-            {issueStudies.length === 1 ? "study" : "studies"} · Printed{" "}
-            {new Date().toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>
-        </div>
-      </div>
-
-      <div className="issue-print-studies" aria-hidden="true">
-        {issueStudies.map((p) => (
-          <StudyCard
-            key={p.id}
-            prompt={p}
-            to={readerPath(p.issueSlug, p.page)}
-            headingLevel="h3"
-            isSaved={isSaved(p.id)}
-            onToggleSaved={toggleSaved}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-export function Archive() {
+export function ArchivePage() {
   const archive = useRef<HTMLElement>(null);
   const [preparingPrint, setPreparingPrint] = useState(false);
   async function printSelection() {
@@ -653,11 +437,7 @@ export function Archive() {
       </form>
 
       {/* Interactive Tag Pills */}
-      <div
-        className="archive-tag-pills"
-        role="region"
-        aria-label="Tag filters"
-      >
+      <div className="archive-tag-pills" role="region" aria-label="Tag filters">
         <span className="tag-pills-label">Tags:</span>
         <div className="tag-pills-scroll">
           {tagCounts.slice(0, 16).map(({ name, count }) => {
@@ -860,123 +640,6 @@ export function Archive() {
           />
         </Suspense>
       )}
-    </section>
-  );
-}
-export function StudyPage() {
-  const { id } = useParams();
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
-  }, [id]);
-  const prompt = prompts.find((p) => p.id === id);
-  if (!prompt) return <NotFound />;
-  return (
-    <section className="standalone-study">
-      <div className="study-links">
-        <Link to="/prompts">← Prompt archive</Link>
-        <Link to={readerPath(prompt.issueSlug, prompt.page)}>
-          Read in the issue ↗
-        </Link>
-      </div>
-      <Study key={prompt.id} prompt={prompt} />
-      <aside className="parameters">
-        <h3>Study record</h3>
-        <dl>
-          <div>
-            <dt>Model</dt>
-            <dd>{prompt.model ?? "Not recorded"}</dd>
-          </div>
-          <div>
-            <dt>Date</dt>
-            <dd>{prompt.date ?? "Not recorded"}</dd>
-          </div>
-          <div>
-            <dt>Parameters</dt>
-            <dd>
-              {Object.keys(prompt.parameters).length
-                ? Object.entries(prompt.parameters)
-                    .map(([k, v]) => `${k}: ${v}`)
-                    .join(" · ")
-                : "Not recorded"}
-            </dd>
-          </div>
-          <div>
-            <dt>Style tags</dt>
-            <dd>{prompt.tags.join(" · ")}</dd>
-          </div>
-        </dl>
-        <p>
-          Review flags describe the published record; they do not establish
-          rights or publication clearance.
-        </p>
-      </aside>
-    </section>
-  );
-}
-export function About() {
-  return (
-    <article className="about editorial-copy">
-      <p className="eyebrow">About the publication</p>
-      <h1>
-        Looking closely.
-        <br />
-        <em>Writing precisely.</em>
-      </h1>
-      <section>
-        <h2>Editorial statement</h2>
-        <p>
-          The Portrait Edit is an independent editorial magazine and working
-          archive of AI portrait prompts. It brings reference images,
-          descriptive language, and working notes together so readers can study
-          how light, texture, styling, and composition are articulated.
-        </p>
-      </section>
-      <section>
-        <h2>Methodology</h2>
-        <p>
-          Each study preserves its published prompt, reference, and notes. The
-          archive treats those records as a starting point for close reading and
-          experimentation. Style tags are drawn from the existing style
-          descriptions; unknown model versions, parameters, and dates remain
-          unrecorded.
-        </p>
-        <p>
-          Repeated studies and pairing or rights-review flags remain visible. A
-          text verification means the prompt matches the published source, not
-          that a reference has been cleared for reuse.
-        </p>
-      </section>
-      <section>
-        <h2>Contact & source</h2>
-        <p>
-          For editorial questions or corrections, use the{" "}
-          <a href="https://github.com/ivan-esteban23/the-portrait-edit-issue-02/issues">
-            publication’s GitHub issue tracker
-          </a>
-          .
-        </p>
-        <p>
-          <a href="https://github.com/ivan-esteban23/the-portrait-edit">
-            Source & production notes ↗
-          </a>
-        </p>
-      </section>
-    </article>
-  );
-}
-export function NotFound() {
-  return (
-    <section className="not-found">
-      <p className="eyebrow">404 / Outside the issue</p>
-      <h1>
-        This page isn’t
-        <br />
-        in the archive.
-      </h1>
-      <p>The page or study may not exist. The magazine is still here.</p>
-      <Button asChild variant="default">
-        <Link to={readerPath(currentIssue.slug)}>Back to the reader</Link>
-      </Button>
     </section>
   );
 }

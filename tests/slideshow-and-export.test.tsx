@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
-import { Archive } from "../src/components/SitePages";
+import { ArchivePage as Archive } from "../src/pages/ArchivePage";
 import { PromptStudioDrawer } from "../src/components/PromptStudioDrawer";
 import { Reader } from "../src/components/Reader";
 import { generateMarkdownDossier } from "../src/lib/dossier";

@@ -20,7 +20,7 @@ import { lightHaptic } from "@/lib/utils";
 import { useIdleChrome, useMedia } from "@/hooks/useReader";
 import { Button } from "./ui/button";
 import { Study } from "./Study";
-import { NotFound } from "./SitePages";
+import { NotFoundPage } from "@/pages/NotFoundPage";
 import { useTheme } from "@/hooks/useTheme";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { saveReadingProgress } from "@/hooks/useReadingProgress";
@@ -56,7 +56,7 @@ export function Reader(props: ReaderProps) {
     n < 1 ||
     n > issue.pages
   )
-    return <NotFound />;
+    return <NotFoundPage />;
   return <ReaderView {...props} issue={issue} page={n} />;
 }
 function ReaderView({
