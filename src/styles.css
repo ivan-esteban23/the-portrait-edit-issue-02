@@ -4476,150 +4476,164 @@ body::before {
   font-size: 0.875rem;
 }
 
-/* Gallery cards: a 3:4 print window, touch-safe actions and linen captions. */
+/* Image-first gallery cards: portraits stay clear and actions have their own row. */
 .archive-grid {
-  gap: clamp(24px, 3.8vw, 52px) clamp(14px, 2.5vw, 34px);
+  gap: clamp(28px, 3.5vw, 44px) clamp(14px, 2.5vw, 32px);
 }
 .archive-grid .study-card {
-  padding: 0 0 4px;
+  padding: 0;
+}
+.study-card.has-open-actions {
+  z-index: 10;
 }
 .archive-grid .study-card-media {
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   border: 1px solid var(--border);
-  border-radius: 3px;
-  background: var(--surface-raised, var(--surface));
-  box-shadow: var(--shadow);
+  border-radius: 4px;
+  background: var(--surface);
 }
 .archive-grid .study-card-media img {
   width: 100%;
   height: 100%;
   margin: 0;
   object-fit: cover;
-  transition:
-    transform 400ms ease-out,
-    filter 400ms ease-out;
-}
-.archive-grid .study-card:hover .study-card-media img,
-.archive-grid .study-card:focus-within .study-card-media img {
-  transform: scale(1.025);
 }
 .study-card-media {
   overflow: hidden;
 }
-.study-card-image-caption {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  bottom: auto;
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  max-width: calc(100% - 100px);
-  padding: 7px 10px;
-  border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: 999px;
-  color: #f4f2ec;
-  background: rgb(8 8 8 / 62%);
-  font: 500 0.63rem/1.2 var(--font-sans);
-  letter-spacing: 0.035em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  pointer-events: none;
+.study-card .card-actions {
+  position: relative;
+  inset: auto;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(44px, 1fr));
+  gap: 0;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
 }
-.study-card-image-caption span + span::before {
-  content: "·";
-  margin-right: 7px;
-  color: var(--accent);
-}
-.archive-grid .card-actions {
-  left: auto;
-  top: auto;
-  right: 8px;
-  bottom: 8px;
-  width: auto;
-  max-width: calc(100% - 16px);
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 3px;
-  padding: 4px;
-  border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 999px;
-  background: rgb(8 8 8 / 62%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-.archive-grid .card-action-btn,
-.archive-grid .copy-format-trigger {
-  width: 44px;
+.study-card .card-action-btn {
+  width: 100%;
   min-width: 44px;
   min-height: 44px;
-  border-radius: 50%;
-  color: #f4f2ec;
-  border-color: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: var(--muted);
   background: transparent;
   box-shadow: none;
 }
-.archive-grid .copy-action-wrapper {
-  display: inline-flex;
+.study-card .card-action-btn:hover,
+.study-card .card-action-btn:focus-visible {
+  color: var(--text);
+  background: var(--surface-hover);
+  transform: none;
 }
-.archive-grid .card-actions {
-  pointer-events: none;
-}
-.archive-grid .card-actions > * {
-  pointer-events: auto;
-}
-.card-action-btn,
-.copy-format-trigger {
-  min-height: 44px;
-}
-.card-action-btn {
-  width: 44px;
-  min-width: 44px;
-}
-.copy-format-trigger {
-  min-width: 44px;
-}
-.archive-grid .card-action-btn:hover,
-.archive-grid .copy-format-trigger:hover {
-  color: var(--accent);
-  background: rgb(255 255 255 / 10%);
-}
-.archive-grid .card-action-btn.is-saved {
+.study-card .card-action-btn.is-saved,
+.study-card .card-action-btn.is-copied,
+.study-card .card-action-btn.is-comparing {
   color: var(--accent);
 }
-.archive-grid .format-dropdown-menu {
-  bottom: calc(100% + 8px);
-  top: auto;
+.study-card .btn-icon-svg {
+  width: 18px;
+  height: 18px;
+}
+/* Keep copy feedback inside the card, including the leftmost phone column. */
+.study-card .action-tooltip {
+  left: 0;
+  right: auto;
+}
+.study-card-more > span {
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: 2px;
+}
+.study-card-menu {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(100% + 6px);
+  z-index: 10;
+  display: grid;
+  max-height: min(320px, 60dvh);
+  overflow-y: auto;
+  padding: 4px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface-raised, var(--surface));
+  border-radius: 8px;
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
-.archive-grid .format-menu-item {
+.study-card .study-card-menu-item {
+  width: 100%;
   min-height: 44px;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--text);
+  background: transparent;
+  text-align: start;
+  font: 500 0.75rem/1.4 var(--font-sans);
+}
+.study-card-menu-item:hover,
+.study-card-menu-item:focus-visible {
+  background: var(--surface-hover);
 }
 .archive-grid .study-card > .eyebrow {
-  margin-bottom: 5px;
+  margin-bottom: 4px;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
 }
 .archive-grid .study-card h2 {
-  font-size: clamp(1.25rem, 1.7vw, 1.7rem);
+  margin: 0;
+  font-size: clamp(1.05rem, 1.6vw, 1.4rem);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
+.study-card-model,
 .archive-grid .study-card-style {
   color: var(--muted);
-  font-size: 0.83rem;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
+.archive-grid .card-tags-list {
+  flex-wrap: wrap;
+  gap: 0 10px;
+  margin-block: 4px 8px;
+  padding-bottom: 2px;
+}
 .archive-grid .tag-badge {
-  min-height: 32px;
-  padding-inline: 10px;
-  border-color: var(--border);
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  text-align: start;
+  background: transparent;
+}
+@media (min-width: 360px) and (max-width: 767px) {
+  .archive-grid .study-card h2 {
+    min-height: 2.6em;
+  }
+}
+/* Three 44px controls need more room than the narrowest two-column cards. */
+@media (max-width: 359px) {
+  .archive-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.archive-grid .tag-badge:hover,
+.archive-grid .tag-badge:focus-visible {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .archive-filters {
   gap: 12px;
@@ -4853,18 +4867,6 @@ textarea {
     background: color-mix(in srgb, var(--surface) 90%, transparent);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-  }
-  .archive-grid .card-actions {
-    gap: 0;
-  }
-  .archive-grid .card-action-btn,
-  .archive-grid .copy-format-trigger {
-    width: 44px;
-    min-width: 44px;
-    min-height: 44px;
-  }
-  .study-card-image-caption {
-    max-width: calc(100% - 90px);
   }
   .page-stage:not(.spread-stage) {
     padding: 5px;

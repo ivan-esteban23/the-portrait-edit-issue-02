@@ -1,11 +1,5 @@
 import { Icon } from "@/components/ui/Icon";
-import {
-  useState,
-  useRef,
-  useEffect,
-  type MouseEvent,
-  type KeyboardEvent,
-} from "react";
+import { useState, useRef, useEffect, useId, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
@@ -47,6 +41,34 @@ export function StudyCard({
   const [copied, setCopied] = useState(false);
   const [copiedFormat, setCopiedFormat] = useState<string>("Copied!");
   const [menuOpen, setMenuOpen] = useState(false);
+  const actionsId = useId();
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const moreTrigger = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const closeMenu = () => {
+    setMenuOpen(false);
+    moreTrigger.current?.focus({ preventScroll: true });
+  };
+  useEffect(() => {
+    if (!menuOpen) return;
+    menuRef.current
+      ?.querySelector<HTMLButtonElement>("button")
+      ?.focus({ preventScroll: true });
+    const dismissOutside = (event: Event) => {
+      if (
+        event.target instanceof Node &&
+        !actionsRef.current?.contains(event.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", dismissOutside);
+    document.addEventListener("focusin", dismissOutside);
+    return () => {
+      document.removeEventListener("pointerdown", dismissOutside);
+      document.removeEventListener("focusin", dismissOutside);
+    };
+  }, [menuOpen]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -59,7 +81,7 @@ export function StudyCard({
     e.preventDefault();
     e.stopPropagation();
     if (timer.current) clearTimeout(timer.current);
-    setMenuOpen(false);
+    if (menuOpen) closeMenu();
     try {
       const text = formatPromptText(prompt, format);
       await copyText(text);
@@ -86,6 +108,7 @@ export function StudyCard({
   const handleShare = async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    closeMenu();
     await sharePrompt(prompt, to);
   };
 
@@ -93,7 +116,7 @@ export function StudyCard({
 
   return (
     <article
-      className={`study-card ${selectionMode ? "is-selection-mode" : ""} ${isSelected ? "is-selected" : ""}`}
+      className={`study-card ${menuOpen ? "has-open-actions" : ""} ${selectionMode ? "is-selection-mode" : ""} ${isSelected ? "is-selected" : ""}`}
     >
       <div className="study-card-media">
         {selectionMode && (
@@ -120,176 +143,147 @@ export function StudyCard({
           alt={prompt.title}
           loading="lazy"
         />
-        <div className="study-card-image-caption" aria-hidden="true">
-          <span>{prompt.model || "Portrait study"}</span>
-          {prompt.tags[0] && <span>{prompt.tags[0]}</span>}
-        </div>
-        <div className="card-actions" onClick={(e) => e.stopPropagation()}>
-          {/* Compare toggle button */}
-          {onToggleCompare && (
-            <button
-              type="button"
-              className={`card-action-btn compare-btn ${isComparing ? "is-comparing" : ""}`}
-              title={isComparing ? "Remove from comparison" : "Add to compare"}
-              aria-label={
-                isComparing
-                  ? `Remove Study ${prompt.studyNumber} from compare`
-                  : `Add Study ${prompt.studyNumber} to compare`
-              }
-              aria-pressed={isComparing}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onToggleCompare(prompt.id);
-              }}
-            >
-              <span className="btn-icon">⇄</span>
-              <span className="action-tooltip">
-                {isComparing ? "Comparing" : "Compare"}
-              </span>
-            </button>
-          )}
-
-          {/* Quick copy with format options */}
-          <div className="copy-action-wrapper">
-            <button
-              type="button"
-              className={`card-action-btn copy-btn ${copied ? "is-copied" : ""}`}
-              title={copied ? copiedFormat : "Copy prompt"}
-              aria-label={
-                copied
-                  ? `Copied prompt for Study ${prompt.studyNumber}`
-                  : `Copy prompt for Study ${prompt.studyNumber}`
-              }
-              onClick={(e) => handleCopy(e, "raw")}
-            >
-              {copied ? (
-                <span className="btn-icon">✓</span>
-              ) : (
-                <Icon name="copy" className="btn-icon-svg" />
-              )}
-              <span className="action-tooltip">
-                {copied ? copiedFormat : "Copy prompt"}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              className="copy-format-trigger"
-              title="Copy formats (Raw, Params, Markdown)"
-              aria-label={`Copy format options for Study ${prompt.studyNumber}`}
-              aria-expanded={menuOpen}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setMenuOpen(!menuOpen);
-              }}
-            >
-              ▾
-            </button>
-
-            {menuOpen && (
-              <div
-                className="format-dropdown-menu"
-                role="menu"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="format-menu-item"
-                  onClick={(e) => handleCopy(e, "raw")}
-                >
-                  Raw Prompt
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="format-menu-item"
-                  onClick={(e) => handleCopy(e, "params")}
-                >
-                  With Parameters
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="format-menu-item"
-                  onClick={(e) => handleCopy(e, "markdown")}
-                >
-                  Markdown Card
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Web Share API button if supported */}
-          {canShare() && (
-            <button
-              type="button"
-              className="card-action-btn share-btn"
-              title="Share study"
-              aria-label={`Share Study ${prompt.studyNumber}`}
-              onClick={handleShare}
-            >
-              <Icon name="share" className="btn-icon-svg" />
-              <span className="action-tooltip">Share</span>
-            </button>
-          )}
-
-          {/* Bookmark button */}
-          <button
-            type="button"
-            className={`card-action-btn bookmark-btn ${isSaved ? "is-saved" : ""}`}
-            title={isSaved ? "Remove from saved" : "Save study"}
-            aria-label={
-              isSaved
-                ? `Remove Study ${prompt.studyNumber} from saved`
-                : `Save Study ${prompt.studyNumber}`
-            }
-            aria-pressed={isSaved}
-            onClick={handleToggleBookmark}
-          >
-            <Icon
-              name={isSaved ? "bookmark-filled" : "bookmark"}
-              className="btn-icon-svg"
-            />
-            <span className="action-tooltip">
-              {isSaved ? "Saved" : "Save study"}
-            </span>
-          </button>
-        </div>
       </div>
       <p className="eyebrow">
         Study {String(prompt.studyNumber).padStart(3, "0")}
       </p>
       <Heading>{prompt.title}</Heading>
-      <p className="study-card-style">{prompt.style}</p>
+      {prompt.model && <p className="study-card-model">{prompt.model}</p>}
+      {prompt.tags.length === 0 && (
+        <p className="study-card-style">{prompt.style}</p>
+      )}
       {prompt.tags && prompt.tags.length > 0 && (
         <div className="card-tags-list" aria-label="Style tags">
           {prompt.tags.map((t) => (
-            <span
+            <button
+              type="button"
               key={t}
-              role="button"
-              tabIndex={0}
               className="tag-badge"
               onClick={(e: MouseEvent) => {
                 e.preventDefault();
                 e.stopPropagation();
                 onTagClick?.(t);
               }}
-              onKeyDown={(e: KeyboardEvent) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onTagClick?.(t);
-                }
-              }}
             >
               #{t}
-            </span>
+            </button>
           ))}
         </div>
       )}
+      <div
+        className="card-actions"
+        ref={actionsRef}
+        role="group"
+        aria-label={`Actions for Study ${prompt.studyNumber}`}
+      >
+        <button
+          type="button"
+          className={`card-action-btn copy-btn ${copied ? "is-copied" : ""}`}
+          title={copied ? copiedFormat : "Copy prompt"}
+          aria-label={`${copied ? "Copied" : "Copy"} prompt for Study ${prompt.studyNumber}`}
+          onClick={(event) => handleCopy(event, "raw")}
+        >
+          {copied ? (
+            <span aria-hidden="true">✓</span>
+          ) : (
+            <Icon name="copy" className="btn-icon-svg" />
+          )}
+          <span className="action-tooltip">
+            {copied ? copiedFormat : "Copy prompt"}
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`card-action-btn bookmark-btn ${isSaved ? "is-saved" : ""}`}
+          title={isSaved ? "Remove from saved" : "Save study"}
+          aria-label={
+            isSaved
+              ? `Remove Study ${prompt.studyNumber} from saved`
+              : `Save Study ${prompt.studyNumber}`
+          }
+          aria-pressed={isSaved}
+          onClick={handleToggleBookmark}
+        >
+          <Icon
+            name={isSaved ? "bookmark-filled" : "bookmark"}
+            className="btn-icon-svg"
+          />
+          <span className="action-tooltip">
+            {isSaved ? "Saved" : "Save study"}
+          </span>
+        </button>
+        <button
+          ref={moreTrigger}
+          type="button"
+          className={`card-action-btn study-card-more ${isComparing ? "is-comparing" : ""}`}
+          title="More actions"
+          aria-label={`More actions for Study ${prompt.studyNumber}`}
+          aria-expanded={menuOpen}
+          aria-controls={actionsId}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span aria-hidden="true">···</span>
+        </button>
+        {menuOpen && (
+          <div
+            ref={menuRef}
+            id={actionsId}
+            className="study-card-menu"
+            role="group"
+            aria-label={`More actions for Study ${prompt.studyNumber}`}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                event.stopPropagation();
+                closeMenu();
+              }
+            }}
+          >
+            {onToggleCompare && (
+              <button
+                type="button"
+                className="study-card-menu-item compare-btn"
+                aria-label={
+                  isComparing
+                    ? `Remove Study ${prompt.studyNumber} from compare`
+                    : `Add Study ${prompt.studyNumber} to compare`
+                }
+                aria-pressed={isComparing}
+                onClick={() => {
+                  onToggleCompare(prompt.id);
+                  closeMenu();
+                }}
+              >
+                {isComparing ? "Remove from comparison" : "Compare study"}
+              </button>
+            )}
+            <button
+              type="button"
+              className="study-card-menu-item"
+              onClick={(event) => handleCopy(event, "params")}
+            >
+              Copy with parameters
+            </button>
+            <button
+              type="button"
+              className="study-card-menu-item"
+              onClick={(event) => handleCopy(event, "markdown")}
+            >
+              Copy as Markdown
+            </button>
+            {canShare() && (
+              <button
+                type="button"
+                className="study-card-menu-item"
+                aria-label={`Share Study ${prompt.studyNumber}`}
+                onClick={handleShare}
+              >
+                Share study
+              </button>
+            )}
+          </div>
+        )}
+      </div>
       <Link
         className="study-card-overlay"
         to={to}

@@ -832,14 +832,10 @@ test("accessibility: Compare Lab contains focus and restores it through a nested
   page,
 }) => {
   await page.goto("prompts");
-  await page
-    .getByRole("button", { name: /^Add Study \d+ to compare$/ })
-    .nth(0)
-    .click();
-  await page
-    .getByRole("button", { name: /^Add Study \d+ to compare$/ })
-    .nth(0)
-    .click();
+  for (const card of [page.locator(".archive-grid .study-card").nth(0), page.locator(".archive-grid .study-card").nth(1)]) {
+    await card.getByRole("button", { name: /^More actions for Study/ }).click();
+    await card.getByRole("button", { name: /^Add Study \d+ to compare$/ }).click();
+  }
   const opener = page.getByRole("button", { name: "Compare 2 studies ⇄" });
   await opener.click();
   const compare = page.getByRole("dialog", {
