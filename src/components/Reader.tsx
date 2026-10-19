@@ -2,6 +2,7 @@ import { useSlideshow } from "@/hooks/useSlideshow";
 import { useReaderKeyboard } from "@/hooks/useReaderKeyboard";
 import { useSwipeGestures } from "@/hooks/useSwipeGestures";
 import { ReaderToolbar } from "./reader/ReaderToolbar";
+import { ReaderChapterDrawer } from "./reader/ReaderChapterDrawer";
 import { ReaderScrubber } from "./reader/ReaderScrubber";
 import { RawText, OriginalPage, SpreadPage } from "./reader/ReaderPages";
 import {
@@ -26,6 +27,13 @@ import { useTheme } from "@/hooks/useTheme";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { saveReadingProgress } from "@/hooks/useReadingProgress";
 import { useSoundEffect } from "@/utils/audio";
+import {
+  getSoundscapePreference,
+  setSoundscapeVolume,
+  startFocusSoundscape,
+  stopFocusSoundscape,
+  SOUNDSCAPE_CHANGE_EVENT,
+} from "@/lib/soundscape";
 
 const ImageLightbox = lazy(() =>
   import("./ImageLightbox").then((m) => ({ default: m.ImageLightbox })),
@@ -130,6 +138,11 @@ function ReaderView({
   const [turning, setTurning] = useState(false);
   const [showThumbnails, setShowThumbnails] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [tableOfContentsOpen, setTableOfContentsOpen] = useState(
+    () => new URLSearchParams(window.location.search).get("toc") === "1",
+  );
+  const [soundscape, setSoundscape] = useState(getSoundscapePreference);
+  const soundscapeNeedsResume = useRef(soundscape.enabled);
   const [showTouchHint, setShowTouchHint] = useState(false);
   const touchHintDismissed = useRef(false);
 
@@ -176,6 +189,49 @@ function ReaderView({
   }, []);
 
   const { soundEnabled, toggleSound, playPaperTurn } = useSoundEffect();
+  useEffect(() => {
+    const syncSoundscape = (event: Event) =>
+      setSoundscape(
+        (event as CustomEvent<{ enabled: boolean; volume: number }>).detail,
+      );
+    window.addEventListener(SOUNDSCAPE_CHANGE_EVENT, syncSoundscape);
+    return () =>
+      window.removeEventListener(SOUNDSCAPE_CHANGE_EVENT, syncSoundscape);
+  }, []);
+  useEffect(() => {
+    if (!soundscapeNeedsResume.current) return;
+    const resumeOnInteraction = () => {
+      if (!soundscapeNeedsResume.current) return;
+      soundscapeNeedsResume.current = false;
+      void startFocusSoundscape(soundscape.volume);
+    };
+    window.addEventListener("pointerdown", resumeOnInteraction, { once: true });
+    window.addEventListener("keydown", resumeOnInteraction, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", resumeOnInteraction);
+      window.removeEventListener("keydown", resumeOnInteraction);
+    };
+  }, [soundscape.volume]);
+  useEffect(() => {
+    const openIndex = () => setTableOfContentsOpen(true);
+    window.addEventListener("reader:open-toc", openIndex);
+    return () => window.removeEventListener("reader:open-toc", openIndex);
+  }, []);
+  useEffect(() => {
+    const search = new URLSearchParams(location.search);
+    if (search.get("toc") !== "1") return;
+    setTableOfContentsOpen(true);
+    search.delete("toc");
+    navigate(
+      `${location.pathname}${search.size ? `?${search.toString()}` : ""}`,
+      { replace: true },
+    );
+  }, [location.pathname, location.search, navigate]);
+  const toggleSoundscape = useCallback(() => {
+    soundscapeNeedsResume.current = false;
+    if (soundscape.enabled) stopFocusSoundscape();
+    else void startFocusSoundscape(soundscape.volume);
+  }, [soundscape]);
   const isInitialPageRender = useRef(true);
   const [lightbox, setLightbox] = useState<{
     src: string;
@@ -384,6 +440,7 @@ function ReaderView({
       settings ||
       rawOpen ||
       shortcutsOpen ||
+      tableOfContentsOpen ||
       Boolean(lightbox) ||
       showThumbnails,
   });
@@ -449,6 +506,7 @@ function ReaderView({
   useReaderKeyboard({
     settings,
     shortcutsOpen,
+    setTableOfContentsOpen,
     getFocus: () => currentRouteFocus(focus),
     toggleFocus,
     setShortcutsOpen,
@@ -524,6 +582,11 @@ function ReaderView({
           setSize,
           soundEnabled,
           toggleSound,
+          soundscapeEnabled: soundscape.enabled,
+          soundscapeVolume: soundscape.volume,
+          onToggleSoundscape: toggleSoundscape,
+          onSoundscapeVolumeChange: setSoundscapeVolume,
+          onOpenTableOfContents: () => setTableOfContentsOpen(true),
           slideshowSpeed,
           setSlideshowSpeed,
           loopSlideshow,
@@ -539,6 +602,16 @@ function ReaderView({
           setShortcutsOpen,
         }}
         onToggleFocus={() => toggleFocus(!currentRouteFocus(focus))}
+      />
+      <ReaderChapterDrawer
+        issue={issue}
+        page={page}
+        isOpen={tableOfContentsOpen}
+        onClose={() => setTableOfContentsOpen(false)}
+        onSelect={(target) => {
+          setTableOfContentsOpen(false);
+          go(target);
+        }}
       />
       {showTouchHint && (
         <div
@@ -567,7 +640,7 @@ function ReaderView({
             onClick={() => go(c.startPage)}
             style={
               {
-                "--chapter-progress": `${(100 * (page - c.startPage + 1)) / (c.endPage - c.startPage + 1)}%`,
+                "--chapter-progress": `${Math.max(0, Math.min(100, (100 * (page - c.startPage + 1)) / (c.endPage - c.startPage + 1)))}%`,
               } as CSSProperties
             }
           >

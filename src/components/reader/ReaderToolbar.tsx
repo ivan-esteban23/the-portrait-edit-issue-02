@@ -30,6 +30,11 @@ interface ReaderToolbarProps {
   setSize: (size: number) => void;
   soundEnabled: boolean;
   toggleSound: () => void;
+  soundscapeEnabled: boolean;
+  soundscapeVolume: number;
+  onToggleSoundscape: () => void;
+  onSoundscapeVolumeChange: (volume: number) => void;
+  onOpenTableOfContents: () => void;
   slideshowSpeed: number;
   setSlideshowSpeed: (speed: number) => void;
   loopSlideshow: boolean;
@@ -70,6 +75,11 @@ export function ReaderToolbar({
   setSize,
   soundEnabled,
   toggleSound,
+  soundscapeEnabled,
+  soundscapeVolume,
+  onToggleSoundscape,
+  onSoundscapeVolumeChange,
+  onOpenTableOfContents,
   slideshowSpeed,
   setSlideshowSpeed,
   loopSlideshow,
@@ -87,6 +97,7 @@ export function ReaderToolbar({
 }: ReaderToolbarProps) {
   const [input, setInput] = useState(String(page));
   const [hint, setHint] = useState(false);
+  const [soundscapeControlsOpen, setSoundscapeControlsOpen] = useState(false);
   useEffect(() => setInput(String(page)), [page]);
   const openSettings = (open: boolean) => {
     setSettings(open);
@@ -124,6 +135,16 @@ export function ReaderToolbar({
             </select>
           </label>
         )}
+        <Button
+          variant="ghost"
+          aria-label="Table of contents"
+          aria-keyshortcuts="T"
+          title="Table of contents (T)"
+          onClick={onOpenTableOfContents}
+        >
+          <span aria-hidden="true">☷</span>
+          <span className="toc-button-label">Index</span>
+        </Button>
         <div className="pager" role="group" aria-label="Page navigation">
           <Button
             className="top-turn"
@@ -296,6 +317,7 @@ export function ReaderToolbar({
                 ← / K previous · → / J next
                 <br />
                 Home / End first and last page
+                <br />T Table of contents · R Reading view
                 <br />P Play / Pause presentation slideshow
                 <br />F Fullscreen reading / Focus
                 <br />B Bookmark / save current study
@@ -374,6 +396,47 @@ export function ReaderToolbar({
             {soundEnabled ? "Sound: On" : "Sound: Off"}
           </span>
         </Button>
+        <div className="soundscape-control">
+          <Button
+            variant="ghost"
+            className={`soundscape-toggle-btn ${soundscapeEnabled ? "is-active" : ""}`}
+            aria-label={
+              soundscapeEnabled
+                ? "Mute Focus Soundscape"
+                : "Enable Focus Soundscape"
+            }
+            aria-pressed={soundscapeEnabled}
+            onClick={onToggleSoundscape}
+            title="Focus Soundscape"
+          >
+            {soundscapeEnabled ? "◖))" : "◖"}
+            <span className="sound-fx-label">Ambience</span>
+          </Button>
+          <Button
+            variant="ghost"
+            aria-label="Adjust soundscape volume"
+            aria-expanded={soundscapeControlsOpen}
+            onClick={() => setSoundscapeControlsOpen((open) => !open)}
+          >
+            ⌄
+          </Button>
+          {soundscapeControlsOpen && (
+            <label className="soundscape-volume">
+              <span>Soundscape volume</span>
+              <input
+                aria-label="Soundscape volume"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={soundscapeVolume}
+                onChange={(event) =>
+                  onSoundscapeVolumeChange(Number(event.target.value))
+                }
+              />
+            </label>
+          )}
+        </div>
         {study && (
           <Button
             variant="ghost"

@@ -11,6 +11,7 @@ import type { Theme } from "./useTheme";
 interface ReaderKeyboardOptions {
   settings: boolean;
   shortcutsOpen: boolean;
+  setTableOfContentsOpen: Dispatch<SetStateAction<boolean>>;
   getFocus: () => boolean;
   toggleFocus: (focus: boolean) => void;
   setShortcutsOpen: Dispatch<SetStateAction<boolean>>;
@@ -36,6 +37,7 @@ export function useReaderKeyboard(options: ReaderKeyboardOptions) {
     const {
       settings,
       shortcutsOpen,
+      setTableOfContentsOpen,
       getFocus,
       toggleFocus,
       setShortcutsOpen,
@@ -96,9 +98,13 @@ export function useReaderKeyboard(options: ReaderKeyboardOptions) {
       e.preventDefault();
       toggleFullscreen();
     }
-    if (k === "t" && !e.repeat) {
+    if (k === "r" && !e.repeat) {
       e.preventDefault();
       setMode((m) => (m === "page" ? "text" : "page"));
+    }
+    if (k === "t" && !e.repeat) {
+      e.preventDefault();
+      setTableOfContentsOpen((open) => !open);
     }
     if (k === "s" && !e.repeat && spreadCapable) {
       e.preventDefault();

@@ -851,7 +851,15 @@ test("accessibility: Compare Lab contains focus and restores it through a nested
     .focus();
   await page.keyboard.press("Tab");
   await expect(
+    compare.getByRole("button", { name: "Copy Combined Prompt" }),
+  ).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(
     compare.getByRole("radio", { name: "Side by Side" }),
+  ).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(
+    compare.getByRole("button", { name: "Copy Combined Prompt" }),
   ).toBeFocused();
   await page.keyboard.press("Shift+Tab");
   await expect(

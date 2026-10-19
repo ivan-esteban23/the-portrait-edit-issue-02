@@ -5,6 +5,7 @@ import { copyText } from "@/lib/utils";
 import { formatCommand, splitPromptParameters } from "@/lib/promptFormatter";
 import { CommandParameters } from "./CommandParameters";
 import { Button } from "./ui/button";
+import { PromptAnatomy } from "./PromptAnatomy";
 
 interface PromptStudioDrawerProps {
   prompt: Prompt;
@@ -134,7 +135,10 @@ function loadRemixes(): RemixRecord[] {
 
 function saveRemixes(remixes: RemixRecord[]) {
   try {
-    localStorage.setItem(REMIX_STORAGE_KEY, JSON.stringify(remixes.slice(0, 20)));
+    localStorage.setItem(
+      REMIX_STORAGE_KEY,
+      JSON.stringify(remixes.slice(0, 20)),
+    );
   } catch {
     /* localStorage full or denied */
   }
@@ -190,6 +194,7 @@ export function PromptStudioDrawer({
   );
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [copied, setCopied] = useState<string>("");
+  const [anatomyOpen, setAnatomyOpen] = useState(false);
   const [enabledParameters, setEnabledParameters] = useState([
     "v",
     "style",
@@ -313,7 +318,8 @@ export function PromptStudioDrawer({
     if (remix.parameters.chaos !== undefined) setChaos(remix.parameters.chaos);
     if (remix.parameters.modelPreset)
       setModelPreset(remix.parameters.modelPreset);
-    if (remix.parameters.keywords) setSelectedKeywords(remix.parameters.keywords);
+    if (remix.parameters.keywords)
+      setSelectedKeywords(remix.parameters.keywords);
   };
 
   const clearRemixes = () => {
@@ -328,9 +334,7 @@ export function PromptStudioDrawer({
   const handleCopy = async (format: "plain" | "discord" = "plain") => {
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     const textToCopy =
-      format === "discord"
-        ? `/imagine prompt: ${commandText}`
-        : modifiedPrompt;
+      format === "discord" ? `/imagine prompt: ${commandText}` : modifiedPrompt;
     try {
       await copyText(textToCopy);
       if (!alive.current) return;
@@ -592,14 +596,24 @@ export function PromptStudioDrawer({
                     <span className="studio-group-label">
                       Live Prompt Preview
                     </span>
-                    <button
-                      type="button"
-                      className="studio-reset-link"
-                      onClick={handleReset}
-                      title="Reset all tweaks to study defaults"
-                    >
-                      Reset to default
-                    </button>
+                    <span className="preview-box-actions">
+                      <button
+                        type="button"
+                        className="studio-reset-link"
+                        onClick={handleReset}
+                        title="Reset all tweaks to study defaults"
+                      >
+                        Reset to default
+                      </button>
+                      <button
+                        type="button"
+                        className="studio-reset-link"
+                        aria-pressed={anatomyOpen}
+                        onClick={() => setAnatomyOpen((open) => !open)}
+                      >
+                        Anatomy / X-Ray
+                      </button>
+                    </span>
                   </div>
                   <div
                     id="prompt-preview"
@@ -608,7 +622,11 @@ export function PromptStudioDrawer({
                     role="region"
                     aria-label="Live Prompt Preview"
                   >
-                    <p className="preview-text">{modifiedPrompt}</p>
+                    {anatomyOpen ? (
+                      <PromptAnatomy prompt={modifiedPrompt} />
+                    ) : (
+                      <p className="preview-text">{modifiedPrompt}</p>
+                    )}
                   </div>
                 </div>
 
@@ -634,7 +652,8 @@ export function PromptStudioDrawer({
                   <div className="studio-remixes-list">
                     {remixes.length === 0 ? (
                       <p className="no-remixes-note">
-                        No saved remixes yet. Copy a tweaked prompt to save it here.
+                        No saved remixes yet. Copy a tweaked prompt to save it
+                        here.
                       </p>
                     ) : (
                       remixes.map((remix) => (
@@ -642,10 +661,13 @@ export function PromptStudioDrawer({
                           <div className="remix-header">
                             <span className="remix-title">{remix.title}</span>
                             <span className="remix-date">
-                              {new Date(remix.timestamp).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {new Date(remix.timestamp).toLocaleTimeString(
+                                [],
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )}
                             </span>
                           </div>
                           <p className="remix-prompt-snippet">{remix.prompt}</p>

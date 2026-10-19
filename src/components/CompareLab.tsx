@@ -5,6 +5,8 @@ import { Button } from "./ui/button";
 import { ModalContent, ModalTitle } from "./ui/dialog";
 import { copyText } from "@/lib/utils";
 import { formatPromptText, type CopyFormat } from "@/lib/promptFormatter";
+import { getCommandParameters } from "@/lib/promptFormatter";
+import { parsePromptTokens } from "@/lib/promptParser";
 
 interface CompareLabProps {
   studyA: Prompt;
@@ -27,6 +29,7 @@ export function CompareLab({
   const [mode, setMode] = useState<"side-by-side" | "split">("side-by-side");
   const [splitPos, setSplitPos] = useState<number>(50);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [combinedCopied, setCombinedCopied] = useState(false);
   const sliderFrameRef = useRef<HTMLDivElement>(null);
 
   const closeButton = useRef<HTMLButtonElement>(null);
@@ -80,6 +83,67 @@ export function CompareLab({
       setTimeout(() => setCopiedId(null), 1500);
     } catch {
       /* ignore */
+    }
+  };
+
+  const descriptorsA = parsePromptTokens(studyA.prompt).categories.flatMap(
+    (category) => category.tokens,
+  );
+  const descriptorsB = parsePromptTokens(studyB.prompt).categories.flatMap(
+    (category) => category.tokens,
+  );
+  const normalizedA = new Set(
+    descriptorsA.map((phrase) => phrase.toLocaleLowerCase().trim()),
+  );
+  const normalizedB = new Set(
+    descriptorsB.map((phrase) => phrase.toLocaleLowerCase().trim()),
+  );
+  const sharedDescriptors = descriptorsA.filter((phrase) =>
+    normalizedB.has(phrase.toLocaleLowerCase().trim()),
+  );
+  const uniqueA = descriptorsA.filter(
+    (phrase) => !normalizedB.has(phrase.toLocaleLowerCase().trim()),
+  );
+  const uniqueB = descriptorsB.filter(
+    (phrase) => !normalizedA.has(phrase.toLocaleLowerCase().trim()),
+  );
+  const parameterValues = (prompt: Prompt) => {
+    const values: Record<string, string> = {
+      Model: prompt.model || "Midjourney",
+    };
+    getCommandParameters(prompt).forEach(({ key, value }) => {
+      const label =
+        key === "ar"
+          ? "Aspect Ratio"
+          : key === "s"
+            ? "Stylize"
+            : key === "v"
+              ? "Version"
+              : key === "c"
+                ? "Chaos"
+                : key.toUpperCase();
+      values[label] = value || "On";
+    });
+    return values;
+  };
+  const parameterA = parameterValues(studyA);
+  const parameterB = parameterValues(studyB);
+  const parameterKeys = [
+    ...new Set([...Object.keys(parameterA), ...Object.keys(parameterB)]),
+  ];
+  const copyCombined = async () => {
+    const combined = [
+      ...descriptorsA,
+      ...descriptorsB.filter(
+        (phrase) => !normalizedA.has(phrase.toLocaleLowerCase().trim()),
+      ),
+    ];
+    try {
+      await copyText(combined.join(", "));
+      setCombinedCopied(true);
+      window.setTimeout(() => setCombinedCopied(false), 1600);
+    } catch {
+      /* Keep the comparison usable when clipboard access is blocked. */
     }
   };
 
@@ -367,6 +431,86 @@ export function CompareLab({
           </div>
         </div>
       )}
+      <section
+        className="prompt-comparison-panel"
+        aria-label="Prompt comparison"
+      >
+        <header className="prompt-comparison-heading">
+          <div>
+            <span className="eyebrow">Editorial analysis</span>
+            <h3>Prompt Comparison</h3>
+          </div>
+          <Button variant="outline" onClick={() => void copyCombined()}>
+            {combinedCopied
+              ? "✓ Combined Prompt Copied"
+              : "Copy Combined Prompt"}
+          </Button>
+        </header>
+        <div className="prompt-diff-grid">
+          {[
+            { label: "Study A", unique: uniqueA },
+            { label: "Study B", unique: uniqueB },
+          ].map((column) => (
+            <div className="prompt-diff-column" key={column.label}>
+              <h4>{column.label} descriptors</h4>
+              <div className="prompt-diff-tokens">
+                {sharedDescriptors.map((phrase, index) => (
+                  <span
+                    className="prompt-diff-token is-shared"
+                    key={`shared-${index}-${phrase}`}
+                  >
+                    {phrase}
+                  </span>
+                ))}
+                {column.unique.map((phrase, index) => (
+                  <span
+                    className={`prompt-diff-token ${column.label === "Study A" ? "is-unique-a" : "is-unique-b"}`}
+                    key={`${column.label}-${index}-${phrase}`}
+                  >
+                    {phrase}
+                  </span>
+                ))}
+                {!sharedDescriptors.length && !column.unique.length && (
+                  <p className="compare-empty-note">
+                    No descriptive phrases found.
+                  </p>
+                )}
+              </div>
+              <p className="prompt-diff-legend">
+                Neutral = shared · Accent = unique to this study
+              </p>
+            </div>
+          ))}
+        </div>
+        <div className="prompt-parameter-diff">
+          <h4>Parameter differences</h4>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Setting</th>
+                <th scope="col">Study A</th>
+                <th scope="col">Study B</th>
+              </tr>
+            </thead>
+            <tbody>
+              {parameterKeys.map((key) => {
+                const valueA = parameterA[key] ?? "—";
+                const valueB = parameterB[key] ?? "—";
+                return (
+                  <tr
+                    key={key}
+                    className={valueA !== valueB ? "is-different" : ""}
+                  >
+                    <th scope="row">{key}</th>
+                    <td>{valueA}</td>
+                    <td>{valueB}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </ModalContent>
   );
 }

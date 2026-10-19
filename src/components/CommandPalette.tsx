@@ -1,9 +1,14 @@
 import { Icon } from "@/components/ui/Icon";
 import { useState, useEffect, useLayoutEffect, useRef, useId, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as Dialog from "@radix-ui/react-dialog";
 import { currentIssue, prompts, readerPath } from "@/content";
 import type { Theme } from "@/hooks/useTheme";
+import {
+  getSoundscapePreference,
+  startFocusSoundscape,
+  stopFocusSoundscape,
+} from "@/lib/soundscape";
 
 export interface CommandPaletteProps {
   isOpen: boolean;
@@ -37,6 +42,7 @@ export function CommandPalette({
   onToggleFullscreen,
 }: CommandPaletteProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -179,7 +185,45 @@ export function CommandPalette({
         onOpenShortcuts?.();
       },
     },
+    {
+      id: "act-toc",
+      section: "Actions",
+      title: "Open Table of Contents",
+      subtitle: "Browse issue chapters and jump to a chapter opening",
+      badge: "T",
+      action: () => {
+        if (/\/pages\/\d+\/?$/.test(location.pathname)) {
+          window.dispatchEvent(new Event("reader:open-toc"));
+        } else {
+          navigate(`${readerPath(currentIssue.slug, 1)}?toc=1`);
+        }
+        onClose();
+      },
+    },
+    {
+      id: "act-soundscape-on",
+      section: "Actions",
+      title: "Enable Focus Soundscape",
+      subtitle: "Play a soft synthesized vinyl and room tone",
+      badge: "Audio",
+      action: () => {
+        void startFocusSoundscape(getSoundscapePreference().volume);
+        onClose();
+      },
+    },
+    {
+      id: "act-soundscape-off",
+      section: "Actions",
+      title: "Mute Soundscape",
+      subtitle: "Stop the focus ambience",
+      badge: "Mute",
+      action: () => {
+        stopFocusSoundscape();
+        onClose();
+      },
+    },
   ], [
+    location.pathname,
     navigate,
     onClose,
     onOpenShortcuts,

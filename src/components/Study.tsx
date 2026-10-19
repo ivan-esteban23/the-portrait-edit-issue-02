@@ -17,6 +17,7 @@ import {
 
 import { CommandParameters } from "./CommandParameters";
 import { RelatedStudies } from "./RelatedStudies";
+import { PromptAnatomy } from "./PromptAnatomy";
 
 const ImageLightbox = lazy(() =>
   import("./ImageLightbox").then((m) => ({ default: m.ImageLightbox })),
@@ -46,6 +47,7 @@ export function PromptCard({
     recordedParameters.map((parameter) => parameter.key),
   );
   const [feedback, setFeedback] = useState("");
+  const [anatomyOpen, setAnatomyOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [exportingCard, setExportingCard] = useState(false);
   useEffect(() => {
@@ -129,6 +131,13 @@ export function PromptCard({
                 ? "Copying…"
                 : "Copy prompt"}
           </Button>
+          <Button
+            variant={anatomyOpen ? "outline" : "ghost"}
+            aria-pressed={anatomyOpen}
+            onClick={() => setAnatomyOpen((open) => !open)}
+          >
+            Anatomy / X-Ray
+          </Button>
           <div className="prompt-secondary-actions">
             <Button
               variant="outline"
@@ -202,12 +211,15 @@ export function PromptCard({
             : "Optional starting points. Select flags for your command."
         }
       />
-      <p className="prompt-body">{prompt.prompt}</p>
+      {anatomyOpen ? (
+        <PromptAnatomy prompt={prompt.prompt} />
+      ) : (
+        <p className="prompt-body">{prompt.prompt}</p>
+      )}
       <p role="status" className="copy-feedback">
         {feedback}
       </p>
       <p className="source-note">Text checked against the published study.</p>
-
     </section>
   );
 }
