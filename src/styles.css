@@ -637,7 +637,7 @@ select:hover {
   padding: 0 var(--gutter) 24px;
 }
 .reader-top {
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 20;
   background: var(--bg);
@@ -4333,7 +4333,7 @@ body::before {
 #reader-toolbar {
   width: min(100%, 1440px);
   margin: 10px auto 0;
-  padding: 10px 16px 11px;
+  padding: 6px 12px;
   border: 1px solid var(--border);
   border-radius: 20px;
   background: color-mix(in srgb, var(--surface) 84%, transparent);
@@ -4374,6 +4374,7 @@ body::before {
   font-variant-numeric: tabular-nums;
 }
 .chapter-progress {
+  display: none;
   padding-left: 8px;
   font-size: 0.7rem;
   letter-spacing: 0.025em;
@@ -4875,7 +4876,7 @@ textarea {
     );
   }
   #reader-toolbar.reader-top {
-    position: sticky;
+    position: relative;
     top: 0;
     z-index: 30;
     margin: 0;
@@ -4885,7 +4886,7 @@ textarea {
     border-bottom: 1px solid var(--border);
     border-left: none;
     background: var(--bg);
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 10px;
+    padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 8px;
   }
   .reader-bottom {
     padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);

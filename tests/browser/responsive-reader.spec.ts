@@ -162,3 +162,47 @@ test("200 percent equivalent layout keeps keyboard navigation and dialogs usable
   await expect(page).toHaveURL(/pages\/61$/);
   await noOverflow(page);
 });
+
+for (const viewport of [
+  { name: "phone", width: 390, height: 844 },
+  { name: "laptop", width: 1366, height: 768 },
+]) {
+  for (const focus of [0, 1]) {
+    test(`${viewport.name}: toolbar scrolls away with Focus ${focus ? "on" : "off"}`, async ({
+      page,
+    }, info) => {
+      await page.setViewportSize(viewport);
+      await page.goto(`${reader}?focus=${focus}`);
+      const toolbar = page.locator("#reader-toolbar");
+      await expect(toolbar).toBeVisible();
+      await expect(toolbar).toHaveCSS("position", "relative");
+      expect((await toolbar.boundingBox())!.height).toBeLessThanOrEqual(64);
+      // Exercise actual document scrolling rather than just the CSS declaration.
+      await page.evaluate(() => window.scrollTo(0, 600));
+      await expect
+        .poll(() =>
+          toolbar.evaluate((node) => node.getBoundingClientRect().bottom),
+        )
+        .toBeLessThanOrEqual(0);
+      await noOverflow(page);
+      await page.screenshot({
+        path: `test-results/${info.project.name}-${viewport.name}-scrolled-focus${focus}.png`,
+      });
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await expect
+        .poll(() =>
+          toolbar.evaluate((node) => node.getBoundingClientRect().top),
+        )
+        .toBeGreaterThanOrEqual(0);
+      await page
+        .getByRole("button", {
+          name: focus ? "Exit Focus" : "Focus",
+          exact: true,
+        })
+        .click();
+      await expect(page.locator(".reader")).toHaveClass(
+        focus ? /reader(?!.*is-focus)/ : /is-focus/,
+      );
+    });
+  }
+}

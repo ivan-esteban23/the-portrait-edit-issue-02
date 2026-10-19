@@ -5,7 +5,9 @@ Tools reveals presentation, fullscreen, audio, bookmarks, and keyboard shortcuts
 It is a nonmodal disclosure: Tab follows normal document order; Escape from the
 panel closes it and restores focus to Tools. Wide screens retain inline tools.
 Resizing changes presentation without remounting the reader or clearing preferences.
-The publication header scrolls away while the reader toolbar stays available.
+The publication header and compact reader toolbar scroll away with the page in
+both Focus modes. Scroll back to the top to reach them; the existing phone
+bottom-navigation dock remains available.
 
 ## Automated coverage
 
