@@ -1,3 +1,4 @@
+import { openReaderTools } from "./helpers/reader-tools";
 import { test, expect, type Locator } from "@playwright/test";
 const reader = "issues/the-prompt-issue/pages/60";
 
@@ -6,6 +7,7 @@ test("reader bookmarks synchronize and progress resumes in a fresh session", asy
   browser,
 }) => {
   await page.goto(reader);
+  await openReaderTools(page);
   const bookmark = page.locator(".reader-bookmark-btn");
   await expect(bookmark).toHaveAttribute("aria-pressed", "false");
   await bookmark.click();
@@ -174,6 +176,7 @@ test("reader slideshow toggle and keyboard shortcut p control presentation playb
   page,
 }) => {
   await page.goto(reader);
+  await openReaderTools(page);
   const slideshowBtn = page.getByRole("button", {
     name: "Toggle presentation slideshow",
     exact: true,

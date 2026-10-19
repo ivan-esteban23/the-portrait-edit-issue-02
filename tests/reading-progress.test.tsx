@@ -134,6 +134,8 @@ it("keeps the toolbar and embedded study bookmark synchronized in both direction
     ),
   );
   reader();
+  const tools = screen.queryByRole("button", { name: "Tools" });
+  if (tools) fireEvent.click(tools);
   const toolbar = screen.getByRole("button", {
     name: "Save study to bookmarks",
   });

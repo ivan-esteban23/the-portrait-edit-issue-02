@@ -4902,3 +4902,100 @@ textarea {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Essential controls stay in one row; optional tools expand only on request. */
+.publication:has(.reader) .masthead {
+  position: relative;
+}
+.reader-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.reader-tools[hidden] {
+  display: none;
+}
+.reader-tools > button,
+.reader-tools .soundscape-control > button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.reader-toolbar-compact .reader-controls {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 4px;
+}
+.reader-toolbar-compact .reader-issue,
+.reader-toolbar-compact .chapter-control,
+.reader-toolbar-compact .toc-button-label {
+  display: none;
+}
+.reader-toolbar-compact .reader-controls > .pager {
+  margin-right: auto;
+}
+.reader-toolbar-compact .reader-tools {
+  position: absolute;
+  inset-inline-end: 8px;
+  top: calc(100% + 4px);
+  width: min(440px, calc(100% - 16px));
+  max-height: min(320px, calc(100dvh - 180px));
+  overflow-y: auto;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.reader-toolbar-compact .reader-tools .sound-fx-label,
+.reader-toolbar-compact .reader-tools .slideshow-label {
+  display: inline !important;
+}
+.reader-toolbar-compact .reader-tools .soundscape-volume {
+  position: static;
+}
+@media (max-height: 600px) {
+  .publication:has(.reader) .wordmark span,
+  .reader .chapter-progress,
+  .reader .chapter-strip {
+    display: none;
+  }
+  #reader-toolbar {
+    padding-block: 6px;
+  }
+  .reader-toolbar-compact .reader-tools {
+    position: fixed;
+    top: max(8px, env(safe-area-inset-top));
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    max-height: none;
+    align-content: flex-start;
+  }
+  .command-palette-overlay {
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+  .command-palette-card {
+    max-height: calc(100dvh - 24px);
+  }
+}
+
+@media (max-width: 480px) {
+  .reader-toolbar-compact .pager form > span {
+    display: none;
+  }
+  .reader-toolbar-compact .reader-controls > button {
+    padding-inline: 8px;
+  }
+}
+
+.reader-top.reader-tools-open {
+  z-index: 40;
+}
+@media (max-height: 600px) {
+  /* A filter creates a containing block for fixed descendants. Keep the short-
+     screen tools panel anchored to the viewport, above the publication header. */
+  #reader-toolbar {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--surface);
+  }
+}
