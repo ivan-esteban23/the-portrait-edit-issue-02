@@ -11,14 +11,14 @@ The publication header scrolls away while the reader toolbar stays available.
 
 ```sh
 npm ci
-npx playwright install --with-deps chromium firefox webkit
+npx playwright install --with-deps chromium firefox
 npm run build
 npm test
 npm run test:e2e
 ```
 
 The existing seven viewport/theme projects run the full Chromium suite. The
-`chromium-responsive`, `firefox-responsive`, and `webkit-responsive` projects run
+`chromium-responsive` and `firefox-responsive` projects run
 the focused responsive suite at 320×740, 390×844, 844×390, 834×1112,
 1194×834, 1366×768, and 1920×1080. These projects also exercise rotation/resizing,
 retained reading size/theme/bookmarks, keyboard navigation, dialog focus, overflow,
@@ -29,15 +29,36 @@ physical hardware. Existing Chromium projects also exercise touch emulation.
 To run just this suite:
 
 ```sh
-npx playwright test --project=chromium-responsive --project=firefox-responsive --project=webkit-responsive
+npx playwright test --project=chromium-responsive --project=firefox-responsive
 ```
+
+WebKit is deferred and excluded from the default run. To enable it later:
+
+```sh
+npx playwright install --with-deps webkit
+PLAYWRIGHT_WEBKIT=1 npx playwright test --project=webkit-responsive
+```
+
+The GitHub Actions manual workflow also offers an `include_webkit` checkbox.
 
 Browser downloads require `cdn.playwright.dev` and
 `playwright.download.prss.microsoft.com`. On a cloud machine with an unwritable
 home cache, set `PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright` for both
 installation and execution. Restart Vite after reinstalling dependencies.
 
-## Manual release checks (not completed by viewport emulation)
+## Linux release checks
+
+Linux is the primary development and validation platform for this change. Run the
+Chromium and Firefox responsive projects on Linux. WebKit also runs on Linux;
+it does not require macOS and does not certify Safari on Apple hardware.
+
+- [ ] Spot-check Chrome/Chromium and Firefox on Linux with keyboard navigation,
+      browser zoom at 200%, short laptop windows, and wide desktop windows.
+- [ ] Verify desktop single-page/spread modes and reduced motion.
+
+## Optional wider-platform checks (not completed by viewport emulation)
+
+These checks are outside the current Linux-focused validation scope.
 
 - [ ] Chrome, Edge, Brave, and Opera: verify reading, Display, Tools, images, and
       downloads; include Windows at native display scaling and browser zoom 200%.

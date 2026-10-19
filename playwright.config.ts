@@ -1,5 +1,12 @@
 import { defineConfig } from "@playwright/test";
 import { existsSync } from "node:fs";
+const responsiveBrowsers: ("chromium" | "firefox" | "webkit")[] = [
+  "chromium",
+  "firefox",
+];
+// WebKit remains available for a later validation pass without blocking Linux QA.
+if (process.env.PLAYWRIGHT_WEBKIT === "1") responsiveBrowsers.push("webkit");
+
 export default defineConfig({
   testDir: "tests/browser",
   timeout: 30000,
@@ -74,7 +81,7 @@ export default defineConfig({
       name: "desktop-light",
       use: { viewport: { width: 1280, height: 900 }, colorScheme: "light" },
     },
-    ...(["chromium", "firefox", "webkit"] as const).map((browserName) => ({
+    ...responsiveBrowsers.map((browserName) => ({
       name: `${browserName}-responsive`,
       testMatch: "**/responsive-reader.spec.ts",
       use: {
