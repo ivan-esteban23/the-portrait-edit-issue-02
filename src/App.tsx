@@ -2,6 +2,7 @@ import { Icon } from "@/components/ui/Icon";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import {
   Link,
+  NavLink,
   Route,
   Routes,
   useLocation,
@@ -122,12 +123,16 @@ export default function App() {
   const cycleTheme = useCallback(() => {
     const nextTheme: Theme =
       theme === "system"
-        ? "light"
-        : theme === "light"
+        ? "dark"
+        : theme === "dark"
           ? "paper"
           : theme === "paper"
-            ? "dark"
-            : "system";
+            ? "sepia"
+            : theme === "sepia"
+              ? "midnight"
+              : theme === "midnight"
+                ? "light"
+                : "system";
     setTheme(nextTheme);
   }, [theme, setTheme]);
 
@@ -174,7 +179,8 @@ export default function App() {
       {!focused && (
         <header className="masthead">
           <Link className="wordmark" to="/">
-            The Portrait Edit<span>Independent portrait studies</span>
+            THE PORTRAIT EDIT — ISSUE 02
+            <span>Independent portrait studies</span>
           </Link>
           <nav aria-label="Publication">
             <button
@@ -191,9 +197,24 @@ export default function App() {
               </span>
               <kbd className="search-trigger-kbd">⌘K</kbd>
             </button>
-            <Link to={`/issues/${currentIssue.slug}`}>Issue 02</Link>
-            <Link to="/prompts">Archive</Link>
-            <Link to="/about">About</Link>
+            <NavLink
+              to={readerPath(currentIssue.slug, 1)}
+              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+            >
+              Reader
+            </NavLink>
+            <NavLink
+              to="/prompts"
+              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+            >
+              Archive
+            </NavLink>
+            <NavLink
+              to="/about"
+              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+            >
+              About
+            </NavLink>
             <div className="masthead-theme">
               <select
                 aria-label="Color theme"
@@ -204,6 +225,8 @@ export default function App() {
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
                 <option value="paper">Paper</option>
+                <option value="sepia">Sepia</option>
+                <option value="midnight">Midnight Gallery</option>
               </select>
             </div>
           </nav>

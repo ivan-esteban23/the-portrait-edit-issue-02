@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type Theme = "system" | "light" | "dark" | "paper";
+export type Theme =
+  "system" | "light" | "dark" | "paper" | "sepia" | "midnight";
 
 const STORAGE_KEY = "portrait-edit-theme";
 const THEME_COLORS: Record<Exclude<Theme, "system">, string> = {
   light: "#f7f5f0",
   paper: "#f2ece0",
   dark: "#121212",
+  sepia: "#f6f0e5",
+  midnight: "#06080f",
 };
 const THEME_EVENT = "portrait-edit-theme-change";
 let transientTheme: Theme | null = null;
@@ -16,7 +19,9 @@ function isTheme(value: unknown): value is Theme {
     value === "system" ||
     value === "light" ||
     value === "dark" ||
-    value === "paper"
+    value === "paper" ||
+    value === "sepia" ||
+    value === "midnight"
   );
 }
 function readTheme(): Theme {
