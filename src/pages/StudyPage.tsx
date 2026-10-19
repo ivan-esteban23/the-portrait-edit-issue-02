@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { assetUrl, currentIssue, prompts, readerPath } from "@/content";
 import { Study } from "@/components/Study";
 import { useEffect } from "react";
@@ -7,10 +7,35 @@ import { usePageMeta, truncateMetaDescription } from "@/hooks/usePageMeta";
 
 export function StudyPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [id]);
   const prompt = prompts.find((p) => p.id === id);
+  const promptIndex = prompts.findIndex((p) => p.id === id);
+  const previousPrompt = promptIndex > 0 ? prompts[promptIndex - 1] : undefined;
+  const nextPrompt = promptIndex >= 0 ? prompts[promptIndex + 1] : undefined;
+  useEffect(() => {
+    if (!prompt) return;
+    const handleStudyNavigation = (event: KeyboardEvent) => {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.closest("input, textarea, select, [contenteditable='true']"))
+      ) return;
+      if (event.key === "ArrowLeft" && previousPrompt) {
+        event.preventDefault();
+        navigate(`/prompts/${previousPrompt.id}`);
+      } else if (event.key === "ArrowRight" && nextPrompt) {
+        event.preventDefault();
+        navigate(`/prompts/${nextPrompt.id}`);
+      }
+    };
+    window.addEventListener("keydown", handleStudyNavigation);
+    return () => window.removeEventListener("keydown", handleStudyNavigation);
+  }, [navigate, nextPrompt, previousPrompt, prompt]);
   usePageMeta({
     title: prompt
       ? `Study #${prompt.studyNumber}: ${prompt.title} | The Portrait Edit`
@@ -28,6 +53,22 @@ export function StudyPage() {
           Read in the issue ↗
         </Link>
       </div>
+      <nav className="study-sequence-nav" aria-label="Study navigation">
+        {previousPrompt ? (
+          <Link to={`/prompts/${previousPrompt.id}`} rel="prev">
+            <span>← Previous study</span>
+            <strong>#{String(previousPrompt.studyNumber).padStart(3, "0")} · {previousPrompt.title}</strong>
+            <kbd>←</kbd>
+          </Link>
+        ) : <span />}
+        {nextPrompt ? (
+          <Link to={`/prompts/${nextPrompt.id}`} rel="next">
+            <span>Next study →</span>
+            <strong>#{String(nextPrompt.studyNumber).padStart(3, "0")} · {nextPrompt.title}</strong>
+            <kbd>→</kbd>
+          </Link>
+        ) : <span />}
+      </nav>
       <Study key={prompt.id} prompt={prompt} />
       <aside className="parameters">
         <h3>Study record</h3>

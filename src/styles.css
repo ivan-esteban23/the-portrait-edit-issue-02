@@ -153,8 +153,8 @@ body {
   font-family: var(--font-sans);
   color: var(--text);
   background: var(--bg);
-  font-size: 16px;
-  line-height: 1.65;
+  font-size: 17px;
+  line-height: 1.7;
   font-kerning: normal;
   font-variant-ligatures: common-ligatures;
   font-optical-sizing: auto;
@@ -512,6 +512,58 @@ select:hover {
   gap: 20px;
   font-size: 0.8125rem;
   margin-bottom: 32px;
+}
+.study-sequence-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto 28px;
+}
+.study-sequence-nav a {
+  min-width: 0;
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-content: center;
+  gap: 4px 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  text-decoration: none;
+}
+.study-sequence-nav a:last-of-type {
+  text-align: right;
+}
+.study-sequence-nav span {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.study-sequence-nav strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 550;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.study-sequence-nav kbd {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--muted);
+  font: 0.8rem var(--mono);
+}
+.study-sequence-nav a:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+}
+@media (max-width: 560px) {
+  .study-sequence-nav {
+    grid-template-columns: 1fr;
+  }
 }
 .parameters {
   max-width: 68ch;
@@ -2269,7 +2321,7 @@ select:hover {
   flex-wrap: wrap;
 }
 .compare-section h4 {
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -2297,9 +2349,9 @@ select:hover {
   background: var(--surface-hover);
 }
 .compare-prompt-text {
-  font-family: var(--serif);
-  font-size: 0.9375rem;
-  line-height: 1.6;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.75;
   margin: 0;
 }
 .compare-params-grid {
@@ -2317,12 +2369,12 @@ select:hover {
 }
 .param-key {
   font-family: var(--mono);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   color: var(--muted);
 }
 .param-val {
   font-family: var(--mono);
-  font-size: 0.75rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -2332,14 +2384,15 @@ select:hover {
   gap: 6px;
 }
 .compare-style-lead {
-  font-size: 0.875rem;
+  font-size: 1rem;
+  line-height: 1.65;
   color: var(--text);
   margin: 0 0 8px;
 }
 .compare-note-text {
-  font-size: 0.8125rem;
-  color: var(--muted);
-  line-height: 1.5;
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.7;
   margin: 0;
 }
 .compare-empty-note {
@@ -4405,11 +4458,21 @@ body::before {
   letter-spacing: -0.03em;
 }
 .prompt-body,
-.compare-prompt-text,
 .anatomy-parameter {
   font-family: var(--mono);
   letter-spacing: -0.01em;
   line-height: 1.6;
+}
+.compare-prompt-text {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  letter-spacing: normal;
+  line-height: 1.75;
+}
+.compare-section .tag-badge {
+  min-height: 36px;
+  padding: 5px 11px;
+  font-size: 0.875rem;
 }
 
 /* Gallery cards: a 3:4 print window, touch-safe actions and linen captions. */
