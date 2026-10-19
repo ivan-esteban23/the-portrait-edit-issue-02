@@ -1,10 +1,21 @@
 import { Icon } from "@/components/ui/Icon";
-import { useState, useRef, useEffect, type MouseEvent, type KeyboardEvent } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  type MouseEvent,
+  type KeyboardEvent,
+} from "react";
 import { Link } from "react-router-dom";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
 import { copyText } from "@/lib/utils";
-import { formatPromptText, canShare, sharePrompt, type CopyFormat } from "@/lib/promptFormatter";
+import {
+  formatPromptText,
+  canShare,
+  sharePrompt,
+  type CopyFormat,
+} from "@/lib/promptFormatter";
 
 interface StudyCardProps {
   prompt: Prompt;
@@ -53,7 +64,13 @@ export function StudyCard({
       const text = formatPromptText(prompt, format);
       await copyText(text);
       setCopied(true);
-      setCopiedFormat(format === "raw" ? "Copied!" : format === "params" ? "Copied +Params!" : "Copied MD!");
+      setCopiedFormat(
+        format === "raw"
+          ? "Copied!"
+          : format === "params"
+            ? "Copied +Params!"
+            : "Copied MD!",
+      );
       timer.current = setTimeout(() => setCopied(false), 1600);
     } catch {
       /* clipboard write failed */
@@ -103,6 +120,10 @@ export function StudyCard({
           alt={prompt.title}
           loading="lazy"
         />
+        <div className="study-card-image-caption" aria-hidden="true">
+          <span>{prompt.model || "Portrait study"}</span>
+          {prompt.tags[0] && <span>{prompt.tags[0]}</span>}
+        </div>
         <div className="card-actions" onClick={(e) => e.stopPropagation()}>
           {/* Compare toggle button */}
           {onToggleCompare && (
@@ -238,7 +259,9 @@ export function StudyCard({
           </button>
         </div>
       </div>
-      <p className="eyebrow">Study {String(prompt.studyNumber).padStart(3, "0")}</p>
+      <p className="eyebrow">
+        Study {String(prompt.studyNumber).padStart(3, "0")}
+      </p>
       <Heading>{prompt.title}</Heading>
       <p className="study-card-style">{prompt.style}</p>
       {prompt.tags && prompt.tags.length > 0 && (

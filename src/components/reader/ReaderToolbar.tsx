@@ -113,7 +113,7 @@ export function ReaderToolbar({
     }
   };
   return (
-    <header className="reader-top">
+    <header id="reader-toolbar" className="reader-top">
       <div className="reader-controls">
         <Link className="reader-issue" to={`/issues/${issue.slug}`}>
           Issue {issue.number}
@@ -202,6 +202,8 @@ export function ReaderToolbar({
                   <option value="light">Light</option>
                   <option value="dark">Dark</option>
                   <option value="paper">Warm Paper / Sepia</option>
+                  <option value="sepia">Sepia</option>
+                  <option value="midnight">Midnight Gallery</option>
                 </select>
               </label>
               <label>

@@ -25,8 +25,9 @@ export function PromptAnatomy({ prompt }: { prompt: string }) {
               <button
                 type="button"
                 className={`anatomy-token ${category.colorClass}`}
+                aria-label={`Copy ${category.label} phrase: ${token}`}
                 key={`${category.label}-${index}-${token}`}
-                title="Copy phrase"
+                title={`${category.label} · Click to copy phrase`}
                 onClick={() => void copyPhrase(token)}
               >
                 {token}
