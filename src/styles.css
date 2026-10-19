@@ -3838,9 +3838,9 @@ select:hover {
   width: 100%;
   aspect-ratio: 3 / 4;
   height: auto;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 12px;
-  background: var(--surface);
+  background: var(--bg);
 }
 .related-studies-grid .eyebrow {
   margin-top: 12px;
