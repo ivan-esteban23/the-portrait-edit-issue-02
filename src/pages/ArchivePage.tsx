@@ -8,6 +8,7 @@ import { splitPromptParameters } from "@/lib/promptFormatter";
 import { copyText } from "@/lib/utils";
 import { generateMarkdownDossier, downloadFile } from "@/lib/dossier";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 type ParsedParameters = ReturnType<typeof splitPromptParameters>;
 
@@ -21,6 +22,7 @@ const ImageLightbox = lazy(() =>
 );
 
 export function ArchivePage() {
+  const { t } = useLanguage();
   usePageMeta({
     title: `Prompt Archive (${prompts.length} Studies) | The Portrait Edit`,
     description:
@@ -287,7 +289,7 @@ export function ArchivePage() {
           Search
           <input
             type="search"
-            placeholder="Light, texture, study number…"
+            placeholder={t("Light, texture, study number…")}
             value={query}
             onChange={(e) => filter("q", e.target.value)}
           />
@@ -295,7 +297,7 @@ export function ArchivePage() {
         <label>
           Style / tag
           <select value={tag} onChange={(e) => filter("tag", e.target.value)}>
-            <option value="">All styles</option>
+            <option value="">{t("All styles")}</option>
             {tags.map((t) => (
               <option key={t}>{t}</option>
             ))}
@@ -307,19 +309,19 @@ export function ArchivePage() {
             value={model}
             onChange={(e) => filter("model", e.target.value)}
           >
-            <option value="">All models</option>
+            <option value="">{t("All models")}</option>
             {models.map((m) => (
               <option key={m}>{m}</option>
             ))}
           </select>
         </label>
         <label>
-          Aspect Ratio
+          {t("Aspect Ratio")}
           <select
             value={aspectRatio}
             onChange={(e) => filter("ar", e.target.value)}
           >
-            <option value="">All aspect ratios</option>
+            <option value="">{t("All aspect ratios")}</option>
             {aspectRatios.map((ar) => (
               <option key={ar} value={ar}>
                 {ar}
@@ -344,7 +346,7 @@ export function ArchivePage() {
             variant="ghost"
             className={`selection-mode-toggle-btn ${selectionMode ? "is-active" : ""}`}
             aria-pressed={selectionMode}
-            aria-label={selectionMode ? "Cancel Selection" : "Select Prompts"}
+            aria-label={selectionMode ? t("Cancel Selection") : t("Select Prompts")}
             onClick={() => {
               setSelectionMode((prev) => {
                 if (prev) setSelectedIds([]);
@@ -352,7 +354,7 @@ export function ArchivePage() {
               });
             }}
           >
-            {selectionMode ? "Cancel Selection" : "Select Prompts"}
+            {selectionMode ? t("Cancel Selection") : t("Select Prompts")}
           </Button>
 
           {selectionMode && (
@@ -451,7 +453,7 @@ export function ArchivePage() {
             aria-busy={preparingPrint}
             title="Print editorial contact sheet (@media print)"
           >
-            {preparingPrint ? "Preparing sheet…" : "Print Contact Sheet 🖨"}
+            {preparingPrint ? t("Preparing sheet…") : t("Print Contact Sheet 🖨")}
           </Button>
 
           {savedCount > 0 && (
@@ -463,7 +465,7 @@ export function ArchivePage() {
                 onClick={exportSaved}
                 title="Export saved studies as JSON"
               >
-                Export JSON ↗
+                {t("Export JSON ↗")}
               </Button>
               <Button
                 type="button"
@@ -484,11 +486,11 @@ export function ArchivePage() {
               onClick={() => setSearch({})}
               aria-label="Reset all filters"
             >
-              Reset all filters ✕
+              {t("Reset all filters ✕")}
             </Button>
           )}
           <Button variant="ghost" onClick={() => setSearch({})}>
-            Clear filters
+            {t("Clear filters")}
           </Button>
         </div>
       </form>
@@ -573,7 +575,7 @@ export function ArchivePage() {
         <p className="empty-state">
           {savedOnly && savedCount === 0
             ? "No studies saved yet. Tap the bookmark icon on any study to add it to your curation board."
-            : "No studies match these filters. Try a broader search or clear the filters."}
+            : t("No studies match these filters. Try a broader search or clear the filters.")}
         </p>
       )}
 
@@ -598,7 +600,7 @@ export function ArchivePage() {
                 }}
                 className="dock-compare-btn"
               >
-                Compare 2 studies ⇄
+                {t("Compare 2 studies ⇄")}
               </Button>
               <Button
                 type="button"

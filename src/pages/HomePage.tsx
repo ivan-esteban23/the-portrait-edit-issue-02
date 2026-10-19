@@ -5,8 +5,10 @@ import { StudyCard } from "@/components/StudyCard";
 import { useLastReadPage } from "@/hooks/useReadingProgress";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 export function HomePage() {
+  const { t } = useLanguage();
   const lastReadPage = useLastReadPage(currentIssue);
   const navigate = useNavigate();
   const { isSaved, toggleSaved } = useBookmarks();
@@ -44,7 +46,7 @@ export function HomePage() {
       <section className="home-hero">
         <div>
           <p className="eyebrow">
-            Issue {currentIssue.number} / A portrait archive
+            Issue {currentIssue.number} / {t("A portrait archive")}
           </p>
           <h1>
             The
@@ -53,31 +55,31 @@ export function HomePage() {
           </h1>
           <p className="hero-deck">{currentIssue.description}</p>
           <p className="issue-stats">
-            {currentIssue.studies} studies <span>·</span> {currentIssue.pages}{" "}
-            pages <span>·</span> {currentIssue.chapters.length} chapters
+            {currentIssue.studies} {t("studies")} <span>·</span> {currentIssue.pages}{" "}
+            {t("pages")} <span>·</span> {currentIssue.chapters.length} {t("chapters")}
           </p>
           <div className="hero-actions">
             <Button asChild variant="default">
               <Link to={readerPath(currentIssue.slug, lastReadPage)}>
                 {lastReadPage > 1
-                  ? `Resume reading · Page ${lastReadPage} ↗`
-                  : "Start reading ↗"}
+                  ? t("Resume reading · Page {page} ↗", { page: lastReadPage })
+                  : t("Start reading ↗")}
               </Link>
             </Button>
             {lastReadPage > 1 && (
               <Button asChild variant="outline">
                 <Link to={readerPath(currentIssue.slug)}>
-                  Start from beginning
+                  {t("Start from beginning")}
                 </Link>
               </Button>
             )}
-            <Link to={`/issues/${currentIssue.slug}`}>Inside the issue</Link>
+            <Link to={`/issues/${currentIssue.slug}`}>{t("Inside the issue")}</Link>
           </div>
         </div>
         <Link
           className="hero-cover"
           to={readerPath(currentIssue.slug, lastReadPage)}
-          aria-label="Read The Prompt Issue"
+          aria-label={t("Read The Prompt Issue")}
         >
           <img
             src={assetUrl(currentIssue.cover)}
@@ -90,8 +92,8 @@ export function HomePage() {
       </section>
       <section className="selected-section">
         <div className="section-title">
-          <h2>From the archive</h2>
-          <Link to="/prompts">All studies ↗</Link>
+          <h2>{t("From the archive")}</h2>
+          <Link to="/prompts">{t("All studies ↗")}</Link>
         </div>
         <div className="selected-strip">
           {featured.map((p) => (

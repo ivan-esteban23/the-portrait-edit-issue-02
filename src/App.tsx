@@ -13,6 +13,7 @@ import { useTheme, type Theme } from "./hooks/useTheme";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Toast } from "./components/ui/Toast";
 import { BOOKMARK_REMOVED, useBookmarks } from "./hooks/useBookmarks";
+import { useLanguage } from "./i18n/LanguageProvider";
 
 const CommandPalette = lazy(() =>
   import("./components/CommandPalette").then((m) => ({
@@ -50,6 +51,7 @@ const Reader = lazy(() =>
 );
 
 export default function App() {
+  const { locale, setLocale, t } = useLanguage();
   const { theme, setTheme } = useTheme();
   const location = useLocation(),
     navigate = useNavigate();
@@ -174,26 +176,26 @@ export default function App() {
   return (
     <div className={focused ? "publication focused" : "publication"}>
       <a className="skip-link" href="#main">
-        Skip to content
+        {t("Skip to content")}
       </a>
       {!focused && (
         <header className="masthead">
           <Link className="wordmark" to="/">
             THE PORTRAIT EDIT — ISSUE 02
-            <span>Independent portrait studies</span>
+            <span>{t("Independent portrait studies")}</span>
           </Link>
           <nav aria-label="Publication">
             <button
               type="button"
               className="masthead-search-trigger"
               onClick={() => setCommandPaletteOpen(true)}
-              title="Search commands, pages, and prompts (⌘K / Ctrl+K)"
-              aria-label="Search and command palette"
+              title={t("Search commands, pages, and prompts (⌘K / Ctrl+K)")}
+              aria-label={t("Search and command palette")}
             >
               <Icon name="search" size={15} />
               <span className="search-trigger-label">
-                <span className="search-label-long">Search</span>
-                <span className="search-label-short">Find</span>
+                <span className="search-label-long">{t("Search")}</span>
+                <span className="search-label-short">{t("Find")}</span>
               </span>
               <kbd className="search-trigger-kbd">⌘K</kbd>
             </button>
@@ -201,19 +203,19 @@ export default function App() {
               to={readerPath(currentIssue.slug, 1)}
               className={({ isActive }) => (isActive ? "is-active" : undefined)}
             >
-              Reader
+              {t("Reader")}
             </NavLink>
             <NavLink
               to="/prompts"
               className={({ isActive }) => (isActive ? "is-active" : undefined)}
             >
-              Archive
+              {t("Archive")}
             </NavLink>
             <NavLink
               to="/about"
               className={({ isActive }) => (isActive ? "is-active" : undefined)}
             >
-              About
+              {t("About")}
             </NavLink>
             <div className="masthead-theme">
               <select
@@ -229,6 +231,18 @@ export default function App() {
                 <option value="midnight">Midnight Gallery</option>
               </select>
             </div>
+            <div className="masthead-theme masthead-language">
+              <select
+                aria-label={t("Language")}
+                value={locale}
+                onChange={(event) => setLocale(event.target.value as typeof locale)}
+              >
+                <option value="en">English</option>
+                <option value="ja">日本語</option>
+                <option value="zh-CN">简体中文</option>
+                <option value="ko">한국어</option>
+              </select>
+            </div>
           </nav>
         </header>
       )}
@@ -237,7 +251,7 @@ export default function App() {
           <Suspense
             fallback={
               <p className="route-loading" role="status">
-                Opening the archive…
+                {t("Opening the archive…")}
               </p>
             }
           >
@@ -262,18 +276,18 @@ export default function App() {
             <Link className="wordmark" to="/">
               The Portrait Edit
             </Link>
-            <p>An independent editorial archive.</p>
+            <p>{t("An independent editorial archive.")}</p>
           </div>
           <nav aria-label="Publication resources">
-            <a href={currentIssue.pdfUrl}>Download Issue 02 PDF ↗</a>
+            <a href={currentIssue.pdfUrl}>{t("Download Issue 02 PDF ↗")}</a>
             <a href={currentIssue.otherIssueUrl}>
-              Issue 01 — The Fashion Issue ↗
+              {t("Issue 01 — The Fashion Issue ↗")}
             </a>
             <Link to={`/issues/${currentIssue.slug}`}>
-              Issue 02 — The Prompt Issue
+              {t("Issue 02 — The Prompt Issue")}
             </Link>
             <a href="https://github.com/ivan-esteban23/the-portrait-edit">
-              Source & production notes ↗
+              {t("Source & production notes ↗")}
             </a>
           </nav>
         </footer>
@@ -281,7 +295,7 @@ export default function App() {
 
       <Toast
         key={bookmarkToast?.token ?? "bookmark-toast"}
-        message={`Study removed from ${bookmarkToast?.collection ?? "collection"}`}
+        message={t("Study removed from {collection}", { collection: bookmarkToast?.collection ?? t("collection") })}
         visible={Boolean(bookmarkToast)}
         onUndo={undoBookmarkRemoval}
         onDismiss={dismissBookmarkToast}

@@ -5,6 +5,7 @@ import type { Theme } from "@/hooks/useTheme";
 import { Icon } from "../ui/Icon";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 interface ReaderToolbarProps {
   issue: Issue;
@@ -95,6 +96,7 @@ export function ReaderToolbar({
   toggleStudyBookmark,
   setShortcutsOpen,
 }: ReaderToolbarProps) {
+  const { t } = useLanguage();
   const [input, setInput] = useState(String(page));
   const [hint, setHint] = useState(false);
   const [soundscapeControlsOpen, setSoundscapeControlsOpen] = useState(false);
@@ -120,7 +122,7 @@ export function ReaderToolbar({
         </Link>
         {!small && (
           <label className="chapter-control">
-            <span className="sr-only">Chapter</span>
+          <span className="sr-only">{t("Chapter")}</span>
             <select
               aria-label="Chapter"
               value={chapter.startPage}
@@ -139,11 +141,11 @@ export function ReaderToolbar({
           variant="ghost"
           aria-label="Table of contents"
           aria-keyshortcuts="T"
-          title="Table of contents (T)"
+          title={`${t("Table of contents")} (T)`}
           onClick={onOpenTableOfContents}
         >
           <span aria-hidden="true">☷</span>
-          <span className="toc-button-label">Index</span>
+          <span className="toc-button-label">{t("Index")}</span>
         </Button>
         <div className="pager" role="group" aria-label="Page navigation">
           <Button
@@ -186,34 +188,34 @@ export function ReaderToolbar({
           </Button>
         </div>
         <Dialog open={settings} onOpenChange={openSettings}>
-          <DialogTrigger asChild>
-            <Button variant="ghost">Display</Button>
+            <DialogTrigger asChild>
+            <Button variant="ghost">{t("Display")}</Button>
           </DialogTrigger>
           <DialogContent>
             <div className="settings-grid">
               <label>
-                Theme
+                {t("Theme")}
                 <select
                   aria-label="Color theme"
                   value={theme}
                   onChange={(e) => setTheme(e.target.value as Theme)}
                 >
-                  <option value="system">System (default)</option>
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                  <option value="paper">Warm Paper / Sepia</option>
-                  <option value="sepia">Sepia</option>
-                  <option value="midnight">Midnight Gallery</option>
+                  <option value="system">{t("Auto")}</option>
+                  <option value="light">{t("Light")}</option>
+                  <option value="dark">{t("Dark")}</option>
+                  <option value="paper">{t("Paper")}</option>
+                  <option value="sepia">{t("Sepia")}</option>
+                  <option value="midnight">{t("Midnight Gallery")}</option>
                 </select>
               </label>
               <label>
-                Chapter
+                {t("Jump to chapter")}
                 <select
                   aria-label="Jump to chapter"
                   value={chapter.startPage}
                   onChange={(e) => go(Number(e.target.value))}
                 >
-                  <option value="1">Front matter</option>
+                  <option value="1">{t("Front matter")}</option>
                   {issue.chapters.map((c) => (
                     <option key={c.startPage} value={c.startPage}>
                       {c.title}
@@ -222,20 +224,20 @@ export function ReaderToolbar({
                 </select>
               </label>
               <label>
-                View
+                {t("View")}
                 <select
                   aria-label="Reading mode"
                   value={mode}
                   onChange={(e) => setMode(e.target.value as "page" | "text")}
                 >
-                  <option value="page">Original page</option>
-                  <option value="text">Reading view</option>
+                  <option value="page">{t("Original page")}</option>
+                  <option value="text">{t("Reading view")}</option>
                 </select>
               </label>
               {mode === "page" ? (
                 <>
                   <label>
-                    Zoom
+                    {t("Zoom")}
                     <select
                       aria-label="Zoom"
                       value={zoom}
@@ -243,7 +245,7 @@ export function ReaderToolbar({
                     >
                       {[100, 125, 150, 200].map((n) => (
                         <option key={n} value={n}>
-                          {n === 100 ? "Fit" : `${n}%`}
+                          {n === 100 ? t("Fit") : `${n}%`}
                         </option>
                       ))}
                     </select>
@@ -251,7 +253,7 @@ export function ReaderToolbar({
                   <label
                     className={`spread-toggle-row ${!spreadCapable ? "is-disabled" : ""}`}
                   >
-                    <span>Two-page spread</span>
+                    <span>{t("Two-page spread")}</span>
                     <input
                       type="checkbox"
                       aria-label="Two-page spread"
@@ -268,7 +270,7 @@ export function ReaderToolbar({
                 </>
               ) : (
                 <fieldset>
-                  <legend>Text size</legend>
+                  <legend>{t("Text size")}</legend>
                   <div className="text-stepper">
                     {[16, 18, 20].map((n) => (
                       <Button
@@ -283,7 +285,7 @@ export function ReaderToolbar({
                 </fieldset>
               )}
               <label className="sound-toggle-row">
-                <span>Paper turn sound</span>
+                <span>{t("Paper turn sound")}</span>
                 <input
                   type="checkbox"
                   aria-label="Paper turn sound (Web Audio)"
@@ -304,7 +306,7 @@ export function ReaderToolbar({
                 </select>
               </label>
               <label className="loop-toggle-row">
-                <span>Loop presentation</span>
+                <span>{t("Loop presentation")}</span>
                 <input
                   type="checkbox"
                   aria-label="Loop presentation slideshow"
@@ -314,7 +316,7 @@ export function ReaderToolbar({
               </label>
             </div>
             <div className="keyboard-guide">
-              <h3>Keyboard</h3>
+              <h3>{t("Keyboard")}</h3>
               <p>
                 ← / K previous · → / J next
                 <br />
@@ -337,7 +339,7 @@ export function ReaderToolbar({
                 </p>
               )}
             </div>
-            <a href={issue.pdfUrl}>Download original PDF ↗</a>
+            <a href={issue.pdfUrl}>{t("Download original PDF ↗")}</a>
           </DialogContent>
         </Dialog>
         <Button
