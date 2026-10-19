@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useMedia } from "@/hooks/useReader";
 import { Link } from "react-router-dom";
 import type { Issue, Prompt } from "@/content/schema";
 import type { Theme } from "@/hooks/useTheme";
@@ -97,6 +98,20 @@ export function ReaderToolbar({
   setShortcutsOpen,
 }: ReaderToolbarProps) {
   const { t } = useLanguage();
+  const compact = useMedia("(max-width: 1399px), (max-height: 600px)");
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const toolsTrigger = useRef<HTMLButtonElement>(null);
+  const toolsPanel = useRef<HTMLDivElement>(null);
+  // If rotation hides the expanded panel, keep focus on a visible control.
+  useEffect(() => {
+    if (
+      compact &&
+      !toolsOpen &&
+      toolsPanel.current?.contains(document.activeElement)
+    ) {
+      toolsTrigger.current?.focus();
+    }
+  }, [compact, toolsOpen]);
   const [input, setInput] = useState(String(page));
   const [hint, setHint] = useState(false);
   const [soundscapeControlsOpen, setSoundscapeControlsOpen] = useState(false);
@@ -115,14 +130,17 @@ export function ReaderToolbar({
     }
   };
   return (
-    <header id="reader-toolbar" className="reader-top">
+    <header
+      id="reader-toolbar"
+      className={`reader-top${compact ? " reader-toolbar-compact" : ""}${compact && toolsOpen ? " reader-tools-open" : ""}`}
+    >
       <div className="reader-controls">
         <Link className="reader-issue" to={`/issues/${issue.slug}`}>
           Issue {issue.number}
         </Link>
         {!small && (
           <label className="chapter-control">
-          <span className="sr-only">{t("Chapter")}</span>
+            <span className="sr-only">{t("Chapter")}</span>
             <select
               aria-label="Chapter"
               value={chapter.startPage}
@@ -188,7 +206,7 @@ export function ReaderToolbar({
           </Button>
         </div>
         <Dialog open={settings} onOpenChange={openSettings}>
-            <DialogTrigger asChild>
+          <DialogTrigger asChild>
             <Button variant="ghost">{t("Display")}</Button>
           </DialogTrigger>
           <DialogContent>
@@ -349,134 +367,177 @@ export function ReaderToolbar({
           aria-keyshortcuts="F"
           onClick={onToggleFocus}
         >
-          {focus ? "Exit Focus" : "Focus"}
-        </Button>
-
-        {/* Presentation Slideshow Play/Pause Button */}
-        <Button
-          variant="ghost"
-          className={`reader-slideshow-btn ${isPlaying ? "is-playing" : ""}`}
-          aria-label="Toggle presentation slideshow"
-          aria-pressed={isPlaying}
-          aria-keyshortcuts="P"
-          title={
-            isPlaying
-              ? "Pause slideshow (P)"
-              : "Play presentation slideshow (P)"
-          }
-          onClick={toggleSlideshow}
-        >
-          {isPlaying ? <Icon name="pause" /> : <Icon name="play" />}
-          <span className="slideshow-label">
-            {isPlaying ? "Pause" : "Play"}
+          {compact && <span aria-hidden="true">◉</span>}
+          <span className={compact ? "sr-only" : undefined}>
+            {focus ? "Exit Focus" : "Focus"}
           </span>
         </Button>
 
-        {/* Fullscreen Button */}
-        <Button
-          variant="ghost"
-          className="reader-fullscreen-btn"
-          aria-label="Toggle fullscreen"
-          title="Toggle fullscreen (F)"
-          aria-keyshortcuts="F"
-          onClick={toggleFullscreen}
-        >
-          <Icon name={isFullscreen ? "fullscreen-exit" : "fullscreen"} />
-          <span className="sr-only">Fullscreen</span>
-        </Button>
-        <Button
-          variant="ghost"
-          className={`sound-fx-toggle-btn ${soundEnabled ? "is-active" : ""}`}
-          aria-label={`Sound FX: ${soundEnabled ? "On" : "Off"}`}
-          title={`Sound FX: ${soundEnabled ? "On" : "Off"}`}
-          onClick={toggleSound}
-        >
-          {soundEnabled ? (
-            <Icon name="speaker" />
-          ) : (
-            <Icon name="speaker-muted" />
-          )}
-          <span className="sound-fx-label">
-            {soundEnabled ? "Sound: On" : "Sound: Off"}
-          </span>
-        </Button>
-        <div className="soundscape-control">
+        {compact && (
           <Button
+            ref={toolsTrigger}
             variant="ghost"
-            className={`soundscape-toggle-btn ${soundscapeEnabled ? "is-active" : ""}`}
-            aria-label={
-              soundscapeEnabled
-                ? "Mute Focus Soundscape"
-                : "Enable Focus Soundscape"
-            }
-            aria-pressed={soundscapeEnabled}
-            onClick={onToggleSoundscape}
-            title="Focus Soundscape"
+            className="reader-tools-trigger"
+            aria-expanded={toolsOpen}
+            aria-controls="reader-tools"
+            onClick={() => setToolsOpen((open) => !open)}
           >
-            {soundscapeEnabled ? "◖))" : "◖"}
-            <span className="sound-fx-label">Ambience</span>
-          </Button>
-          <Button
-            variant="ghost"
-            aria-label="Adjust soundscape volume"
-            aria-expanded={soundscapeControlsOpen}
-            onClick={() => setSoundscapeControlsOpen((open) => !open)}
-          >
-            ⌄
-          </Button>
-          {soundscapeControlsOpen && (
-            <label className="soundscape-volume">
-              <span>Soundscape volume</span>
-              <input
-                aria-label="Soundscape volume"
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={soundscapeVolume}
-                onChange={(event) =>
-                  onSoundscapeVolumeChange(Number(event.target.value))
-                }
-              />
-            </label>
-          )}
-        </div>
-        {study && (
-          <Button
-            variant="ghost"
-            className={`reader-bookmark-btn ${isSaved(study.id) ? "is-saved" : ""}`}
-            aria-label={
-              isSaved(study.id)
-                ? "Remove study from saved bookmarks"
-                : "Save study to bookmarks"
-            }
-            aria-pressed={isSaved(study.id)}
-            aria-keyshortcuts="B"
-            title="Bookmark study (B)"
-            onClick={toggleStudyBookmark}
-          >
-            <Icon
-              name={
-                isSaved(study.id)
-                  ? "bookmark-straight-filled"
-                  : "bookmark-straight"
-              }
-              size={18}
-            />
+            {t("Tools")}
           </Button>
         )}
-        <Button
-          variant="ghost"
-          className="shortcuts-trigger-btn"
-          aria-label="Keyboard shortcuts"
-          title="Keyboard shortcuts (?)"
-          onClick={(event) => {
-            event.currentTarget.focus();
-            setShortcutsOpen(true);
+        <div
+          id="reader-tools"
+          ref={toolsPanel}
+          role="group"
+          aria-label={t("Reader tools")}
+          className="reader-tools"
+          hidden={compact && !toolsOpen}
+          onKeyDown={(event) => {
+            if (compact && event.key === "Escape") {
+              event.preventDefault();
+              event.stopPropagation();
+              setToolsOpen(false);
+              toolsTrigger.current?.focus();
+            }
           }}
         >
-          ?
-        </Button>
+          {compact && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setToolsOpen(false);
+                toolsTrigger.current?.focus();
+              }}
+            >
+              {t("Close tools")}
+            </Button>
+          )}
+          {/* Presentation Slideshow Play/Pause Button */}
+          <Button
+            variant="ghost"
+            className={`reader-slideshow-btn ${isPlaying ? "is-playing" : ""}`}
+            aria-label="Toggle presentation slideshow"
+            aria-pressed={isPlaying}
+            aria-keyshortcuts="P"
+            title={
+              isPlaying
+                ? "Pause slideshow (P)"
+                : "Play presentation slideshow (P)"
+            }
+            onClick={toggleSlideshow}
+          >
+            {isPlaying ? <Icon name="pause" /> : <Icon name="play" />}
+            <span className="slideshow-label">
+              {isPlaying ? "Pause" : "Play"}
+            </span>
+          </Button>
+
+          {/* Fullscreen Button */}
+          <Button
+            variant="ghost"
+            className="reader-fullscreen-btn"
+            aria-label="Toggle fullscreen"
+            title="Toggle fullscreen (F)"
+            aria-keyshortcuts="F"
+            onClick={toggleFullscreen}
+          >
+            <Icon name={isFullscreen ? "fullscreen-exit" : "fullscreen"} />
+            <span className="sr-only">Fullscreen</span>
+          </Button>
+          <Button
+            variant="ghost"
+            className={`sound-fx-toggle-btn ${soundEnabled ? "is-active" : ""}`}
+            aria-label={`Sound FX: ${soundEnabled ? "On" : "Off"}`}
+            title={`Sound FX: ${soundEnabled ? "On" : "Off"}`}
+            onClick={toggleSound}
+          >
+            {soundEnabled ? (
+              <Icon name="speaker" />
+            ) : (
+              <Icon name="speaker-muted" />
+            )}
+            <span className="sound-fx-label">
+              {soundEnabled ? "Sound: On" : "Sound: Off"}
+            </span>
+          </Button>
+          <div className="soundscape-control">
+            <Button
+              variant="ghost"
+              className={`soundscape-toggle-btn ${soundscapeEnabled ? "is-active" : ""}`}
+              aria-label={
+                soundscapeEnabled
+                  ? "Mute Focus Soundscape"
+                  : "Enable Focus Soundscape"
+              }
+              aria-pressed={soundscapeEnabled}
+              onClick={onToggleSoundscape}
+              title="Focus Soundscape"
+            >
+              {soundscapeEnabled ? "◖))" : "◖"}
+              <span className="sound-fx-label">Ambience</span>
+            </Button>
+            <Button
+              variant="ghost"
+              aria-label="Adjust soundscape volume"
+              aria-expanded={soundscapeControlsOpen}
+              onClick={() => setSoundscapeControlsOpen((open) => !open)}
+            >
+              ⌄
+            </Button>
+            {soundscapeControlsOpen && (
+              <label className="soundscape-volume">
+                <span>Soundscape volume</span>
+                <input
+                  aria-label="Soundscape volume"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={soundscapeVolume}
+                  onChange={(event) =>
+                    onSoundscapeVolumeChange(Number(event.target.value))
+                  }
+                />
+              </label>
+            )}
+          </div>
+          {study && (
+            <Button
+              variant="ghost"
+              className={`reader-bookmark-btn ${isSaved(study.id) ? "is-saved" : ""}`}
+              aria-label={
+                isSaved(study.id)
+                  ? "Remove study from saved bookmarks"
+                  : "Save study to bookmarks"
+              }
+              aria-pressed={isSaved(study.id)}
+              aria-keyshortcuts="B"
+              title="Bookmark study (B)"
+              onClick={toggleStudyBookmark}
+            >
+              <Icon
+                name={
+                  isSaved(study.id)
+                    ? "bookmark-straight-filled"
+                    : "bookmark-straight"
+                }
+                size={18}
+              />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            className="shortcuts-trigger-btn"
+            aria-label="Keyboard shortcuts"
+            title="Keyboard shortcuts (?)"
+            onClick={(event) => {
+              event.currentTarget.focus();
+              setShortcutsOpen(true);
+            }}
+          >
+            ?
+          </Button>
+        </div>
       </div>
       <p className="chapter-progress">
         {chapter.title}{" "}

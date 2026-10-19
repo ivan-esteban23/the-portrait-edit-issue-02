@@ -17,6 +17,7 @@ export default defineConfig({
   },
   projects: [
     {
+      testIgnore: "**/responsive-reader.spec.ts",
       name: "small-phone-dark",
       use: {
         viewport: { width: 320, height: 740 },
@@ -26,6 +27,7 @@ export default defineConfig({
       },
     },
     {
+      testIgnore: "**/responsive-reader.spec.ts",
       name: "phone-light",
       use: {
         viewport: { width: 390, height: 844 },
@@ -35,6 +37,7 @@ export default defineConfig({
       },
     },
     {
+      testIgnore: "**/responsive-reader.spec.ts",
       name: "large-phone-dark",
       use: {
         viewport: { width: 430, height: 932 },
@@ -44,6 +47,7 @@ export default defineConfig({
       },
     },
     {
+      testIgnore: "**/responsive-reader.spec.ts",
       name: "tablet-light",
       use: {
         viewport: { width: 834, height: 1112 },
@@ -52,6 +56,7 @@ export default defineConfig({
       },
     },
     {
+      testIgnore: "**/responsive-reader.spec.ts",
       name: "tablet-landscape-dark",
       use: {
         viewport: { width: 1194, height: 834 },
@@ -60,13 +65,26 @@ export default defineConfig({
       },
     },
     {
+      testIgnore: "**/responsive-reader.spec.ts",
       name: "desktop-dark",
       use: { viewport: { width: 1440, height: 1000 }, colorScheme: "dark" },
     },
     {
+      testIgnore: "**/responsive-reader.spec.ts",
       name: "desktop-light",
       use: { viewport: { width: 1280, height: 900 }, colorScheme: "light" },
     },
+    ...(["chromium", "firefox", "webkit"] as const).map((browserName) => ({
+      name: `${browserName}-responsive`,
+      testMatch: "**/responsive-reader.spec.ts",
+      use: {
+        browserName,
+        launchOptions:
+          browserName === "chromium" && existsSync("/usr/bin/chromium")
+            ? { executablePath: "/usr/bin/chromium" }
+            : {},
+      },
+    })),
   ],
   webServer: {
     command: "npm run preview -- --host 127.0.0.1",

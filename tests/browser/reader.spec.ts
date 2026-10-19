@@ -1,3 +1,4 @@
+import { openReaderTools } from "./helpers/reader-tools";
 import { test, expect, type Page } from "@playwright/test";
 const reader = "issues/the-prompt-issue/pages/60";
 async function settings(page: Page) {
@@ -634,6 +635,7 @@ test("accessibility: shortcuts and lightbox trap focus and restore external trig
   page,
 }) => {
   await page.goto(reader);
+  await openReaderTools(page);
   const opener = page.getByRole("button", {
     name: "Keyboard shortcuts",
     exact: true,
@@ -804,6 +806,7 @@ test("accessibility: coarse-pointer reader and modal controls have 44px targets"
   await checkTargets(
     ".reader-top :is(button,a,input,select), .reader-bottom button, .scrubber :is(button,input)",
   );
+  await openReaderTools(page);
   await page
     .getByRole("button", { name: "Keyboard shortcuts", exact: true })
     .click();

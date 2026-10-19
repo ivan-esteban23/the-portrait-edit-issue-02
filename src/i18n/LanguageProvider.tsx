@@ -15,6 +15,7 @@ const STORAGE_KEY = "portrait-edit-language";
 const locales: Locale[] = ["en", "ja", "zh-CN", "ko"];
 const translations: Record<Exclude<Locale, "en">, Record<string, string>> = {
   ja: {
+    Tools: "ツール", "Reader tools": "リーダーツール", "Close tools": "ツールを閉じる",
     "Skip to content": "本文へスキップ", "Independent portrait studies": "独立系ポートレート研究誌",
     "Search commands, pages, and prompts (⌘K / Ctrl+K)": "コマンド、ページ、プロンプトを検索（⌘K / Ctrl+K）", "Search and command palette": "検索とコマンドパレット",
     Search: "検索", Find: "探す", Reader: "リーダー", Archive: "アーカイブ", About: "この出版物について", Publication: "出版物", Language: "言語",
@@ -31,6 +32,7 @@ const translations: Record<Exclude<Locale, "en">, Record<string, string>> = {
     "Compare 2 studies ⇄": "2件を比較 ⇄", Clear: "解除", "Copy Prompts": "プロンプトをコピー", "Copied!": "コピーしました！", "Batch actions toolbar": "一括操作ツールバー", "Prompt Comparison": "プロンプト比較", "Image Prompt": "画像プロンプト", "Working notes": "制作ノート", "Try this": "試してみる", "Copy prompt": "プロンプトをコピー", Share: "共有", Compare: "比較", "Add to compare": "比較に追加", Comparing: "比較中", Parameters: "パラメーター", "Tags & Style": "タグとスタイル", "Variations to Try": "試してみるバリエーション", "Prompt Studio": "プロンプトスタジオ", "Keyboard Shortcuts": "キーボードショートカット", "Open Command Palette & Search": "コマンドパレットと検索を開く", "Open Table of Contents": "目次を開く", "Close table of contents": "目次を閉じる",
   },
   "zh-CN": {
+    Tools: "工具", "Reader tools": "阅读器工具", "Close tools": "关闭工具",
     "Skip to content": "跳转到正文", "Independent portrait studies": "独立人像编辑档案",
     "Search commands, pages, and prompts (⌘K / Ctrl+K)": "搜索命令、页面和提示词（⌘K / Ctrl+K）", "Search and command palette": "搜索与命令面板",
     Search: "搜索", Find: "查找", Reader: "阅读器", Archive: "档案库", About: "关于", Publication: "刊物", Language: "语言",
@@ -47,6 +49,7 @@ const translations: Record<Exclude<Locale, "en">, Record<string, string>> = {
     "Compare 2 studies ⇄": "比较 2 项 ⇄", Clear: "清除", "Copy Prompts": "复制提示词", "Copied!": "已复制！", "Batch actions toolbar": "批量操作工具栏", "Prompt Comparison": "提示词对比", "Image Prompt": "图像提示词", "Working notes": "创作笔记", "Try this": "尝试此方案", "Copy prompt": "复制提示词", Share: "分享", Compare: "比较", "Add to compare": "加入比较", Comparing: "正在比较", Parameters: "参数", "Tags & Style": "标签与风格", "Variations to Try": "可尝试的变化", "Prompt Studio": "提示词工作室", "Keyboard Shortcuts": "键盘快捷键", "Open Command Palette & Search": "打开命令面板与搜索", "Open Table of Contents": "打开目录", "Close table of contents": "关闭目录",
   },
   ko: {
+    Tools: "도구", "Reader tools": "리더 도구", "Close tools": "도구 닫기",
     "Skip to content": "본문으로 건너뛰기", "Independent portrait studies": "독립 포트레이트 편집 아카이브",
     "Search commands, pages, and prompts (⌘K / Ctrl+K)": "명령, 페이지, 프롬프트 검색 (⌘K / Ctrl+K)", "Search and command palette": "검색 및 명령 팔레트",
     Search: "검색", Find: "찾기", Reader: "리더", Archive: "아카이브", About: "소개", Publication: "출판물", Language: "언어",
