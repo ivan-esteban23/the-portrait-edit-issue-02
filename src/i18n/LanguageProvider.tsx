@@ -97,7 +97,12 @@ function getInitialLocale(): Locale {
 const LanguageContext = createContext<LanguageContextValue>({
   locale: "en",
   setLocale: () => undefined,
-  t: (key) => key,
+  t: (key, values) =>
+    values
+      ? key.replace(/\{(\w+)\}/g, (match, name: string) =>
+          String(values[name] ?? match),
+        )
+      : key,
 });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
