@@ -40,7 +40,7 @@ for (const screen of screens) {
       const box = (await control.boundingBox())!;
       expect(box.x).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width).toBeLessThanOrEqual(screen.width + 1);
-      // Firefox may report 44 CSS pixels as 43.99994 after layout rounding.
+      // Round subpixel layout values before asserting the 44px touch target.
       expect(Math.round(box.width * 100) / 100).toBeGreaterThanOrEqual(44);
       expect(Math.round(box.height * 100) / 100).toBeGreaterThanOrEqual(44);
     }
