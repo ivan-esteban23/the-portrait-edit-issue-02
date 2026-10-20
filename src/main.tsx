@@ -4,6 +4,8 @@ import { BrowserRouter } from "react-router-dom";
 import "@fontsource-variable/inter/standard.css";
 import "@fontsource-variable/newsreader/standard.css";
 import "@fontsource-variable/newsreader/standard-italic.css";
+import "@fontsource-variable/jetbrains-mono/wght.css";
+import "@fontsource-variable/jetbrains-mono/wght-italic.css";
 import "./styles.css";
 import App from "./App";
 import { LanguageProvider } from "./i18n/LanguageProvider";
