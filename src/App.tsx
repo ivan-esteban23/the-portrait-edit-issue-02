@@ -1,5 +1,12 @@
 import { Icon } from "@/components/ui/Icon";
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Link,
   NavLink,
@@ -96,14 +103,34 @@ export default function App() {
     }
   });
 
-  const setFocus = useCallback((value: boolean) => {
-    setFocusState(value);
-    try {
-      localStorage.setItem("portrait-edit-focus-mode", String(value));
-    } catch {
-      /* Private browsing still works. */
-    }
-  }, []);
+  const locationRef = useRef(location);
+  locationRef.current = location;
+  // Single Focus transition: state, persisted preference and an existing
+  // ?focus= parameter always change together, so a refresh never reverts it.
+  const setFocus = useCallback(
+    (value: boolean) => {
+      setFocusState(value);
+      try {
+        localStorage.setItem("portrait-edit-focus-mode", String(value));
+      } catch {
+        /* Private browsing still works. */
+      }
+      const search = new URLSearchParams(locationRef.current.search);
+      const current = search.get("focus");
+      if (current !== null && current !== (value ? "1" : "0")) {
+        search.set("focus", value ? "1" : "0");
+        navigate(
+          {
+            pathname: locationRef.current.pathname,
+            search: `?${search.toString()}`,
+            hash: locationRef.current.hash,
+          },
+          { replace: true },
+        );
+      }
+    },
+    [navigate],
+  );
 
   const readerRoute = /^\/issues\/[^/]+\/pages\/\d+\/?$/.test(
     location.pathname,

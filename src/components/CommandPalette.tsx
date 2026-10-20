@@ -120,35 +120,13 @@ export function CommandPalette({
       },
     },
     {
-      id: "act-filter-ar-4-5",
+      id: "act-filter-ar-none",
       section: "Actions",
-      title: "Filter Archive: 4:5 Portrait Aspect Ratio",
-      subtitle: "Show prompts composed in vertical editorial 4:5 format",
-      badge: "AR 4:5",
+      title: "Filter Archive: Aspect Ratio Not Recorded",
+      subtitle: "Show studies whose prompt does not record an --ar parameter",
+      badge: "AR",
       action: () => {
-        navigate("/prompts?ar=4:5");
-        onClose();
-      },
-    },
-    {
-      id: "act-filter-ar-16-9",
-      section: "Actions",
-      title: "Filter Archive: 16:9 Cinematic Aspect Ratio",
-      subtitle: "Show prompts composed in widescreen cinematic 16:9 format",
-      badge: "AR 16:9",
-      action: () => {
-        navigate("/prompts?ar=16:9");
-        onClose();
-      },
-    },
-    {
-      id: "act-filter-ar-1-1",
-      section: "Actions",
-      title: "Filter Archive: 1:1 Square Aspect Ratio",
-      subtitle: "Show prompts composed in square 1:1 format",
-      badge: "AR 1:1",
-      action: () => {
-        navigate("/prompts?ar=1:1");
+        navigate("/prompts?ar=none");
         onClose();
       },
     },

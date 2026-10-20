@@ -4041,6 +4041,11 @@ select:hover {
   color: var(--text);
   white-space: nowrap;
 }
+.batch-copy-error {
+  font-size: 0.8125rem;
+  color: var(--danger, #b42318);
+  max-width: 28ch;
+}
 .batch-toolbar-actions {
   display: flex;
   align-items: center;

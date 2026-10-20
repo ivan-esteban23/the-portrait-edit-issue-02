@@ -140,9 +140,9 @@ describe("Editorial Enhancements: Slideshow, Export, Presets & Filtering", () =>
       const arSelect = screen.getByLabelText("Aspect Ratio");
       expect(arSelect).toBeInTheDocument();
 
-      // Filter by aspect ratio "4:5"
-      fireEvent.change(arSelect, { target: { value: "4:5" } });
-      expect((arSelect as HTMLSelectElement).value).toBe("4:5");
+      // Filter by studies without a recorded aspect ratio
+      fireEvent.change(arSelect, { target: { value: "none" } });
+      expect((arSelect as HTMLSelectElement).value).toBe("none");
 
       // Reset filters button should appear
       const resetBtn = screen.getByRole("button", { name: /Reset all filters/i });

@@ -13,7 +13,12 @@ export function editable(target: EventTarget | null) {
 }
 export async function copyText(text: string) {
   if (navigator.clipboard?.writeText) {
-    return navigator.clipboard.writeText(text);
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // Permission denied or insecure context: fall back to execCommand below.
+    }
   }
 
   // Fallback: use an off-screen textarea so we can select + copy.
@@ -31,17 +36,15 @@ export async function copyText(text: string) {
   document.body.append(area);
   try {
     area.select();
-    if (navigator.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(text);
-        return;
-      } catch {
-        // Clipboard API failed; fall through to execCommand
-      }
-    }
     // execCommand("copy") is deprecated but remains the only synchronous
     // clipboard fallback for older browsers and non-secure contexts.
-    if (!document.execCommand("copy")) throw Error("Copy unavailable");
+    let copied = false;
+    try {
+      copied = document.execCommand?.("copy") ?? false;
+    } catch {
+      copied = false;
+    }
+    if (!copied) throw Error("Copy unavailable");
   } finally {
     area.remove();
     active?.focus({ preventScroll: true });
@@ -56,4 +59,11 @@ export function lightHaptic() {
   } catch {
     // Haptics are optional, including on browsers that restrict vibration.
   }
+}
+
+/** True while a modal dialog (lightbox, settings, palette) owns the keyboard. */
+export function modalOpen() {
+  return Boolean(
+    document.querySelector('[role="dialog"][aria-modal="true"], [role="alertdialog"]'),
+  );
 }
