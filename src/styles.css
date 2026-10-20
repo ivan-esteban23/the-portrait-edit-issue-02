@@ -32,10 +32,10 @@
   --serif:
     "Newsreader Variable", Newsreader, "Source Serif 4", "Charter",
     "Bitstream Charter", "Georgia", "DejaVu Serif", serif;
-  /* Editorial monospace for prompts and parameters. */
+  /* Bundled monospace keeps prompts and parameters consistent across devices. */
   --mono:
-    ui-monospace, "SFMono-Regular", "SF Mono", "Cascadia Code",
-    "Liberation Mono", Menlo, Consolas, monospace;
+    "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", "SF Mono",
+    "Cascadia Code", "Liberation Mono", Menlo, Consolas, monospace;
   --gutter: clamp(16px, 4vw, 48px);
   --reader-bottom-height: 72px;
   --measure: min(68ch, 100%);
