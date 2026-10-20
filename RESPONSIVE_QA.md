@@ -48,6 +48,22 @@ Browser downloads require `cdn.playwright.dev` and
 home cache, set `PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright` for both
 installation and execution. Restart Vite after reinstalling dependencies.
 
+## Archive cards
+
+Portraits have no caption or action overlays. Copy and Save sit below the text;
+More opens comparison, parameter/Markdown copying, and native sharing when the
+browser supports it. Escape closes More and restores its trigger; moving focus
+or clicking outside dismisses it. Tags are native buttons and wrap without clipping.
+
+The archive retains two columns at 360–767px and three at larger widths. Below
+360px, it uses one column so the three footer controls retain 44px touch targets.
+
+Both responsive engine projects also run `archive-cards.spec.ts` at 320, 390,
+430, 834, 1366, and 1920px. Checks cover clear portraits, action/menu bounds,
+copying, sharing, comparison, bookmarking, keyboard dismissal, and tag filtering.
+Existing Chromium checks cover archive routing, multi-selection, print output,
+and Compare Lab focus behavior.
+
 ## Linux release checks
 
 Linux is the primary development and validation platform for this change. Run the

@@ -24,7 +24,7 @@ export default defineConfig({
   },
   projects: [
     {
-      testIgnore: "**/responsive-reader.spec.ts",
+      testIgnore: "**/{responsive-reader,archive-cards}.spec.ts",
       name: "small-phone-dark",
       use: {
         viewport: { width: 320, height: 740 },
@@ -34,7 +34,7 @@ export default defineConfig({
       },
     },
     {
-      testIgnore: "**/responsive-reader.spec.ts",
+      testIgnore: "**/{responsive-reader,archive-cards}.spec.ts",
       name: "phone-light",
       use: {
         viewport: { width: 390, height: 844 },
@@ -44,7 +44,7 @@ export default defineConfig({
       },
     },
     {
-      testIgnore: "**/responsive-reader.spec.ts",
+      testIgnore: "**/{responsive-reader,archive-cards}.spec.ts",
       name: "large-phone-dark",
       use: {
         viewport: { width: 430, height: 932 },
@@ -54,7 +54,7 @@ export default defineConfig({
       },
     },
     {
-      testIgnore: "**/responsive-reader.spec.ts",
+      testIgnore: "**/{responsive-reader,archive-cards}.spec.ts",
       name: "tablet-light",
       use: {
         viewport: { width: 834, height: 1112 },
@@ -63,7 +63,7 @@ export default defineConfig({
       },
     },
     {
-      testIgnore: "**/responsive-reader.spec.ts",
+      testIgnore: "**/{responsive-reader,archive-cards}.spec.ts",
       name: "tablet-landscape-dark",
       use: {
         viewport: { width: 1194, height: 834 },
@@ -72,18 +72,18 @@ export default defineConfig({
       },
     },
     {
-      testIgnore: "**/responsive-reader.spec.ts",
+      testIgnore: "**/{responsive-reader,archive-cards}.spec.ts",
       name: "desktop-dark",
       use: { viewport: { width: 1440, height: 1000 }, colorScheme: "dark" },
     },
     {
-      testIgnore: "**/responsive-reader.spec.ts",
+      testIgnore: "**/{responsive-reader,archive-cards}.spec.ts",
       name: "desktop-light",
       use: { viewport: { width: 1280, height: 900 }, colorScheme: "light" },
     },
     ...responsiveBrowsers.map((browserName) => ({
       name: `${browserName}-responsive`,
-      testMatch: "**/responsive-reader.spec.ts",
+      testMatch: "**/{responsive-reader,archive-cards}.spec.ts",
       use: {
         browserName,
         launchOptions:
