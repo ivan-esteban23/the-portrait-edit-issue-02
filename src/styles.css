@@ -182,7 +182,11 @@ button,
 input,
 select,
 summary {
-  min-height: 44px;
+  min-height: 48px;
+}
+button,
+select {
+  min-width: 48px;
 }
 button,
 summary,
@@ -3415,6 +3419,18 @@ select:hover {
 /* Actual control boxes grow on touch devices; targets never overlap neighbors. */
 @media (pointer: coarse) {
   :is(
+    button,
+    input,
+    select,
+    summary,
+    a[href],
+    [role="button"],
+    [role="slider"]
+  ) {
+    min-width: 48px !important;
+    min-height: 48px !important;
+  }
+  :is(
       .reader-top,
       .reader-bottom,
       .scrubber,
@@ -3425,8 +3441,8 @@ select:hover {
       .compare-lab-container
     )
     :is(button, a, input, select, [role="slider"]) {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 48px;
+    min-height: 48px;
   }
   .reader-issue {
     display: inline-flex;
@@ -4513,7 +4529,7 @@ body::before {
   inset: auto;
   z-index: 2;
   display: grid;
-  grid-template-columns: repeat(3, minmax(44px, 1fr));
+  grid-template-columns: repeat(3, minmax(48px, 1fr));
   gap: 0;
   width: 100%;
   margin-top: auto;
@@ -4524,8 +4540,8 @@ body::before {
 }
 .study-card .card-action-btn {
   width: 100%;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   border: 0;
   border-radius: 4px;
   color: var(--muted);
@@ -4573,7 +4589,7 @@ body::before {
 }
 .study-card .study-card-menu-item {
   width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   padding: 10px 8px;
   border: 0;
   border-radius: 4px;
@@ -4879,7 +4895,8 @@ textarea {
   .reader {
     padding-top: 12px;
     padding-bottom: calc(
-      var(--reader-bottom-height, 64px) + env(safe-area-inset-bottom, 0px) + 32px
+      var(--reader-bottom-height, 64px) + env(safe-area-inset-bottom, 0px) +
+        32px
     );
   }
   #reader-toolbar.reader-top {

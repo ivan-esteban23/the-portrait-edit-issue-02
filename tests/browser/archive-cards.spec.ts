@@ -22,6 +22,9 @@ for (const viewport of [
       }),
     );
     await page.goto("prompts");
+    await expect(
+      page.getByRole("heading", { name: "Portrait prompts" }),
+    ).toBeVisible({ timeout: 30_000 });
     const card = page.locator(".archive-grid .study-card").first();
     const media = card.locator(".study-card-media");
     await expect(media.locator("img")).toBeVisible();
@@ -39,8 +42,8 @@ for (const viewport of [
     await expect(actions.locator(":scope > button")).toHaveCount(3);
     for (const button of await actions.locator(":scope > button").all()) {
       const box = (await button.boundingBox())!;
-      expect(Math.round(box.width * 100) / 100).toBeGreaterThanOrEqual(44);
-      expect(Math.round(box.height * 100) / 100).toBeGreaterThanOrEqual(44);
+      expect(Math.round(box.width * 100) / 100).toBeGreaterThanOrEqual(48);
+      expect(Math.round(box.height * 100) / 100).toBeGreaterThanOrEqual(48);
     }
     expect(
       await page.evaluate(
@@ -152,4 +155,42 @@ test("card actions copy, share, compare, and filter without opening the study", 
   await expect(page).toHaveURL(
     new RegExp(`tag=${encodeURIComponent(study.tags[0])}`),
   );
+});
+
+test("More actions supports keyboard entry, Escape at the trigger, and natural Tab dismissal", async ({
+  page,
+}) => {
+  await page.goto("prompts");
+  const card = page.locator(".archive-grid .study-card").first();
+  const more = card.getByRole("button", {
+    name: "More actions for Study 1",
+    exact: true,
+  });
+  const compare = card.getByRole("button", {
+    name: "Add Study 1 to compare",
+    exact: true,
+  });
+  await more.focus();
+  await page.keyboard.press("Enter");
+  await expect(compare).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(more).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(more).toHaveAttribute("aria-expanded", "false");
+  await expect(more).toBeFocused();
+
+  await page.keyboard.press("Space");
+  await expect(compare).toBeFocused();
+  const items = card.locator(".study-card-menu button");
+  const count = await items.count();
+  for (let index = 0; index < count; index++) await page.keyboard.press("Tab");
+  await expect(card.locator(".study-card-overlay")).toBeFocused();
+  await expect(more).toHaveAttribute("aria-expanded", "false");
+
+  await more.focus();
+  await page.keyboard.press("Enter");
+  await expect(compare).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(more).toBeFocused();
+  await expect(more).toHaveAttribute("aria-expanded", "false");
 });

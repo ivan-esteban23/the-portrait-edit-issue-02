@@ -175,6 +175,12 @@ export function StudyCard({
         ref={actionsRef}
         role="group"
         aria-label={`Actions for Study ${prompt.studyNumber}`}
+        onKeyDown={(event) => {
+          if (!menuOpen || event.key !== "Escape") return;
+          event.preventDefault();
+          event.stopPropagation();
+          closeMenu();
+        }}
       >
         <button
           type="button"
@@ -231,13 +237,6 @@ export function StudyCard({
             className="study-card-menu"
             role="group"
             aria-label={`More actions for Study ${prompt.studyNumber}`}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                event.preventDefault();
-                event.stopPropagation();
-                closeMenu();
-              }
-            }}
           >
             {onToggleCompare && (
               <button

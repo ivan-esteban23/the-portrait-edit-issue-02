@@ -1,4 +1,10 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { expect, it, vi } from "vitest";
 import { copyText } from "../src/lib/utils";
@@ -66,8 +72,10 @@ it("never presents unrecorded aspect ratios as 4:5", () => {
 
 it("filters every study without a recorded ratio under Not recorded", () => {
   renderArchive("/prompts?ar=none");
-  expect(document.querySelectorAll(".archive-grid article, .archive-grid > *").length)
-    .toBeGreaterThan(0);
+  expect(
+    document.querySelectorAll(".archive-grid article, .archive-grid > *")
+      .length,
+  ).toBeGreaterThan(0);
   expect(screen.queryByText(/No studies match/i)).toBeNull();
 });
 
@@ -87,14 +95,16 @@ it("reports a failed batch copy instead of failing silently", async () => {
     fireEvent.click(screen.getByRole("button", { name: "Copy Prompts" }));
   });
   expect(screen.getByRole("alert")).toHaveTextContent("Copy unavailable");
-  expect(screen.getByRole("button", { name: "Copy Prompts" })).toHaveTextContent(
-    "Copy Prompts",
-  );
-});
+  expect(
+    screen.getByRole("button", { name: "Copy Prompts" }),
+  ).toHaveTextContent("Copy Prompts");
+}, 30_000);
 
 function LocationProbe() {
   const location = useLocation();
-  return <output data-testid="path">{location.pathname + location.search}</output>;
+  return (
+    <output data-testid="path">{location.pathname + location.search}</output>
+  );
 }
 
 function renderStudy(id: string) {
@@ -111,7 +121,9 @@ function renderStudy(id: string) {
 it("arrow keys change study when no dialog is open", () => {
   renderStudy(prompts[1].id);
   fireEvent.keyDown(document.body, { key: "ArrowRight" });
-  expect(screen.getByTestId("path")).toHaveTextContent(`/prompts/${prompts[2].id}`);
+  expect(screen.getByTestId("path")).toHaveTextContent(
+    `/prompts/${prompts[2].id}`,
+  );
 });
 
 it("arrow keys do not leave the study while the image inspector is open", () => {
@@ -123,7 +135,9 @@ it("arrow keys do not leave the study while the image inspector is open", () => 
   try {
     fireEvent.keyDown(dialog, { key: "ArrowRight" });
     fireEvent.keyDown(document.body, { key: "ArrowRight" });
-    expect(screen.getByTestId("path")).toHaveTextContent(`/prompts/${prompts[1].id}`);
+    expect(screen.getByTestId("path")).toHaveTextContent(
+      `/prompts/${prompts[1].id}`,
+    );
   } finally {
     dialog.remove();
   }

@@ -176,7 +176,7 @@ for (const viewport of [
       const toolbar = page.locator("#reader-toolbar");
       await expect(toolbar).toBeVisible();
       await expect(toolbar).toHaveCSS("position", "relative");
-      expect((await toolbar.boundingBox())!.height).toBeLessThanOrEqual(64);
+      expect((await toolbar.boundingBox())!.height).toBeLessThanOrEqual(72);
       // Exercise actual document scrolling rather than just the CSS declaration.
       await page.evaluate(() => window.scrollTo(0, 600));
       await expect
