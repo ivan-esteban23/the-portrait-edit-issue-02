@@ -21,6 +21,9 @@ const ImageLightbox = lazy(() =>
   })),
 );
 
+// Filter value for studies without a recorded --ar parameter.
+const NOT_RECORDED = "none";
+
 export function ArchivePage() {
   const { t } = useLanguage();
   usePageMeta({
@@ -125,7 +128,9 @@ export function ArchivePage() {
   // Multi-select batch actions state
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [batchCopied, setBatchCopied] = useState(false);
+  const [batchCopied, setBatchCopied] = useState<"" | "copied" | "failed">(
+    "",
+  );
   const batchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -169,8 +174,10 @@ export function ArchivePage() {
     [],
   );
 
+  // Only ratios actually recorded in a study are offered. Studies without a
+  // recorded --ar are "Not recorded"; they are never assumed to be 4:5.
   const aspectRatios = useMemo(() => {
-    const set = new Set<string>(["1:1", "4:5", "16:9"]);
+    const set = new Set<string>();
     prompts.forEach((p) => {
       const rawAr =
         p.parameters?.["ar"] ||
@@ -197,9 +204,12 @@ export function ArchivePage() {
         const pAr =
           p.parameters?.["ar"] ||
           p.parameters?.["--ar"] ||
-          parsedParameters.get(p.id)?.parameters.get("ar") ||
-          "4:5";
-        if (String(pAr).trim() !== aspectRatio) return false;
+          parsedParameters.get(p.id)?.parameters.get("ar");
+        const recorded =
+          pAr && String(pAr).trim() !== "Unspecified"
+            ? String(pAr).trim()
+            : NOT_RECORDED;
+        if (recorded !== aspectRatio) return false;
       }
       if (
         query &&
@@ -237,10 +247,15 @@ export function ArchivePage() {
   const copySelectedPrompts = async () => {
     const selectedPrompts = prompts.filter((p) => selectedIds.includes(p.id));
     const combined = selectedPrompts.map((p) => p.prompt).join("\n\n");
-    await copyText(combined);
-    setBatchCopied(true);
     if (batchTimer.current) clearTimeout(batchTimer.current);
-    batchTimer.current = setTimeout(() => setBatchCopied(false), 2000);
+    try {
+      await copyText(combined);
+      setBatchCopied("copied");
+      batchTimer.current = setTimeout(() => setBatchCopied(""), 2000);
+    } catch {
+      setBatchCopied("failed");
+      batchTimer.current = setTimeout(() => setBatchCopied(""), 4000);
+    }
   };
 
   const exportSelectedDossier = () => {
@@ -327,6 +342,7 @@ export function ArchivePage() {
                 {ar}
               </option>
             ))}
+            <option value={NOT_RECORDED}>{t("Not recorded")}</option>
           </select>
         </label>
         <div className="archive-actions-group">
@@ -627,6 +643,17 @@ export function ArchivePage() {
               {selectedIds.length}{" "}
               {selectedIds.length === 1 ? "prompt" : "prompts"} selected
             </span>
+            <span className="sr-only batch-copy-status" role="status">
+              {batchCopied === "copied"
+                ? `${selectedIds.length} prompts copied.`
+                : ""}
+            </span>
+            {batchCopied === "failed" && (
+              <span className="batch-copy-error" role="alert">
+                Copy unavailable. Export the dossier or copy prompts one at a
+                time.
+              </span>
+            )}
             <div className="batch-toolbar-actions">
               <Button
                 type="button"
@@ -635,7 +662,7 @@ export function ArchivePage() {
                 onClick={copySelectedPrompts}
                 aria-label="Copy Prompts"
               >
-                {batchCopied ? "Copied!" : "Copy Prompts"}
+                {batchCopied === "copied" ? "Copied!" : "Copy Prompts"}
               </Button>
               <Button
                 type="button"

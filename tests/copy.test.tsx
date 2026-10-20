@@ -51,6 +51,11 @@ it("reports failed copying without changing the prompt", async () => {
     configurable: true,
     value: { writeText: () => Promise.reject(Error("denied")) },
   });
+  // The legacy fallback is tried after a rejection; make it fail too.
+  Object.defineProperty(document, "execCommand", {
+    configurable: true,
+    value: vi.fn(() => false),
+  });
   render(<PromptCard prompt={prompt} />);
   await act(async () => fireEvent.click(screen.getByText("Copy prompt")));
   expect(screen.getByRole("status")).toHaveTextContent(

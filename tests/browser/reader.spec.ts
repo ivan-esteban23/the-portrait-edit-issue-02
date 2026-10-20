@@ -782,7 +782,7 @@ test("accessibility: focus rings meet theme contrast and respect forced colors; 
   expect(color.actual).toBe(color.expected);
 });
 
-test("accessibility: coarse-pointer reader and modal controls have 44px targets", async ({
+test("accessibility: coarse-pointer reader and modal controls have 48px targets", async ({
   page,
 }) => {
   test.skip(
@@ -799,8 +799,8 @@ test("accessibility: coarse-pointer reader and modal controls have 44px targets"
         (await control.getAttribute("aria-label")) ||
           (await control.textContent()) ||
           selector,
-      ).toBeGreaterThanOrEqual(44);
-      expect(box!.height).toBeGreaterThanOrEqual(44);
+      ).toBeGreaterThanOrEqual(48);
+      expect(box!.height).toBeGreaterThanOrEqual(48);
     }
   }
   await checkTargets(
@@ -832,9 +832,14 @@ test("accessibility: Compare Lab contains focus and restores it through a nested
   page,
 }) => {
   await page.goto("prompts");
-  for (const card of [page.locator(".archive-grid .study-card").nth(0), page.locator(".archive-grid .study-card").nth(1)]) {
+  for (const card of [
+    page.locator(".archive-grid .study-card").nth(0),
+    page.locator(".archive-grid .study-card").nth(1),
+  ]) {
     await card.getByRole("button", { name: /^More actions for Study/ }).click();
-    await card.getByRole("button", { name: /^Add Study \d+ to compare$/ }).click();
+    await card
+      .getByRole("button", { name: /^Add Study \d+ to compare$/ })
+      .click();
   }
   const opener = page.getByRole("button", { name: "Compare 2 studies ⇄" });
   await opener.click();

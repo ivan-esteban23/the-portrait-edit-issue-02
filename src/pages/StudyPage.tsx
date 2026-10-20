@@ -4,6 +4,7 @@ import { Study } from "@/components/Study";
 import { useEffect } from "react";
 import { NotFoundPage } from "./NotFoundPage";
 import { usePageMeta, truncateMetaDescription } from "@/hooks/usePageMeta";
+import { modalOpen } from "@/lib/utils";
 
 export function StudyPage() {
   const { id } = useParams();
@@ -18,7 +19,10 @@ export function StudyPage() {
   useEffect(() => {
     if (!prompt) return;
     const handleStudyNavigation = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      // An open image inspector or dialog owns the arrow keys.
+      if (modalOpen()) return;
       const target = event.target;
       if (
         target instanceof HTMLElement &&

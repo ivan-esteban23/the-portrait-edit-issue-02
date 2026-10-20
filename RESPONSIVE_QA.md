@@ -56,11 +56,14 @@ browser supports it. Escape closes More and restores its trigger; moving focus
 or clicking outside dismisses it. Tags are native buttons and wrap without clipping.
 
 The archive retains two columns at 360–767px and three at larger widths. Below
-360px, it uses one column so the three footer controls retain 44px touch targets.
+360px, it uses one column so the three footer controls retain 48px touch targets.
 
 The Chromium responsive project also runs `archive-cards.spec.ts` at 320, 390,
 430, 834, 1366, and 1920px. Checks cover clear portraits, action/menu bounds,
 copying, sharing, comparison, bookmarking, keyboard dismissal, and tag filtering.
+Keyboard checks cover Enter/Space entry, Escape from the panel or trigger, and
+natural Tab dismissal. The viewport audit checks archive and reader overflow at
+26 widths from 360px through 7680px in the responsive project.
 Existing Chromium checks cover archive routing, multi-selection, print output,
 and Compare Lab focus behavior.
 
@@ -89,3 +92,18 @@ These checks are outside the current Linux-focused validation scope.
 
 Record browser version, OS, device, orientation, result, and any issue link. An
 engine test pass does not establish a pass for every branded browser or device.
+
+## Local reliability verification — 2026-10-20
+
+Verified locally on `fix/reliability-pass` before publication. The Firefox run
+below preceded incorporation of main's removal of Firefox from the CI matrix.
+
+- `npm run build`: passed content/asset validation, TypeScript, and production build.
+- `npm test -- --maxWorkers=1 --pool=threads`: 154 tests passed across 19 files.
+- `npm run test:e2e -- --project=chromium-responsive --project=firefox-responsive --workers=1 --max-failures=1 --output=test-results/reliability-final`: 46 passed, including menu keyboard entry/dismissal and the 26-width audits.
+- `npm run test:e2e -- --project=desktop-dark --project=small-phone-dark --grep 'keyboard|coarse-pointer|Compare Lab|focus|ratio|clipboard|manifest' --workers=1 --max-failures=1 --output=test-results/reliability-targeted`: 24 passed; two expected skips (desktop dimming on a phone and coarse-pointer targets on desktop).
+
+Initial parallel attempts encountered unit worker startup timeouts and Firefox
+click timeouts under local memory/I/O pressure. The completed runs above passed
+with reduced concurrency. These results cover automated Linux browser emulation;
+the optional physical-device and wider-platform checks above remain outstanding.
