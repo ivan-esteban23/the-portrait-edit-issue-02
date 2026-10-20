@@ -63,7 +63,7 @@ The Chromium responsive project also runs `archive-cards.spec.ts` at 320, 390,
 copying, sharing, comparison, bookmarking, keyboard dismissal, and tag filtering.
 Keyboard checks cover Enter/Space entry, Escape from the panel or trigger, and
 natural Tab dismissal. The viewport audit checks archive and reader overflow at
-26 widths from 360px through 7680px in both responsive engine projects.
+26 widths from 360px through 7680px in the responsive project.
 Existing Chromium checks cover archive routing, multi-selection, print output,
 and Compare Lab focus behavior.
 
@@ -95,7 +95,8 @@ engine test pass does not establish a pass for every branded browser or device.
 
 ## Local reliability verification — 2026-10-20
 
-Verified locally on `fix/reliability-pass`; no commit, push, or deployment was made.
+Verified locally on `fix/reliability-pass` before publication. The Firefox run
+below preceded incorporation of main's removal of Firefox from the CI matrix.
 
 - `npm run build`: passed content/asset validation, TypeScript, and production build.
 - `npm test -- --maxWorkers=1 --pool=threads`: 154 tests passed across 19 files.
