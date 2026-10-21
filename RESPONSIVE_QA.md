@@ -1,5 +1,18 @@
 # Responsive reader QA
 
+## Homepage discovery and sharing verification — 2026-10-20
+
+- Production build: passed content/asset validation, TypeScript, and bundling.
+- Unit suite: 157 tests passed across 20 files, including clipboard denial,
+  stale copy feedback, saved collections, and resume links.
+- `discovery-sharing.spec.ts`: 4 checks passed across small-phone-dark and
+  desktop-light. Read/Explore/Collect destinations and direct study/page links
+  work with native sharing disabled.
+- `viewport-audit.spec.ts`: both archive and reader checks passed across the
+  existing 26-width matrix.
+- Homepage screenshots inspected at 390px and 1440px. Physical-device checks
+  remain separate from Chromium emulation.
+
 The compact reader toolbar keeps Index, page entry, Display, and Focus available.
 Tools reveals presentation, fullscreen, audio, bookmarks, and keyboard shortcuts.
 It is a nonmodal disclosure: Tab follows normal document order; Escape from the

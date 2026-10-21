@@ -18,6 +18,7 @@ import {
 import { CommandParameters } from "./CommandParameters";
 import { RelatedStudies } from "./RelatedStudies";
 import { PromptAnatomy } from "./PromptAnatomy";
+import { CopyLinkButton } from "./CopyLinkButton";
 
 const ImageLightbox = lazy(() =>
   import("./ImageLightbox").then((m) => ({ default: m.ImageLightbox })),
@@ -283,6 +284,7 @@ export function Study({
                 {exportingCard ? "…" : "Card"}
               </span>
             </Button>
+            <CopyLinkButton path={`/prompts/${prompt.id}`} />
             {canShare() && (
               <Button
                 variant="ghost"

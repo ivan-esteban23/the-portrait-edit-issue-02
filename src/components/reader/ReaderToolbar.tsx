@@ -7,6 +7,8 @@ import { Icon } from "../ui/Icon";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { readerPath } from "@/content";
+import { CopyLinkButton } from "../CopyLinkButton";
 
 interface ReaderToolbarProps {
   issue: Issue;
@@ -412,6 +414,7 @@ export function ReaderToolbar({
               {t("Close tools")}
             </Button>
           )}
+          <CopyLinkButton path={readerPath(issue.slug, page)} label="Copy page link" />
           {/* Presentation Slideshow Play/Pause Button */}
           <Button
             variant="ghost"

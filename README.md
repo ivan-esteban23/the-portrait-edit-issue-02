@@ -49,6 +49,18 @@ All routes live beneath `/the-portrait-edit-issue-02/`. Existing `#page=60` and 
 
 ## Reader interaction
 
+The homepage offers Read, Explore, and Collect entry points. Read resumes the
+last page; Collect opens the active collection's saved studies and shows its
+current count. Progress and collections stay in the current browser; the archive
+provides JSON and Markdown exports for keeping a copy.
+
+Every study has a Copy link action, including on browsers without native sharing.
+The reader's Tools group offers Copy page link for the exact current page. Links
+include the GitHub Pages base path and open directly; if clipboard access fails,
+a read-only field provides the URL for manual copying. Feedback resets when the
+destination changes, and pending copy results cannot overwrite a newer page's
+feedback. These controls and the new homepage copy support all four UI languages.
+
 Below 768px, Reading view is the default; wider screens default to Original page. Original pages offer Fit / 125 / 150 / 200% zoom. Reading view offers 16 / 18 / 20px text with a 68ch maximum measure, Newsreader editorial text, and monospace prompts.
 
 The native page slider previews while dragging and commits on release, keyboard completion or blur. Nine chapter ticks and ±10-page buttons support precise navigation. The page number stays editable. Only previous/next images are prefetched, at low priority; the visible original page uses high priority and async decoding.
