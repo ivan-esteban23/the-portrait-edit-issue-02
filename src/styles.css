@@ -3573,6 +3573,35 @@ select:hover {
 }
 .prompt-studio-footer {
   flex-wrap: wrap;
+  min-width: 0;
+}
+.prompt-studio-footer > button {
+  min-width: 0;
+  white-space: normal;
+  text-align: center;
+}
+@media (max-width: 520px) {
+  .prompt-studio-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding-inline: 16px;
+  }
+  .prompt-studio-footer .studio-copy-action-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+@media (max-width: 360px) {
+  .prompt-studio-footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .prompt-studio-footer .studio-copy-action-btn {
+    grid-column: auto;
+  }
+  .prompt-studio-footer > button {
+    width: 100%;
+  }
 }
 
 /* Prompt anatomy: compact phrase cards with a quiet color key. */

@@ -130,6 +130,67 @@ test("rotation and resizing retain page, reading size, theme, and bookmarks", as
   }
 });
 
+test("Prompt Studio actions stay inside the drawer from phones through 8K displays", async ({
+  page,
+}) => {
+  const viewports = [
+    { name: "small phone", width: 320, height: 568 },
+    { name: "phone screenshot", width: 494, height: 650 },
+    { name: "720p", width: 1280, height: 720 },
+    { name: "1080p", width: 1920, height: 1080 },
+    { name: "1440p", width: 2560, height: 1440 },
+    { name: "4K", width: 3840, height: 2160 },
+    { name: "5K", width: 5120, height: 2880 },
+    { name: "8K", width: 7680, height: 4320 },
+  ];
+  await page.goto("prompts/issue-02-study-005");
+  await page
+    .getByRole("button", { name: "Adjust Parameters", exact: true })
+    .click();
+  const studio = page.getByRole("dialog", {
+    name: "Prompt Studio",
+    exact: true,
+  });
+  const footer = studio.locator(".prompt-studio-footer");
+  const actions = footer.getByRole("button");
+  await expect(studio).toBeVisible();
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    const bounds = await footer.boundingBox();
+    expect(bounds, `${viewport.name}: footer is visible`).not.toBeNull();
+    expect(
+      bounds!.x,
+      `${viewport.name}: footer starts within the viewport`,
+    ).toBeGreaterThanOrEqual(0);
+    expect(
+      bounds!.x + bounds!.width,
+      `${viewport.name}: footer ends within the viewport`,
+    ).toBeLessThanOrEqual(viewport.width + 1);
+    expect(
+      await footer.evaluate((node) => node.scrollWidth <= node.clientWidth + 1),
+      `${viewport.name}: footer has no horizontal overflow`,
+    ).toBe(true);
+    for (const action of await actions.all()) {
+      const box = await action.boundingBox();
+      expect(box, `${viewport.name}: action is visible`).not.toBeNull();
+      expect(
+        box!.x,
+        `${viewport.name}: action starts inside the drawer`,
+      ).toBeGreaterThanOrEqual(bounds!.x - 1);
+      expect(
+        box!.x + box!.width,
+        `${viewport.name}: action ends inside the drawer`,
+      ).toBeLessThanOrEqual(bounds!.x + bounds!.width + 1);
+      expect(
+        await action.evaluate(
+          (node) => node.scrollWidth <= node.clientWidth + 1,
+        ),
+        `${viewport.name}: action text fits`,
+      ).toBe(true);
+    }
+  }
+});
+
 test("masthead theme button stays reachable across phone, tablet, and desktop widths", async ({
   page,
 }) => {
