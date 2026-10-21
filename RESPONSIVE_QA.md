@@ -52,14 +52,7 @@ To run just this suite:
 npx playwright test --project=chromium-responsive
 ```
 
-WebKit is deferred and excluded from the default run. To enable it later:
-
-```sh
-npx playwright install --with-deps webkit
-PLAYWRIGHT_WEBKIT=1 npx playwright test --project=webkit-responsive
-```
-
-The GitHub Actions manual workflow also offers an `include_webkit` checkbox.
+Browser automation runs Chromium only. Safari checks on Apple hardware remain a separate manual platform check.
 
 Browser downloads require `cdn.playwright.dev` and
 `playwright.download.prss.microsoft.com`. On a cloud machine with an unwritable
@@ -88,8 +81,8 @@ and Compare Lab focus behavior.
 ## Linux release checks
 
 Linux is the primary development and validation platform for this change. Run the
-Chromium responsive project on Linux. WebKit remains optional and does not certify
-Safari on Apple hardware.
+Chromium responsive project on Linux. Automated checks do not certify Safari on
+Apple hardware.
 
 - [ ] Spot-check Chrome/Chromium on Linux with keyboard navigation,
       browser zoom at 200%, short laptop windows, and wide desktop windows.
