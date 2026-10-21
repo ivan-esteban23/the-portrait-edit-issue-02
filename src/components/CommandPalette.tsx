@@ -415,7 +415,7 @@ export function CommandPalette({
             id={titleId}
             type="text"
             className="palette-search-input"
-            placeholder="Type a command, page number, or search 174 studies…"
+            placeholder="Type a command, page number, or search 171 studies…"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
