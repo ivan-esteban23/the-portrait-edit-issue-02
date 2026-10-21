@@ -5136,7 +5136,7 @@ textarea {
     min-width: 0;
     min-height: 40px;
     padding: 7px 22px 7px 9px;
-    font-size: 0.75rem;
+    font-size: max(16px, 1rem);
     text-overflow: ellipsis;
     background-position:
       calc(100% - 13px) 17px,
