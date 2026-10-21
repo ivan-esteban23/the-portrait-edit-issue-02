@@ -104,9 +104,8 @@ The workflow follows the [Vite GitHub Pages deployment guide](https://vite.dev/g
 
 ## QA scope
 
-See [Responsive reader QA](RESPONSIVE_QA.md) for the Chromium and optional WebKit
-responsive matrix and the separate physical-device release checklist.
+See [Responsive reader QA](RESPONSIVE_QA.md) for the Chromium responsive matrix and the separate physical-device release checklist.
 
 The active suite includes Zod diagnostics, full content/asset preservation, copy fallback/stale-response isolation, and Chromium browser tests at 320, 390, 430, 834, 1194, 1280 and 1440px in light/dark variants. Browser tests exercise route entry, legacy hashes, archive filtering, Focus, modes, zoom, sizing, copying, keyboard, scrubber, swipes and image retry, and capture review screenshots in ignored `test-results/`.
 
-Chromium viewport/touch emulation does not certify native Safari/WebKit, Windows ClearType or physical gesture bars. Those platform checks remain manual. Do not treat the earlier `VERIFICATION.json` PDF report as a sign-off for this application.
+Chromium viewport/touch emulation does not certify Safari on Apple hardware, Windows ClearType or physical gesture bars. Those platform checks remain manual. Do not treat the earlier `VERIFICATION.json` PDF report as a sign-off for this application.
