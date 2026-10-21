@@ -72,54 +72,6 @@
   --shadow: inset 0 1px 0 rgb(255 255 255 / 5%), 0 8px 30px rgb(0 0 0 / 35%);
   --overlay: rgb(0 0 0 / 72%);
 }
-:root[data-theme="paper"] {
-  color-scheme: light;
-  --bg: #f6f4ef;
-  --body-background: #f2ece0;
-  --surface: #ede8de;
-  --surface-raised: #fffdf8;
-  --text: #1a1917;
-  --muted: #5c5955;
-  --border: rgb(26 25 23 / 8%);
-  --border-hover: rgb(26 25 23 / 22%);
-  --surface-hover: #e5dfd3;
-  --focus-paper: #f0ede5;
-  --accent: #8c6d3b;
-  --shadow:
-    inset 0 1px 0 rgb(255 255 255 / 72%), 0 12px 32px rgb(50 44 30 / 10%);
-  --overlay: rgb(38 33 26 / 40%);
-}
-:root[data-theme="sepia"] {
-  color-scheme: light;
-  --bg: #f1e9d9;
-  --body-background: #f1e9d9;
-  --surface: #f8f1e4;
-  --surface-raised: #fff8ea;
-  --text: #292016;
-  --muted: #74644f;
-  --border: rgb(41 32 22 / 12%);
-  --border-hover: rgb(41 32 22 / 24%);
-  --surface-hover: #e8ddc9;
-  --focus-paper: #f4ecdc;
-  --accent: #8c6d3b;
-  --overlay: rgb(38 33 26 / 44%);
-}
-:root[data-theme="midnight"] {
-  color-scheme: dark;
-  --bg: #06080f;
-  --body-background: #06080f;
-  --surface: #0d111d;
-  --surface-raised: #121a2a;
-  --text: #e6edf5;
-  --muted: #9aa8bb;
-  --border: rgb(230 237 245 / 9%);
-  --border-hover: rgb(230 237 245 / 22%);
-  --surface-hover: #171f30;
-  --focus-paper: #090d17;
-  --accent: #4b7bec;
-  --shadow: inset 0 1px 0 rgb(255 255 255 / 5%), 0 10px 34px rgb(0 0 0 / 42%);
-  --overlay: rgb(0 0 0 / 76%);
-}
 @media (prefers-color-scheme: dark) {
   :root[data-theme="system"] {
     color-scheme: dark;
@@ -1725,9 +1677,6 @@ select:hover {
 }
 .masthead-theme select:hover {
   border-color: var(--border-hover);
-}
-.masthead-language select {
-  min-width: 108px;
 }
 
 /* Study Card & Archive Actions */
@@ -5113,6 +5062,49 @@ textarea {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: var(--surface);
+  }
+}
+
+
+/* Keep the masthead controls balanced on narrow phones. */
+@media (max-width: 480px) {
+  .masthead nav {
+    display: grid;
+    grid-template-columns: minmax(60px, auto) repeat(3, minmax(0, 1fr)) minmax(76px, 84px);
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+  .masthead nav a {
+    justify-content: center;
+    padding-inline: 2px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+  .masthead-theme {
+    min-width: 0;
+  }
+  .masthead-theme select {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 7px 22px 7px 9px;
+    font-size: max(16px, 1rem);
+    text-overflow: ellipsis;
+    background-position:
+      calc(100% - 13px) 17px,
+      calc(100% - 8px) 17px;
+  }
+}
+@media (max-width: 360px) {
+  .search-label-short {
+    display: none !important;
+  }
+  .masthead nav {
+    grid-template-columns: 40px repeat(3, minmax(0, 1fr)) minmax(76px, 84px);
+  }
+  .masthead-search-trigger {
+    justify-content: center;
+    padding-inline: 0;
   }
 }
 

@@ -1,8 +1,6 @@
 import { defineConfig } from "@playwright/test";
 import { existsSync } from "node:fs";
-const responsiveBrowsers: ("chromium" | "webkit")[] = ["chromium"];
-// WebKit remains available for a later validation pass without blocking Linux QA.
-if (process.env.PLAYWRIGHT_WEBKIT === "1") responsiveBrowsers.push("webkit");
+const responsiveBrowsers: "chromium"[] = ["chromium"];
 
 export default defineConfig({
   testDir: "tests/browser",

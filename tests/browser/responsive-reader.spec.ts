@@ -101,7 +101,7 @@ test("rotation and resizing retain page, reading size, theme, and bookmarks", as
   await page
     .getByRole("dialog")
     .getByLabel("Color theme")
-    .selectOption("sepia");
+    .selectOption("light");
   await page.getByRole("button", { name: "Close display settings" }).click();
   for (const viewport of [
     { width: 1194, height: 834 },
@@ -111,7 +111,7 @@ test("rotation and resizing retain page, reading size, theme, and bookmarks", as
     await page.setViewportSize(viewport);
     await expect(page).toHaveURL(/pages\/60$/);
     await expect(page.locator(".study-article")).toBeVisible();
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "sepia");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await openReaderTools(page);
     await expect(
       page.getByRole("button", { name: "Remove study from saved bookmarks" }),
@@ -144,7 +144,7 @@ test("masthead theme button stays reachable across phone, tablet, and desktop wi
     { width: 1280, height: 900 },
     { width: 1440, height: 1000 },
   ];
-  const themes = ["dark", "paper", "sepia", "midnight", "light", "system", "dark"];
+  const themes = ["light", "dark", "system", "light", "dark", "system", "light"];
   for (const [index, viewport] of viewports.entries()) {
     await page.setViewportSize(viewport);
     await expect(theme).toBeVisible();

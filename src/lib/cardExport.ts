@@ -73,7 +73,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 export interface CardExportOptions {
-  theme?: "dark" | "paper" | "light";
+  theme?: "dark" | "light";
 }
 
 /**
@@ -106,18 +106,17 @@ export async function exportStudyRecipeCard(
   }
 
   // Color scheme: Editorial dark slate by default
-  const isPaper = options.theme === "paper";
   const isLight = options.theme === "light";
 
-  const bgColor = isPaper ? "#f5f0e8" : isLight ? "#f8f7f4" : "#0d0d0d";
-  const cardBorderColor = isPaper ? "#ded6c7" : isLight ? "#d9d5cb" : "#242424";
-  const headerTextColor = isPaper ? "#7a756b" : isLight ? "#76746e" : "#8e8e8a";
-  const titleColor = isPaper ? "#1c1a17" : isLight ? "#171614" : "#f4f4f0";
-  const promptColor = isPaper ? "#2e2b26" : isLight ? "#2b2926" : "#e0e0dc";
-  const accentColor = isPaper ? "#8c6b2d" : isLight ? "#8c6b2d" : "#d4af37";
-  const metaColor = isPaper ? "#686359" : isLight ? "#63615b" : "#949490";
-  const tagBgColor = isPaper ? "#eae3d2" : isLight ? "#e8e5dc" : "#1a1a1a";
-  const tagTextColor = isPaper ? "#5c574c" : isLight ? "#57554f" : "#b0b0ac";
+  const bgColor = isLight ? "#f8f7f4" : "#0d0d0d";
+  const cardBorderColor = isLight ? "#d9d5cb" : "#242424";
+  const headerTextColor = isLight ? "#76746e" : "#8e8e8a";
+  const titleColor = isLight ? "#171614" : "#f4f4f0";
+  const promptColor = isLight ? "#2b2926" : "#e0e0dc";
+  const accentColor = "#d4af37";
+  const metaColor = isLight ? "#63615b" : "#949490";
+  const tagBgColor = isLight ? "#e8e5dc" : "#1a1a1a";
+  const tagTextColor = isLight ? "#57554f" : "#b0b0ac";
 
   // 1. Background
   ctx.fillStyle = bgColor;
@@ -155,7 +154,7 @@ export async function exportStudyRecipeCard(
   const imgBoxH = 590;
 
   // Placeholder frame background while loading
-  ctx.fillStyle = isPaper ? "#e9e3d5" : isLight ? "#e5e2d8" : "#141414";
+  ctx.fillStyle = isLight ? "#e5e2d8" : "#141414";
   ctx.fillRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH);
 
   try {

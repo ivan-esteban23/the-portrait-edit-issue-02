@@ -59,7 +59,7 @@ The reader's Tools group offers Copy page link for the exact current page. Links
 include the GitHub Pages base path and open directly; if clipboard access fails,
 a read-only field provides the URL for manual copying. Feedback resets when the
 destination changes, and pending copy results cannot overwrite a newer page's
-feedback. These controls and the new homepage copy support all four UI languages.
+feedback. The interface is presented in English.
 
 Below 768px, Reading view is the default; wider screens default to Original page. Original pages offer Fit / 125 / 150 / 200% zoom. Reading view offers 16 / 18 / 20px text with a 68ch maximum measure, Newsreader editorial text, and monospace prompts.
 
@@ -104,9 +104,8 @@ The workflow follows the [Vite GitHub Pages deployment guide](https://vite.dev/g
 
 ## QA scope
 
-See [Responsive reader QA](RESPONSIVE_QA.md) for the Chromium and optional WebKit
-responsive matrix and the separate physical-device release checklist.
+See [Responsive reader QA](RESPONSIVE_QA.md) for the Chromium responsive matrix and the separate physical-device release checklist.
 
 The active suite includes Zod diagnostics, full content/asset preservation, copy fallback/stale-response isolation, and Chromium browser tests at 320, 390, 430, 834, 1194, 1280 and 1440px in light/dark variants. Browser tests exercise route entry, legacy hashes, archive filtering, Focus, modes, zoom, sizing, copying, keyboard, scrubber, swipes and image retry, and capture review screenshots in ignored `test-results/`.
 
-Chromium viewport/touch emulation does not certify native Safari/WebKit, Windows ClearType or physical gesture bars. Those platform checks remain manual. Do not treat the earlier `VERIFICATION.json` PDF report as a sign-off for this application.
+Chromium viewport/touch emulation does not certify Safari on Apple hardware, Windows ClearType or physical gesture bars. Those platform checks remain manual. Do not treat the earlier `VERIFICATION.json` PDF report as a sign-off for this application.

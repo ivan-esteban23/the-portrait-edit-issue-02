@@ -23,9 +23,9 @@ describe("shared editorial themes", () => {
   it("keeps independently mounted controls in sync in both directions", () => {
     const first = renderHook(() => useTheme());
     const second = renderHook(() => useTheme());
-    act(() => first.result.current.setTheme("paper"));
-    expect(second.result.current.theme).toBe("paper");
-    expect(document.documentElement).toHaveAttribute("data-theme", "paper");
+    act(() => first.result.current.setTheme("light"));
+    expect(second.result.current.theme).toBe("light");
+    expect(document.documentElement).toHaveAttribute("data-theme", "light");
     act(() => second.result.current.setTheme("dark"));
     expect(first.result.current.theme).toBe("dark");
     expect(localStorage.getItem("portrait-edit-theme")).toBe("dark");
@@ -40,13 +40,13 @@ describe("shared editorial themes", () => {
       window.dispatchEvent(
         new StorageEvent("storage", {
           key: "portrait-edit-theme",
-          newValue: "paper",
+          newValue: "light",
           storageArea: localStorage,
         }),
       ),
     );
-    expect(first.result.current.theme).toBe("paper");
-    expect(second.result.current.theme).toBe("paper");
+    expect(first.result.current.theme).toBe("light");
+    expect(second.result.current.theme).toBe("light");
     act(() =>
       window.dispatchEvent(
         new StorageEvent("storage", { key: null, storageArea: localStorage }),
@@ -112,10 +112,10 @@ describe("shared editorial themes", () => {
           throw new Error(reason);
         });
       try {
-        act(() => first.result.current.setTheme("paper"));
+        act(() => first.result.current.setTheme("light"));
         const second = renderHook(() => useTheme());
-        expect(second.result.current.theme).toBe("paper");
-        expect(document.documentElement).toHaveAttribute("data-theme", "paper");
+        expect(second.result.current.theme).toBe("light");
+        expect(document.documentElement).toHaveAttribute("data-theme", "light");
         act(() => second.result.current.setTheme("dark"));
         expect(first.result.current.theme).toBe("dark");
       } finally {
@@ -146,7 +146,6 @@ describe("browser toolbar colors", () => {
     expect(toolbarColors()).toEqual(["#121212", "#121212"]);
     for (const [theme, color] of [
       ["light", "#f7f5f0"],
-      ["paper", "#f2ece0"],
       ["dark", "#121212"],
     ] as const) {
       act(() => result.current.setTheme(theme));

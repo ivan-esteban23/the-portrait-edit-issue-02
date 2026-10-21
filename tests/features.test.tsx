@@ -12,7 +12,7 @@ function ThemeTestComponent() {
   return (
     <div>
       <span data-testid="current-theme">{theme}</span>
-      <button onClick={() => setTheme("paper")}>Set Paper</button>
+      <button onClick={() => setTheme("light")}>Set Light</button>
       <button onClick={() => setTheme("dark")}>Set Dark</button>
     </div>
   );
@@ -40,10 +40,10 @@ describe("Theme & Bookmarks features", () => {
     expect(screen.getByTestId("current-theme")).toHaveTextContent("system");
     expect(document.documentElement.getAttribute("data-theme")).toBe("system");
 
-    fireEvent.click(screen.getByText("Set Paper"));
-    expect(screen.getByTestId("current-theme")).toHaveTextContent("paper");
-    expect(document.documentElement.getAttribute("data-theme")).toBe("paper");
-    expect(localStorage.getItem("portrait-edit-theme")).toBe("paper");
+    fireEvent.click(screen.getByText("Set Light"));
+    expect(screen.getByTestId("current-theme")).toHaveTextContent("light");
+    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+    expect(localStorage.getItem("portrait-edit-theme")).toBe("light");
 
     fireEvent.click(screen.getByText("Set Dark"));
     expect(screen.getByTestId("current-theme")).toHaveTextContent("dark");
