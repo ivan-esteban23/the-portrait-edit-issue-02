@@ -223,9 +223,6 @@ export function ReaderToolbar({
                   <option value="system">{t("Auto")}</option>
                   <option value="light">{t("Light")}</option>
                   <option value="dark">{t("Dark")}</option>
-                  <option value="paper">{t("Paper")}</option>
-                  <option value="sepia">{t("Sepia")}</option>
-                  <option value="midnight">{t("Midnight Gallery")}</option>
                 </select>
               </label>
               <label>
