@@ -58,7 +58,7 @@ const Reader = lazy(() =>
 );
 
 export default function App() {
-  const { locale, setLocale, t } = useLanguage();
+  const { t } = useLanguage();
   const { theme, setTheme } = useTheme();
   const location = useLocation(),
     navigate = useNavigate();
@@ -256,18 +256,6 @@ export default function App() {
                 <option value="paper">Paper</option>
                 <option value="sepia">Sepia</option>
                 <option value="midnight">Midnight Gallery</option>
-              </select>
-            </div>
-            <div className="masthead-theme masthead-language">
-              <select
-                aria-label={t("Language")}
-                value={locale}
-                onChange={(event) => setLocale(event.target.value as typeof locale)}
-              >
-                <option value="en">English</option>
-                <option value="ja">日本語</option>
-                <option value="zh-CN">简体中文</option>
-                <option value="ko">한국어</option>
               </select>
             </div>
           </nav>
