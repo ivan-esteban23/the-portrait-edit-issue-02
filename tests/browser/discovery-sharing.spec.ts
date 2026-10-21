@@ -80,6 +80,18 @@ test("study and reader links work without native sharing and open the exact dest
   await expect(page.getByLabel("Page number", { exact: true })).toHaveValue(
     "60",
   );
+  // Copy feedback must not push the wide toolbar onto another row.
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  const toolbar = page.locator("#reader-toolbar");
+  const copyPageLink = page.getByRole("button", {
+    name: "Copy page link",
+    exact: true,
+  });
+  await expect(copyPageLink).toBeVisible();
+  expect((await toolbar.boundingBox())!.height).toBeLessThanOrEqual(110);
+  await copyPageLink.click();
+  await expect(toolbar.getByRole("status")).toHaveText("Link copied");
+  expect((await toolbar.boundingBox())!.height).toBeLessThanOrEqual(110);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth + 1,

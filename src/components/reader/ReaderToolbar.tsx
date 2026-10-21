@@ -414,7 +414,7 @@ export function ReaderToolbar({
               {t("Close tools")}
             </Button>
           )}
-          <CopyLinkButton path={readerPath(issue.slug, page)} label="Copy page link" />
+          <CopyLinkButton path={readerPath(issue.slug, page)} label="Copy page link" iconOnly={!compact} />
           {/* Presentation Slideshow Play/Pause Button */}
           <Button
             variant="ghost"

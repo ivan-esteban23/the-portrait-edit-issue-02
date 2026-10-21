@@ -10,6 +10,11 @@
   work with native sharing disabled.
 - `viewport-audit.spec.ts`: both archive and reader checks passed across the
   existing 26-width matrix.
+- All 13 responsive-reader scenarios passed, including the 1920px desktop
+  toolbar, rotation, keyboard navigation, and Focus scrolling. The page-link
+  action uses an icon in the wide toolbar and a text label in compact Tools.
+- Sharing checks also verify that copy confirmation leaves the wide toolbar
+  within its 110px height limit, before and after copying.
 - Homepage screenshots inspected at 390px and 1440px. Physical-device checks
   remain separate from Chromium emulation.
 

@@ -427,6 +427,25 @@ h3,
 .copy-link-feedback:empty {
   display: none;
 }
+.copy-link-details:not(.is-visible) {
+  display: contents;
+}
+.reader-top:not(.reader-toolbar-compact) .copy-link-control {
+  position: relative;
+}
+.reader-top:not(.reader-toolbar-compact) .copy-link-details.is-visible {
+  position: absolute;
+  top: calc(100% + 4px);
+  inset-inline-end: 0;
+  z-index: 20;
+  width: 240px;
+  max-width: calc(100vw - 32px);
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
 .copy-link-control input {
   width: 100%;
   min-width: 0;
