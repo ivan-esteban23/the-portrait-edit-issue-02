@@ -551,9 +551,9 @@ test("theme controls, shortcuts, and browser tabs share the same preference", as
     await other.goto(reader);
     const otherTheme = other.locator(".masthead").getByLabel("Color theme");
     await expect(otherTheme).toHaveValue("light");
-    await otherTheme.selectOption("light");
-    await expect(mastheadTheme).toHaveValue("light");
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await otherTheme.selectOption("dark");
+    await expect(mastheadTheme).toHaveValue("dark");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await other.evaluate(() => localStorage.clear());
     await expect(mastheadTheme).toHaveValue("system");
   } finally {
