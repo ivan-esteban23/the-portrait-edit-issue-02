@@ -5115,3 +5115,33 @@ textarea {
     background: var(--surface);
   }
 }
+
+.masthead-theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+.masthead-theme-toggle:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  border-color: var(--border);
+}
+.masthead-theme-toggle:active {
+  transform: scale(0.94);
+}
+.masthead-theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}

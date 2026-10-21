@@ -245,18 +245,18 @@ export default function App() {
               {t("About")}
             </NavLink>
             <div className="masthead-theme">
-              <select
-                aria-label="Color theme"
-                value={theme}
-                onChange={(e) => setTheme(e.target.value as Theme)}
+              <button
+                type="button"
+                className="masthead-theme-toggle"
+                aria-label={`Color theme: ${theme}. Activate to change theme`}
+                title={`Color theme: ${theme}`}
+                onClick={cycleTheme}
               >
-                <option value="system">Auto</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-                <option value="paper">Paper</option>
-                <option value="sepia">Sepia</option>
-                <option value="midnight">Midnight Gallery</option>
-              </select>
+                <Icon
+                  name={theme === "dark" || theme === "midnight" ? "sun" : "moon"}
+                  size={18}
+                />
+              </button>
             </div>
             <div className="masthead-theme masthead-language">
               <select
