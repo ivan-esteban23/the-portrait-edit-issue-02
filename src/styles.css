@@ -5112,3 +5112,46 @@ textarea {
     background: var(--surface);
   }
 }
+
+
+/* Keep the masthead controls balanced on narrow phones. */
+@media (max-width: 480px) {
+  .masthead nav {
+    display: grid;
+    grid-template-columns: minmax(60px, auto) repeat(3, minmax(0, 1fr)) minmax(76px, 84px);
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+  .masthead nav a {
+    justify-content: center;
+    padding-inline: 2px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+  .masthead-theme {
+    min-width: 0;
+  }
+  .masthead-theme select {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 7px 22px 7px 9px;
+    font-size: max(16px, 1rem);
+    text-overflow: ellipsis;
+    background-position:
+      calc(100% - 13px) 17px,
+      calc(100% - 8px) 17px;
+  }
+}
+@media (max-width: 360px) {
+  .search-label-short {
+    display: none !important;
+  }
+  .masthead nav {
+    grid-template-columns: 40px repeat(3, minmax(0, 1fr)) minmax(76px, 84px);
+  }
+  .masthead-search-trigger {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
