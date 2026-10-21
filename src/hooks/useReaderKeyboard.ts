@@ -113,13 +113,7 @@ export function useReaderKeyboard(options: ReaderKeyboardOptions) {
     if (k === "m" && !e.repeat) {
       e.preventDefault();
       const nextTheme =
-        theme === "system"
-          ? "light"
-          : theme === "light"
-            ? "paper"
-            : theme === "paper"
-              ? "dark"
-              : "system";
+        theme === "system" ? "light" : theme === "light" ? "dark" : "system";
       setTheme(nextTheme);
     }
     if (["ArrowRight", "j", "J"].includes(e.key)) {

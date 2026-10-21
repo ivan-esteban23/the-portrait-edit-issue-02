@@ -520,10 +520,10 @@ test("theme controls, shortcuts, and browser tabs share the same preference", as
 }) => {
   await page.goto(reader);
   const mastheadTheme = page.locator(".masthead").getByLabel("Color theme");
-  await mastheadTheme.selectOption("paper");
+  await mastheadTheme.selectOption("light");
   await settings(page);
   const displayTheme = page.getByRole("dialog").getByLabel("Color theme");
-  await expect(displayTheme).toHaveValue("paper");
+  await expect(displayTheme).toHaveValue("light");
   await displayTheme.selectOption("dark");
   await expect(mastheadTheme).toHaveValue("dark");
   await page.getByRole("button", { name: "Close display settings" }).click();
@@ -540,20 +540,20 @@ test("theme controls, shortcuts, and browser tabs share the same preference", as
     "background-color",
     "rgb(246, 244, 239)",
   );
-  await mastheadTheme.selectOption("paper");
+  await mastheadTheme.selectOption("light");
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("body")).toHaveCSS(
     "background-color",
-    "rgb(242, 236, 224)",
+    "rgb(246, 244, 239)",
   );
   const other = await page.context().newPage();
   try {
     await other.goto(reader);
     const otherTheme = other.locator(".masthead").getByLabel("Color theme");
-    await expect(otherTheme).toHaveValue("paper");
-    await otherTheme.selectOption("light");
-    await expect(mastheadTheme).toHaveValue("light");
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await expect(otherTheme).toHaveValue("light");
+    await otherTheme.selectOption("dark");
+    await expect(mastheadTheme).toHaveValue("dark");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await other.evaluate(() => localStorage.clear());
     await expect(mastheadTheme).toHaveValue("system");
   } finally {
@@ -739,7 +739,7 @@ test("accessibility: focus rings meet theme contrast and respect forced colors; 
   await expect(page).toHaveURL(/#main$/);
   const theme = page.locator(".masthead").getByLabel("Color theme");
   const display = page.getByRole("button", { name: "Display", exact: true });
-  for (const value of ["light", "paper", "dark"]) {
+  for (const value of ["light", "dark"]) {
     await theme.selectOption(value);
     await display.focus();
     const contrast = await display.evaluate((node) => {

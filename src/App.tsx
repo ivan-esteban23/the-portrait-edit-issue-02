@@ -151,17 +151,7 @@ export default function App() {
 
   const cycleTheme = useCallback(() => {
     const nextTheme: Theme =
-      theme === "system"
-        ? "dark"
-        : theme === "dark"
-          ? "paper"
-          : theme === "paper"
-            ? "sepia"
-            : theme === "sepia"
-              ? "midnight"
-              : theme === "midnight"
-                ? "light"
-                : "system";
+      theme === "system" ? "light" : theme === "light" ? "dark" : "system";
     setTheme(nextTheme);
   }, [theme, setTheme]);
 
@@ -253,9 +243,6 @@ export default function App() {
                 <option value="system">Auto</option>
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
-                <option value="paper">Paper</option>
-                <option value="sepia">Sepia</option>
-                <option value="midnight">Midnight Gallery</option>
               </select>
             </div>
           </nav>
