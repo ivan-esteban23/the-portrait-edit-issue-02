@@ -130,6 +130,36 @@ test("rotation and resizing retain page, reading size, theme, and bookmarks", as
   }
 });
 
+test("masthead theme button stays reachable across phone, tablet, and desktop widths", async ({
+  page,
+}) => {
+  await page.goto(reader);
+  const theme = page.locator(".masthead-theme-toggle");
+  const viewports = [
+    { width: 320, height: 740 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+    { width: 834, height: 1112 },
+    { width: 1194, height: 834 },
+    { width: 1280, height: 900 },
+    { width: 1440, height: 1000 },
+  ];
+  const themes = ["dark", "paper", "sepia", "midnight", "light", "system", "dark"];
+  for (const [index, viewport] of viewports.entries()) {
+    await page.setViewportSize(viewport);
+    await expect(theme).toBeVisible();
+    const bounds = await theme.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(viewport.width + 1);
+    expect(bounds!.height).toBeGreaterThanOrEqual(44);
+    await theme.click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", themes[index]);
+    await expect(theme).toHaveAttribute("aria-label", new RegExp(themes[index]));
+    await noOverflow(page);
+  }
+});
+
 test("200 percent equivalent layout keeps keyboard navigation and dialogs usable", async ({
   page,
 }) => {
