@@ -71,7 +71,7 @@ Focus is stored under `portrait-edit-focus-mode`. `?focus=1` enters it; `?focus=
 
 ## Typography and themes
 
-Inter and Newsreader variable WOFF2 fonts are self-hosted from their Fontsource npm packages, including Newsreader italic. Charter/Georgia and platform sans/monospace stacks provide fallbacks. Light and dark share geometry and type scales; CSS `prefers-color-scheme` chooses the warm paper or noir palette without a theme cookie, storage entry or toggle.
+Inter and Newsreader variable WOFF2 fonts are self-hosted from their Fontsource npm packages, including Newsreader italic. Charter/Georgia and platform sans/monospace stacks provide fallbacks. Light and dark share geometry and type scales. The theme toggle and display settings offer only Light and Dark, and the chosen theme is saved in local storage.
 
 Every form control has a minimum 16px font across all widths, including iPads. Greyscale font smoothing applies **only** above 192dpi / 2dppx; standard-density Windows keeps its native text rendering. Focus rings, selected/disabled controls, loading and error states use shared theme tokens.
 

@@ -234,18 +234,13 @@ test("desktop Focus dims chrome and wakes on activity", async ({ page }) => {
   await expect(page.locator(".reader")).not.toHaveClass(/chrome-idle/);
 });
 
-test("system theme changes and form controls retain cross-platform legibility", async ({
+test("explicit themes ignore the OS preference and form controls retain cross-platform legibility", async ({
   page,
 }) => {
   await page.goto(reader);
-  for (const scheme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme: scheme });
-    expect(
-      await page
-        .locator("body")
-        .evaluate((e) => getComputedStyle(e).backgroundColor),
-    ).toBe(scheme === "light" ? "rgb(246, 244, 239)" : "rgb(18, 18, 18)");
-  }
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(18, 18, 18)");
   await settings(page);
   for (const control of await page.locator("input,select").all())
     expect(
@@ -530,33 +525,24 @@ test("theme controls, shortcuts, and browser tabs share the same preference", as
   await page.getByRole("button", { name: "Close display settings" }).click();
   await page.locator(".reader-canvas").focus();
   await page.keyboard.press("m");
-  await expect(mastheadTheme).toHaveAttribute("aria-label", /system/);
+  await expect(mastheadTheme).toHaveAttribute("aria-label", /light/);
   await page.emulateMedia({ colorScheme: "dark" });
-  await expect(page.locator("body")).toHaveCSS(
-    "background-color",
-    "rgb(18, 18, 18)",
-  );
-  await page.emulateMedia({ colorScheme: "light" });
   await expect(page.locator("body")).toHaveCSS(
     "background-color",
     "rgb(246, 244, 239)",
   );
   await mastheadTheme.click();
-  await page.emulateMedia({ colorScheme: "dark" });
-  await expect(page.locator("body")).toHaveCSS(
-    "background-color",
-    "rgb(246, 244, 239)",
-  );
+  await expect(mastheadTheme).toHaveAttribute("aria-label", /dark/);
   const other = await page.context().newPage();
   try {
     await other.goto(reader);
     const otherTheme = other.locator(".masthead-theme-toggle");
-    await expect(otherTheme).toHaveAttribute("aria-label", /light/);
+    await expect(otherTheme).toHaveAttribute("aria-label", /dark/);
     await otherTheme.click();
-    await expect(mastheadTheme).toHaveAttribute("aria-label", /dark/);
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await expect(mastheadTheme).toHaveAttribute("aria-label", /light/);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await other.evaluate(() => localStorage.clear());
-    await expect(mastheadTheme).toHaveAttribute("aria-label", /system/);
+    await expect(mastheadTheme).toHaveAttribute("aria-label", /dark/);
   } finally {
     await other.close();
   }

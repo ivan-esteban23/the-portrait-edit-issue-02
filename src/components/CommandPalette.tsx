@@ -67,7 +67,7 @@ export function CommandPalette({
       id: "act-theme",
       section: "Actions",
       title: "Toggle Theme",
-      subtitle: "Cycle between Auto, Light, and Dark themes",
+      subtitle: "Toggle between Light and Dark themes",
       badge: "M",
       action: () => {
         onToggleTheme?.();

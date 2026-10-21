@@ -2,14 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useTheme, type Theme } from "../src/hooks/useTheme";
 
-let systemDark: EventTarget & { matches: boolean };
-
 beforeEach(() => {
-  systemDark = Object.assign(new EventTarget(), { matches: false });
-  vi.stubGlobal(
-    "matchMedia",
-    vi.fn(() => systemDark),
-  );
   document
     .querySelectorAll('meta[name="theme-color"]')
     .forEach((meta) => meta.remove());
@@ -52,9 +45,9 @@ describe("shared editorial themes", () => {
         new StorageEvent("storage", { key: null, storageArea: localStorage }),
       ),
     );
-    expect(first.result.current.theme).toBe("system");
-    expect(second.result.current.theme).toBe("system");
-    expect(document.documentElement).toHaveAttribute("data-theme", "system");
+    expect(first.result.current.theme).toBe("dark");
+    expect(second.result.current.theme).toBe("dark");
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
   });
 
   it("ignores other storage keys and session-storage changes", () => {
@@ -78,10 +71,10 @@ describe("shared editorial themes", () => {
     expect(result.current.theme).toBe("light");
   });
 
-  it("falls back to system for invalid preferences and rejects invalid setter values", () => {
+  it("defaults to dark for invalid preferences and rejects invalid setter values", () => {
     localStorage.setItem("portrait-edit-theme", "invalid");
     const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe("system");
+    expect(result.current.theme).toBe("dark");
     act(() => result.current.setTheme("dark"));
     act(() => result.current.setTheme("invalid" as Theme));
     expect(result.current.theme).toBe("dark");
@@ -93,7 +86,7 @@ describe("shared editorial themes", () => {
         }),
       ),
     );
-    expect(result.current.theme).toBe("system");
+    expect(result.current.theme).toBe("dark");
   });
 
   it.each(["blocked", "full"])(
@@ -121,7 +114,7 @@ describe("shared editorial themes", () => {
       } finally {
         getItem?.mockRestore();
         setItem.mockRestore();
-        act(() => first.result.current.setTheme("system"));
+        act(() => first.result.current.setTheme("dark"));
       }
     },
   );
@@ -141,7 +134,6 @@ describe("browser toolbar colors", () => {
       meta.media = `(prefers-color-scheme: ${scheme})`;
       document.head.appendChild(meta);
     }
-    systemDark.matches = true;
     const { result } = renderHook(() => useTheme());
     expect(toolbarColors()).toEqual(["#121212", "#121212"]);
     for (const [theme, color] of [
@@ -150,30 +142,14 @@ describe("browser toolbar colors", () => {
     ] as const) {
       act(() => result.current.setTheme(theme));
       expect(toolbarColors()).toEqual([color, color]);
-      act(() => {
-        systemDark.matches = !systemDark.matches;
-        systemDark.dispatchEvent(new Event("change"));
-      });
       expect(toolbarColors()).toEqual([color, color]);
     }
   });
 
-  it("creates a tag, follows live system changes, and cleans up its listener", () => {
+  it("creates a dark toolbar color by default without consulting the OS", () => {
     const { unmount } = renderHook(() => useTheme());
-    expect(toolbarColors()).toEqual(["#f7f5f0"]);
-    act(() => {
-      systemDark.matches = true;
-      systemDark.dispatchEvent(new Event("change"));
-    });
     expect(toolbarColors()).toEqual(["#121212"]);
-    act(() => {
-      systemDark.matches = false;
-      systemDark.dispatchEvent(new Event("change"));
-    });
-    expect(toolbarColors()).toEqual(["#f7f5f0"]);
     unmount();
-    systemDark.matches = true;
-    systemDark.dispatchEvent(new Event("change"));
-    expect(toolbarColors()).toEqual(["#f7f5f0"]);
+    expect(toolbarColors()).toEqual(["#121212"]);
   });
 });

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type Theme = "system" | "light" | "dark";
+export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "portrait-edit-theme";
-const THEME_COLORS: Record<Exclude<Theme, "system">, string> = {
+const THEME_COLORS: Record<Theme, string> = {
   light: "#f7f5f0",
   dark: "#121212",
 };
@@ -11,19 +11,15 @@ const THEME_EVENT = "portrait-edit-theme-change";
 let transientTheme: Theme | null = null;
 
 function isTheme(value: unknown): value is Theme {
-  return (
-    value === "system" ||
-    value === "light" ||
-    value === "dark"
-  );
+  return value === "light" || value === "dark";
 }
 function readTheme(): Theme {
   if (transientTheme !== null) return transientTheme;
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return isTheme(stored) ? stored : "system";
+    return isTheme(stored) ? stored : "dark";
   } catch {
-    return "system";
+    return "dark";
   }
 }
 
@@ -59,7 +55,7 @@ export function useTheme() {
         return;
       }
       transientTheme = null;
-      setThemeState(isTheme(event.newValue) ? event.newValue : "system");
+      setThemeState(isTheme(event.newValue) ? event.newValue : "dark");
     };
     window.addEventListener(THEME_EVENT, syncLocal);
     window.addEventListener("storage", syncStorage);
@@ -71,27 +67,17 @@ export function useTheme() {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const updateToolbar = () => {
-      const resolved =
-        theme === "system" ? (media.matches ? "dark" : "light") : theme;
-      const color = THEME_COLORS[resolved];
-      const tags = document.querySelectorAll<HTMLMetaElement>(
-        'meta[name="theme-color"]',
-      );
-      if (tags.length) {
-        tags.forEach((meta) => meta.setAttribute("content", color));
-      } else {
-        const meta = document.createElement("meta");
-        meta.name = "theme-color";
-        meta.content = color;
-        document.head.appendChild(meta);
-      }
-    };
-    updateToolbar();
-    if (theme === "system") {
-      media.addEventListener("change", updateToolbar);
-      return () => media.removeEventListener("change", updateToolbar);
+    const color = THEME_COLORS[theme];
+    const tags = document.querySelectorAll<HTMLMetaElement>(
+      'meta[name="theme-color"]',
+    );
+    if (tags.length) {
+      tags.forEach((meta) => meta.setAttribute("content", color));
+    } else {
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      meta.content = color;
+      document.head.appendChild(meta);
     }
   }, [theme]);
 

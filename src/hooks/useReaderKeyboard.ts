@@ -112,8 +112,7 @@ export function useReaderKeyboard(options: ReaderKeyboardOptions) {
     }
     if (k === "m" && !e.repeat) {
       e.preventDefault();
-      const nextTheme =
-        theme === "system" ? "light" : theme === "light" ? "dark" : "system";
+      const nextTheme: Theme = theme === "dark" ? "light" : "dark";
       setTheme(nextTheme);
     }
     if (["ArrowRight", "j", "J"].includes(e.key)) {

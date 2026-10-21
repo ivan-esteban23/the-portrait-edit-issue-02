@@ -150,8 +150,7 @@ export default function App() {
   }, []);
 
   const cycleTheme = useCallback(() => {
-    const nextTheme: Theme =
-      theme === "system" ? "light" : theme === "light" ? "dark" : "system";
+    const nextTheme: Theme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
   }, [theme, setTheme]);
 
