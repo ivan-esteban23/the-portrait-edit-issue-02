@@ -1726,9 +1726,6 @@ select:hover {
 .masthead-theme select:hover {
   border-color: var(--border-hover);
 }
-.masthead-language select {
-  min-width: 108px;
-}
 
 /* Study Card & Archive Actions */
 .study-card {

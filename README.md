@@ -59,7 +59,7 @@ The reader's Tools group offers Copy page link for the exact current page. Links
 include the GitHub Pages base path and open directly; if clipboard access fails,
 a read-only field provides the URL for manual copying. Feedback resets when the
 destination changes, and pending copy results cannot overwrite a newer page's
-feedback. These controls and the new homepage copy support all four UI languages.
+feedback. The interface is presented in English.
 
 Below 768px, Reading view is the default; wider screens default to Original page. Original pages offer Fit / 125 / 150 / 200% zoom. Reading view offers 16 / 18 / 20px text with a 68ch maximum measure, Newsreader editorial text, and monospace prompts.
 
