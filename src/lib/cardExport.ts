@@ -154,7 +154,7 @@ export async function exportStudyRecipeCard(
   const imgBoxH = 590;
 
   // Placeholder frame background while loading
-  ctx.fillStyle = isPaper ? "#e9e3d5" : isLight ? "#e5e2d8" : "#141414";
+  ctx.fillStyle = isLight ? "#e5e2d8" : "#141414";
   ctx.fillRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH);
 
   try {
