@@ -220,7 +220,6 @@ export function ReaderToolbar({
                   value={theme}
                   onChange={(e) => setTheme(e.target.value as Theme)}
                 >
-                  <option value="system">{t("Auto")}</option>
                   <option value="light">{t("Light")}</option>
                   <option value="dark">{t("Dark")}</option>
                 </select>
