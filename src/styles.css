@@ -4530,7 +4530,7 @@ body::before {
   font-size: 0.875rem;
 }
 
-/* Image-first gallery cards: portraits stay clear and actions have their own row. */
+/* Image-first gallery cards: show the complete source frame and keep actions below it. */
 .archive-grid {
   gap: clamp(28px, 3.5vw, 44px) clamp(14px, 2.5vw, 32px);
 }
@@ -4552,7 +4552,7 @@ body::before {
   width: 100%;
   height: 100%;
   margin: 0;
-  object-fit: cover;
+  object-fit: contain;
 }
 .study-card-media {
   overflow: hidden;
