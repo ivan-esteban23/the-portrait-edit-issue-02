@@ -29,7 +29,7 @@ export function ArchivePage() {
   usePageMeta({
     title: `Prompt Archive (${prompts.length} Studies) | The Portrait Edit`,
     description:
-      "Browse and filter all 168 portrait studies in The Portrait Edit Issue 02",
+      "Browse and filter all 165 portrait studies in The Portrait Edit Issue 02",
     image: assetUrl(currentIssue.cover),
     path: "/prompts",
   });
