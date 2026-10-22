@@ -87,6 +87,38 @@ for (const viewport of [
   });
 }
 
+test("archive cards preserve full source framing on phones and desktop", async ({
+  page,
+}) => {
+  const studyNumbers = [
+    14, 15, 16, 17, 18, 64, 84, 85, 89, 117, 125, 129, 130, 131, 142, 162, 163,
+  ];
+
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1440, height: 1000 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("prompts");
+    const cards = page.locator(".archive-grid .study-card");
+    await cards.first().waitFor();
+
+    for (const studyNumber of studyNumbers) {
+      const card = cards
+        .filter({ hasText: `Study ${String(studyNumber).padStart(3, "0")}` })
+        .first();
+      const image = card.locator(".study-card-media img");
+      await image.scrollIntoViewIfNeeded();
+      const fit = await image.evaluate(
+        (node) => getComputedStyle(node).objectFit,
+      );
+      expect(fit, `Study ${studyNumber} at ${viewport.width}px`).toBe(
+        "contain",
+      );
+    }
+  }
+});
+
 test("card actions copy, share, compare, and filter without opening the study", async ({
   page,
 }) => {
