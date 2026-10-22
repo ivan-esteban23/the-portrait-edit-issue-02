@@ -77,7 +77,7 @@ Every form control has a minimum 16px font across all widths, including iPads. G
 
 ## Content and provenance
 
-Issue records live in `src/content/issues/<slug>/issue.json`; studies live in `src/content/prompts/<id>.json`. Issue 02 contains 196 pages and 165 unique archive studies. Studies with repeated image references are removed from the archive; the printed magazine reader pages retain their original content. Eight archive references use 2× Lanczos-resampled copies; reader pages retain the original extracted images.
+Issue records live in `src/content/issues/<slug>/issue.json`; studies live in `src/content/prompts/<id>.json`. Issue 02 contains 196 pages and 165 unique archive studies. Studies with repeated image references are removed from the archive; the printed magazine reader pages retain their original content. Fourteen archive references use 2× Lanczos-resampled copies; reader pages retain the original extracted images.
 
 The original source does not record model versions, generation parameters or dates: `model` and `date` are `null`, `parameters` is `{}`. The interface says “Not recorded” / “Unspecified”. Tags come only from the existing comma-separated style descriptions. A prompt’s verification statement means its text matches the published source; it is not a rights or identity claim. No private contact details were invented; contact points to the public project issue tracker.
 
