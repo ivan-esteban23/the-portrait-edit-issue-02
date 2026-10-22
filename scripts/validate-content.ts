@@ -21,6 +21,38 @@ function image(path: string, record: string) {
     `${record}: missing image docs/${path}`,
   );
 }
+function jpegDimensions(path: string, record: string) {
+  const bytes = readFileSync(resolve(root, "docs", path));
+  const startOfFrame = new Set([
+    0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce,
+    0xcf,
+  ]);
+  let offset = 2;
+  while (offset < bytes.length) {
+    if (bytes[offset] !== 0xff) {
+      offset += 1;
+      continue;
+    }
+    while (bytes[offset] === 0xff) offset += 1;
+    const marker = bytes[offset++];
+    if (
+      marker === 0x00 ||
+      marker === 0x01 ||
+      marker === 0xd8 ||
+      marker === 0xd9 ||
+      (marker >= 0xd0 && marker <= 0xd7)
+    )
+      continue;
+    const segmentLength = bytes.readUInt16BE(offset);
+    if (startOfFrame.has(marker))
+      return {
+        height: bytes.readUInt16BE(offset + 3),
+        width: bytes.readUInt16BE(offset + 5),
+      };
+    offset += segmentLength;
+  }
+  throw Error(`${record}: docs/${path} is not a supported JPEG`);
+}
 const issues = readdirSync("src/content/issues").map((slug) => {
   const file = `src/content/issues/${slug}/issue.json`;
   const issue = load(file, issueSchema);
@@ -61,15 +93,33 @@ const prompts = readdirSync("src/content/prompts")
 // These archive assets are upscaled copies; the protected reader-page JSON
 // deliberately retains the original extracted image paths.
 const archiveUpscaledStudies = new Set([
+  "issue-02-study-018",
   "issue-02-study-064",
   "issue-02-study-070",
+  "issue-02-study-084",
+  "issue-02-study-085",
+  "issue-02-study-089",
   "issue-02-study-117",
   "issue-02-study-125",
+  "issue-02-study-129",
   "issue-02-study-130",
+  "issue-02-study-131",
   "issue-02-study-142",
   "issue-02-study-162",
   "issue-02-study-163",
 ]);
+for (const p of prompts.filter((prompt) =>
+  archiveUpscaledStudies.has(prompt.id),
+)) {
+  const pageFile = `docs/pages/${String(p.page).padStart(3, "0")}.json`;
+  const published = JSON.parse(readFileSync(pageFile, "utf8")).study;
+  const source = jpegDimensions(published.image, p.id);
+  const archive = jpegDimensions(p.referenceImage, p.id);
+  assert(
+    archive.width === source.width * 2 && archive.height === source.height * 2,
+    `${p.id}: archive image must be a faithful 2× raster of its published source`,
+  );
+}
 for (const issue of issues) {
   const studies = prompts.filter((p) => p.issueSlug === issue.slug);
   assert(
