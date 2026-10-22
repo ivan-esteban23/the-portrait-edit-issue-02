@@ -12,9 +12,9 @@ afterEach(() => {
 it("loads every valid study with no content errors", async () => {
   const { prompts, promptLoadErrors, currentIssue } =
     await import("../src/content");
-  expect(prompts).toHaveLength(168);
+  expect(prompts).toHaveLength(165);
   expect(prompts.map((prompt) => prompt.studyNumber)).not.toEqual(
-    expect.arrayContaining([66, 69, 106, 115, 122, 126]),
+    expect.arrayContaining([66, 69, 79, 83, 106, 113, 115, 122, 126]),
   );
   expect(promptLoadErrors).toEqual([]);
   expect(currentIssue.slug).toBe("the-prompt-issue");
@@ -26,7 +26,7 @@ it("skips a malformed study, records its file and validation error, and keeps ot
   }));
   const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
   const { prompts, promptLoadErrors } = await import("../src/content");
-  expect(prompts).toHaveLength(167);
+  expect(prompts).toHaveLength(164);
   expect(prompts.some((prompt) => prompt.id === "issue-02-study-005")).toBe(
     false,
   );
@@ -60,6 +60,6 @@ it("loads content without importing the build-time Zod schemas", async () => {
     throw new Error("Build-time schemas must not be imported at runtime");
   });
   const { prompts, currentIssue } = await import("../src/content");
-  expect(prompts).toHaveLength(168);
+  expect(prompts).toHaveLength(165);
   expect(currentIssue.slug).toBe("the-prompt-issue");
 });

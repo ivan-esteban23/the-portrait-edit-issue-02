@@ -24,7 +24,7 @@ describe("homepage discovery and direct sharing", () => {
       screen.getByRole("link", { name: /Continue on page 60/ }),
     ).toHaveAttribute("href", readerPath(currentIssue.slug, 60));
     expect(
-      screen.getByRole("link", { name: /Browse 168 studies/ }),
+      screen.getByRole("link", { name: /Browse 165 studies/ }),
     ).toHaveAttribute("href", "/prompts");
     expect(
       screen.getByRole("link", { name: /Your saved studies \(1\)/ }),

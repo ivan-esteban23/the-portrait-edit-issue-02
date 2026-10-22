@@ -42,7 +42,7 @@ test("publication routes, archive filtering, retained PDF, and not-found", async
     page.getByRole("link", { name: /Download PDF ·/ }),
   ).toHaveAttribute("href", /releases\/download\/noir-editorial-1/);
   await page.getByRole("link", { name: "Archive", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText("168 studies");
+  await expect(page.getByRole("status")).toHaveText("165 studies");
   await page.getByLabel("Search", { exact: true }).fill("Frost Fantasy");
   await expect(page.getByRole("status")).toHaveText("1 study");
   await page.locator(".archive-grid a").click();

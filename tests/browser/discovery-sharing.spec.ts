@@ -22,7 +22,7 @@ test("homepage routes readers into the magazine, archive, and saved collection",
   await page.getByRole("link", { name: /Continue on page 60/ }).click();
   await expect(page).toHaveURL(/pages\/60$/);
   await page.goto(home);
-  await page.getByRole("link", { name: /Browse 168 studies/ }).click();
+  await page.getByRole("link", { name: /Browse 165 studies/ }).click();
   await expect(
     page.getByRole("heading", { name: "Portrait prompts" }),
   ).toBeVisible();

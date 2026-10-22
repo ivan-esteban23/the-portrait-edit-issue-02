@@ -7,7 +7,7 @@ import { HomePage as Home } from "../src/pages/HomePage";
 import { IssueOverviewPage as IssueOverview } from "../src/pages/IssueOverviewPage";
 import { currentIssue, prompts, readerPath } from "../src/content";
 
-// Resume actions do not need the full 168-card print contact sheet.
+// Resume actions do not need the full 165-card print contact sheet.
 vi.mock("../src/components/StudyCard", () => ({ StudyCard: () => null }));
 
 const KEY = "portrait-edit-last-read";
