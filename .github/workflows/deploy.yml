@@ -23,7 +23,12 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - name: Install browser system dependencies
+        timeout-minutes: 5
+        run: npx playwright install-deps chromium
+      - name: Install Playwright Chromium
+        timeout-minutes: 5
+        run: npx playwright install chromium
       - run: npm run test:e2e
       - name: Upload browser test diagnostics
         uses: actions/upload-artifact@v6
