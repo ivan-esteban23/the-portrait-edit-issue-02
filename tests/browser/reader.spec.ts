@@ -8,6 +8,13 @@ async function mode(page: Page, value: string) {
   await settings(page);
   await page.getByLabel("Reading mode").selectOption(value);
   await page.getByRole("button", { name: "Close display settings" }).click();
+  // Radix restores focus after unmount; do not send Enter to the old trigger.
+  await expect(
+    page.getByRole("dialog", { name: "Display & navigation" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Display", exact: true }),
+  ).toBeFocused();
 }
 async function noOverflow(page: Page) {
   expect(
@@ -730,7 +737,15 @@ test("accessibility: focus rings meet theme contrast and respect forced colors; 
   for (const value of ["light", "dark"]) {
     await theme.selectOption(value);
     await page.getByRole("button", { name: "Close display settings" }).click();
-    await display.focus();
+    await expect(
+      page.getByRole("dialog", { name: "Display & navigation" }),
+    ).toHaveCount(0);
+    await expect(display).toBeFocused();
+    // Exercise keyboard focus, rather than measuring the mouse-focus fallback.
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(display).toBeFocused();
+    await expect(display).toHaveCSS("outline-width", "2px");
     const contrast = await display.evaluate((node) => {
       const style = getComputedStyle(node);
       const luminance = (color: string) => {

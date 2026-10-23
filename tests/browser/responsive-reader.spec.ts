@@ -154,6 +154,12 @@ test("Prompt Studio actions stay inside the drawer from phones through 8K displa
   const footer = studio.locator(".prompt-studio-footer");
   const actions = footer.getByRole("button");
   await expect(studio).toBeVisible();
+  // Visible drawers may still be translating into the viewport.
+  await studio.evaluate(async (node) => {
+    await Promise.all(
+      node.getAnimations().map((animation) => animation.finished),
+    );
+  });
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
     const bounds = await footer.boundingBox();
