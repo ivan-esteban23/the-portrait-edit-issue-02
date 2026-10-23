@@ -119,6 +119,36 @@ test("archive cards preserve full source framing on phones and desktop", async (
   }
 });
 
+test("archive cards use compact WebP thumbnails while study pages keep originals", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("prompts");
+
+  const card = page.locator(".archive-grid .study-card").first();
+  const cardImage = card.locator(".study-card-media img");
+  const thumbnailUrl = await cardImage.getAttribute("src");
+  expect(thumbnailUrl).toMatch(/\/references\/cards\/[^/]+\.webp$/);
+  await expect(cardImage).toHaveJSProperty("complete", true);
+  await expect
+    .poll(() =>
+      cardImage.evaluate((image: HTMLImageElement) => image.naturalWidth),
+    )
+    .toBeGreaterThan(0);
+
+  const thumbnail = await page.request.get(thumbnailUrl!);
+  expect(thumbnail.ok()).toBe(true);
+  expect(thumbnail.headers()["content-type"]).toContain("image/webp");
+
+  await card.locator(".study-card-overlay").click();
+  const detailImage = page.locator(".study-figure img");
+  await expect(detailImage).toBeVisible();
+  await expect(detailImage).toHaveAttribute(
+    "src",
+    new RegExp(study.referenceImage),
+  );
+});
+
 test("card actions copy, share, compare, and filter without opening the study", async ({
   page,
 }) => {
