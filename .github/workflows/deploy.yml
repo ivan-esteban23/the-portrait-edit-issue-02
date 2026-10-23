@@ -23,6 +23,12 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - name: Select HTTPS Ubuntu package mirror
+        run: |
+          # Avoid slow Azure mirror retries; this only changes the disposable runner.
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            printf '%s\n' 'https://archive.ubuntu.com/ubuntu' | sudo tee /etc/apt/apt-mirrors.txt > /dev/null
+          fi
       - name: Install browser system dependencies
         timeout-minutes: 5
         run: npx playwright install-deps chromium
