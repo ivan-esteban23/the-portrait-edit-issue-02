@@ -109,3 +109,13 @@ See [Responsive reader QA](RESPONSIVE_QA.md) for the Chromium responsive matrix 
 The active suite includes Zod diagnostics, full content/asset preservation, copy fallback/stale-response isolation, and Chromium browser tests at 320, 390, 430, 834, 1194, 1280 and 1440px in light/dark variants. Browser tests exercise route entry, legacy hashes, archive filtering, Focus, modes, zoom, sizing, copying, keyboard, scrubber, swipes and image retry, and capture review screenshots in ignored `test-results/`.
 
 Chromium viewport/touch emulation does not certify Safari on Apple hardware, Windows ClearType or physical gesture bars. Those platform checks remain manual. Do not treat the earlier `VERIFICATION.json` PDF report as a sign-off for this application.
+
+## Browser tests on Arch Linux
+
+Run `npm ci`, `npm run build`, then `npm run test:e2e`. Local runs use
+`/usr/bin/chromium` when available. Set
+`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/path/to/chromium` to override it.
+CI uses the browser installed by the repository's Playwright version instead.
+System Chromium is verified locally, but Arch is not an officially supported
+Playwright distribution; use CI results for the supported release environment.
+Do not run `playwright install-deps` on Arch.
