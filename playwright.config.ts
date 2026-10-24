@@ -1,19 +1,26 @@
 import { defineConfig } from "@playwright/test";
 import { existsSync } from "node:fs";
+// Use Arch's packaged Chromium locally; CI uses Playwright's matched browser.
+const executablePath =
+  process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ||
+  (!process.env.CI && existsSync("/usr/bin/chromium")
+    ? "/usr/bin/chromium"
+    : undefined);
 const responsiveBrowsers: "chromium"[] = ["chromium"];
 
 export default defineConfig({
   testDir: "tests/browser",
   timeout: 60000,
+  globalTimeout: 20 * 60 * 1000,
+  forbidOnly: !!process.env.CI,
+  reporter: [["list"], ["html", { open: "never" }]],
   fullyParallel: true,
   workers: 2,
   retries: 0,
   use: {
     baseURL: "http://127.0.0.1:4173/the-portrait-edit-issue-02/",
     headless: true,
-    launchOptions: existsSync("/usr/bin/chromium")
-      ? { executablePath: "/usr/bin/chromium" }
-      : {},
+    launchOptions: { executablePath },
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },
@@ -82,10 +89,7 @@ export default defineConfig({
       use: {
         browserName,
         hasTouch: true,
-        launchOptions:
-          browserName === "chromium" && existsSync("/usr/bin/chromium")
-            ? { executablePath: "/usr/bin/chromium" }
-            : {},
+        launchOptions: browserName === "chromium" ? { executablePath } : {},
       },
     })),
   ],
