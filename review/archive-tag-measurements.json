@@ -1,0 +1,944 @@
+{
+  "context": "Headless Arch Chromium, default pointer, CSS viewport pixels. Large sizes measured serially without full-page screenshots. Existing Playwright touch-configured keyboard checks are separate.",
+  "before": [
+    {
+      "width": 320,
+      "height": 568,
+      "dpr": 1,
+      "documentWidth": 305,
+      "publicationWidth": 305,
+      "rowWidth": 265,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 1,
+      "firstCardY": 515.046875,
+      "scrollAfterFocus": 1628
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "dpr": 1,
+      "documentWidth": 345,
+      "publicationWidth": 345,
+      "rowWidth": 305,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 2,
+      "firstCardY": 515.046875,
+      "scrollAfterFocus": 1608
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "documentWidth": 375,
+      "publicationWidth": 375,
+      "rowWidth": 335,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 2,
+      "firstCardY": 515.046875,
+      "screenshot": "the-portrait-edit-tags-before-390x844-1792806518742.png",
+      "scrollAfterFocus": 1593
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "dpr": 1,
+      "documentWidth": 415,
+      "publicationWidth": 415,
+      "rowWidth": 375,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 2,
+      "firstCardY": 515.046875,
+      "scrollAfterFocus": 1568
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "dpr": 1,
+      "documentWidth": 829,
+      "publicationWidth": 829,
+      "rowWidth": 761.5,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 6,
+      "firstCardY": 606.265625,
+      "scrollAfterFocus": 1181
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "dpr": 1,
+      "documentWidth": 705,
+      "publicationWidth": 705,
+      "rowWidth": 665,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 5,
+      "firstCardY": 164.65625,
+      "scrollAfterFocus": 1278
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "dpr": 1,
+      "documentWidth": 753,
+      "publicationWidth": 753,
+      "rowWidth": 691.5625,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 6,
+      "firstCardY": 599.875,
+      "scrollAfterFocus": 1251
+    },
+    {
+      "width": 834,
+      "height": 1112,
+      "dpr": 1,
+      "documentWidth": 819,
+      "publicationWidth": 819,
+      "rowWidth": 752.28125,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 6,
+      "firstCardY": 605.421875,
+      "scrollAfterFocus": 1191
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "dpr": 1,
+      "documentWidth": 1009,
+      "publicationWidth": 1009,
+      "rowWidth": 927.09375,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 7,
+      "firstCardY": 621.390625,
+      "scrollAfterFocus": 1016
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1,
+      "documentWidth": 1265,
+      "publicationWidth": 1265,
+      "rowWidth": 1169,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 9,
+      "firstCardY": 571.78125,
+      "scrollAfterFocus": 774
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "dpr": 1,
+      "documentWidth": 1265,
+      "publicationWidth": 1265,
+      "rowWidth": 1169,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 9,
+      "firstCardY": 571.78125,
+      "screenshot": "the-portrait-edit-tags-before-1280x720-1792806522704.png",
+      "scrollAfterFocus": 774
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "dpr": 1,
+      "documentWidth": 1351,
+      "publicationWidth": 1351,
+      "rowWidth": 1255,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 10,
+      "firstCardY": 576.421875,
+      "scrollAfterFocus": 688
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1,
+      "documentWidth": 1425,
+      "publicationWidth": 1425,
+      "rowWidth": 1329,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 11,
+      "firstCardY": 580.421875,
+      "scrollAfterFocus": 614
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "documentWidth": 1905,
+      "publicationWidth": 1440,
+      "rowWidth": 1344,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 11,
+      "firstCardY": 583.890625,
+      "scrollAfterFocus": 599
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "dpr": 1,
+      "documentWidth": 2545,
+      "publicationWidth": 1440,
+      "rowWidth": 1344,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 11,
+      "firstCardY": 583.890625,
+      "scrollAfterFocus": 599
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "dpr": 1,
+      "documentWidth": 3825,
+      "publicationWidth": 1440,
+      "rowWidth": 1344,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 11,
+      "firstCardY": 583.890625,
+      "scrollAfterFocus": 599
+    },
+    {
+      "width": 5120,
+      "height": 2880,
+      "dpr": 1,
+      "documentWidth": 5105,
+      "publicationWidth": 1440,
+      "rowWidth": 1344,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 11,
+      "firstCardY": 583.890625,
+      "scrollAfterFocus": 599
+    },
+    {
+      "width": 6016,
+      "height": 3384,
+      "dpr": 1,
+      "documentWidth": 6001,
+      "publicationWidth": 1440,
+      "rowWidth": 1344,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 11,
+      "firstCardY": 583.890625,
+      "scrollAfterFocus": 599
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "dpr": 1,
+      "documentWidth": 7665,
+      "publicationWidth": 1440,
+      "rowWidth": 1344,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 11,
+      "firstCardY": 583.890625,
+      "scrollAfterFocus": 599
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "dpr": 2,
+      "documentWidth": 375,
+      "publicationWidth": 375,
+      "rowWidth": 335,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 2,
+      "firstCardY": 515.046875,
+      "scrollAfterFocus": 1593
+    },
+    {
+      "width": 834,
+      "height": 1112,
+      "dpr": 2,
+      "documentWidth": 819,
+      "publicationWidth": 819,
+      "rowWidth": 752.28125,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 6,
+      "firstCardY": 605.421875,
+      "scrollAfterFocus": 1191
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 2,
+      "documentWidth": 1905,
+      "publicationWidth": 1440,
+      "rowWidth": 1344,
+      "rowScrollWidth": 1943,
+      "tags": 16,
+      "fullyVisible": 11,
+      "firstCardY": 583.890625,
+      "scrollAfterFocus": 599
+    }
+  ],
+  "after": [
+    {
+      "width": 320,
+      "height": 568,
+      "dpr": 1,
+      "documentWidth": 305,
+      "publicationWidth": 305,
+      "rowWidth": 265,
+      "rowScrollWidth": 265,
+      "popularTags": 1,
+      "cue": "More tags (110)",
+      "firstCardY": 515.046875,
+      "expanded": {
+        "tags": 111,
+        "width": 265,
+        "scrollWidth": 265,
+        "height": 3200,
+        "documentWidth": 305
+      }
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "dpr": 1,
+      "documentWidth": 345,
+      "publicationWidth": 345,
+      "rowWidth": 305,
+      "rowScrollWidth": 305,
+      "popularTags": 1,
+      "cue": "More tags (110)",
+      "firstCardY": 515.046875,
+      "expanded": {
+        "tags": 111,
+        "width": 305,
+        "scrollWidth": 305,
+        "height": 2800,
+        "documentWidth": 345
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "documentWidth": 375,
+      "publicationWidth": 375,
+      "rowWidth": 335,
+      "rowScrollWidth": 335,
+      "popularTags": 2,
+      "cue": "More tags (109)",
+      "firstCardY": 515.046875,
+      "screenshot": "the-portrait-edit-tags-after-390x844-1792808259228.png",
+      "expanded": {
+        "tags": 111,
+        "width": 335,
+        "scrollWidth": 335,
+        "height": 2600,
+        "documentWidth": 375
+      },
+      "expandedScreenshot": "the-portrait-edit-tags-expanded-390x844-1792808259795.png"
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "dpr": 1,
+      "documentWidth": 415,
+      "publicationWidth": 415,
+      "rowWidth": 375,
+      "rowScrollWidth": 375,
+      "popularTags": 2,
+      "cue": "More tags (109)",
+      "firstCardY": 515.046875,
+      "expanded": {
+        "tags": 111,
+        "width": 375,
+        "scrollWidth": 375,
+        "height": 2150,
+        "documentWidth": 415
+      }
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "dpr": 1,
+      "documentWidth": 829,
+      "publicationWidth": 829,
+      "rowWidth": 761.5,
+      "rowScrollWidth": 762,
+      "popularTags": 3,
+      "cue": "More tags (108)",
+      "firstCardY": 610.65625,
+      "expanded": {
+        "tags": 111,
+        "width": 761.5,
+        "scrollWidth": 762,
+        "height": 1110.390625,
+        "documentWidth": 829
+      }
+    },
+    {
+      "width": 720,
+      "height": 1280,
+      "dpr": 1,
+      "documentWidth": 705,
+      "publicationWidth": 705,
+      "rowWidth": 665,
+      "rowScrollWidth": 665,
+      "popularTags": 2,
+      "cue": "More tags (109)",
+      "firstCardY": 482.65625,
+      "expanded": {
+        "tags": 111,
+        "width": 665,
+        "scrollWidth": 665,
+        "height": 1150,
+        "documentWidth": 705
+      }
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "dpr": 1,
+      "documentWidth": 753,
+      "publicationWidth": 753,
+      "rowWidth": 691.5625,
+      "rowScrollWidth": 692,
+      "popularTags": 3,
+      "cue": "More tags (108)",
+      "firstCardY": 604.265625,
+      "expanded": {
+        "tags": 111,
+        "width": 691.5625,
+        "scrollWidth": 692,
+        "height": 1210.390625,
+        "documentWidth": 753
+      }
+    },
+    {
+      "width": 834,
+      "height": 1112,
+      "dpr": 1,
+      "documentWidth": 819,
+      "publicationWidth": 819,
+      "rowWidth": 752.28125,
+      "rowScrollWidth": 752,
+      "popularTags": 3,
+      "cue": "More tags (108)",
+      "firstCardY": 609.8125,
+      "expanded": {
+        "tags": 111,
+        "width": 752.28125,
+        "scrollWidth": 752,
+        "height": 1110.390625,
+        "documentWidth": 819
+      }
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "dpr": 1,
+      "documentWidth": 1009,
+      "publicationWidth": 1009,
+      "rowWidth": 927.09375,
+      "rowScrollWidth": 927,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 625.78125,
+      "expanded": {
+        "tags": 111,
+        "width": 927.09375,
+        "scrollWidth": 927,
+        "height": 860.390625,
+        "documentWidth": 1009
+      }
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "dpr": 1,
+      "documentWidth": 1265,
+      "publicationWidth": 1265,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 576.171875,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 1265
+      }
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "dpr": 1,
+      "documentWidth": 1265,
+      "publicationWidth": 1265,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 576.171875,
+      "screenshot": "the-portrait-edit-tags-after-1280x720-1792808260757.png",
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 1265
+      }
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "dpr": 1,
+      "documentWidth": 1351,
+      "publicationWidth": 1351,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 580.8125,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 1351
+      }
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1,
+      "documentWidth": 1425,
+      "publicationWidth": 1425,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 584.8125,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 1425
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "documentWidth": 1905,
+      "publicationWidth": 1440,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 588.28125,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 1905
+      }
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "dpr": 1,
+      "documentWidth": 2545,
+      "publicationWidth": 1440,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 588.28125,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 2545
+      }
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "dpr": 1,
+      "documentWidth": 3825,
+      "publicationWidth": 1440,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 588.28125,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 3825
+      }
+    },
+    {
+      "width": 5120,
+      "height": 2880,
+      "dpr": 1,
+      "documentWidth": 5105,
+      "publicationWidth": 1440,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 588.28125,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 5105
+      }
+    },
+    {
+      "width": 6016,
+      "height": 3384,
+      "dpr": 1,
+      "documentWidth": 6001,
+      "publicationWidth": 1440,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 588.28125,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 6001
+      }
+    },
+    {
+      "width": 7680,
+      "height": 4320,
+      "dpr": 1,
+      "documentWidth": 7665,
+      "publicationWidth": 1440,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 588.28125,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 7665
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "dpr": 2,
+      "documentWidth": 375,
+      "publicationWidth": 375,
+      "rowWidth": 335,
+      "rowScrollWidth": 335,
+      "popularTags": 2,
+      "cue": "More tags (109)",
+      "firstCardY": 515.046875,
+      "expanded": {
+        "tags": 111,
+        "width": 335,
+        "scrollWidth": 335,
+        "height": 2600,
+        "documentWidth": 375
+      }
+    },
+    {
+      "width": 834,
+      "height": 1112,
+      "dpr": 2,
+      "documentWidth": 819,
+      "publicationWidth": 819,
+      "rowWidth": 752.28125,
+      "rowScrollWidth": 752,
+      "popularTags": 3,
+      "cue": "More tags (108)",
+      "firstCardY": 609.8125,
+      "expanded": {
+        "tags": 111,
+        "width": 752.28125,
+        "scrollWidth": 752,
+        "height": 1110.390625,
+        "documentWidth": 819
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 2,
+      "documentWidth": 1905,
+      "publicationWidth": 1440,
+      "rowWidth": 1152,
+      "rowScrollWidth": 1152,
+      "popularTags": 6,
+      "cue": "More tags (105)",
+      "firstCardY": 588.28125,
+      "expanded": {
+        "tags": 111,
+        "width": 1152,
+        "scrollWidth": 1152,
+        "height": 710.390625,
+        "documentWidth": 1905
+      }
+    }
+  ],
+  "finalContrast": [
+    {
+      "theme": "dark",
+      "data": [
+        {
+          "tag": "#playful (27)",
+          "pressed": "true",
+          "countOpacity": "1",
+          "countContrast": 11.47490554969438,
+          "labelContrast": 11.47490554969438
+        },
+        {
+          "tag": "#bold (25)",
+          "pressed": "false",
+          "countOpacity": "1",
+          "countContrast": 5.745591371856418,
+          "labelContrast": 5.745591371856418
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "data": [
+        {
+          "tag": "#playful (27)",
+          "pressed": "true",
+          "countOpacity": "1",
+          "countContrast": 4.731790887143764,
+          "labelContrast": 4.731790887143764
+        },
+        {
+          "tag": "#bold (25)",
+          "pressed": "false",
+          "countOpacity": "1",
+          "countContrast": 6.7667232381402105,
+          "labelContrast": 6.7667232381402105
+        }
+      ]
+    }
+  ],
+  "keyboardVerification": {
+    "context": "Repository chromium-responsive touch configuration; actual innerWidth/innerHeight/devicePixelRatio were measured and asserted to equal each listed value. Each test traversed every tag with native Tab.",
+    "command": "mise exec node@24 -- npm run test:e2e -- --workers=1",
+    "suiteResult": {
+      "passed": 268,
+      "existingConditionalSkips": 18,
+      "failed": 0,
+      "duration": "30.5m"
+    },
+    "viewports": [
+      {
+        "innerWidth": 320,
+        "innerHeight": 568,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  262 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 320\u00d7568: every tag is discoverable and keyboard reachable (26.7s)"
+      },
+      {
+        "innerWidth": 360,
+        "innerHeight": 640,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  263 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 360\u00d7640: every tag is discoverable and keyboard reachable (26.3s)"
+      },
+      {
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  264 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 390\u00d7844: every tag is discoverable and keyboard reachable (25.8s)"
+      },
+      {
+        "innerWidth": 430,
+        "innerHeight": 932,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  265 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 430\u00d7932: every tag is discoverable and keyboard reachable (25.6s)"
+      },
+      {
+        "innerWidth": 844,
+        "innerHeight": 390,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  266 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 844\u00d7390: every tag is discoverable and keyboard reachable (26.7s)"
+      },
+      {
+        "innerWidth": 720,
+        "innerHeight": 1280,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  267 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 720\u00d71280: every tag is discoverable and keyboard reachable (25.9s)"
+      },
+      {
+        "innerWidth": 768,
+        "innerHeight": 1024,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  268 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 768\u00d71024: every tag is discoverable and keyboard reachable (25.9s)"
+      },
+      {
+        "innerWidth": 834,
+        "innerHeight": 1112,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  269 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 834\u00d71112: every tag is discoverable and keyboard reachable (26.1s)"
+      },
+      {
+        "innerWidth": 1024,
+        "innerHeight": 768,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  270 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 1024\u00d7768: every tag is discoverable and keyboard reachable (25.9s)"
+      },
+      {
+        "innerWidth": 1280,
+        "innerHeight": 800,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  271 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 1280\u00d7800: every tag is discoverable and keyboard reachable (26.8s)"
+      },
+      {
+        "innerWidth": 1280,
+        "innerHeight": 720,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  272 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 1280\u00d7720: every tag is discoverable and keyboard reachable (26.1s)"
+      },
+      {
+        "innerWidth": 1366,
+        "innerHeight": 768,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  273 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 1366\u00d7768: every tag is discoverable and keyboard reachable (26.0s)"
+      },
+      {
+        "innerWidth": 1440,
+        "innerHeight": 900,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  274 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 1440\u00d7900: every tag is discoverable and keyboard reachable (26.1s)"
+      },
+      {
+        "innerWidth": 1920,
+        "innerHeight": 1080,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  275 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 1920\u00d71080: every tag is discoverable and keyboard reachable (26.6s)"
+      },
+      {
+        "innerWidth": 2560,
+        "innerHeight": 1440,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  276 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 2560\u00d71440: every tag is discoverable and keyboard reachable (27.2s)"
+      },
+      {
+        "innerWidth": 3840,
+        "innerHeight": 2160,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  277 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 3840\u00d72160: every tag is discoverable and keyboard reachable (31.1s)"
+      },
+      {
+        "innerWidth": 5120,
+        "innerHeight": 2880,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  278 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 5120\u00d72880: every tag is discoverable and keyboard reachable (31.5s)"
+      },
+      {
+        "innerWidth": 6016,
+        "innerHeight": 3384,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  279 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 6016\u00d73384: every tag is discoverable and keyboard reachable (35.7s)"
+      },
+      {
+        "innerWidth": 7680,
+        "innerHeight": 4320,
+        "devicePixelRatio": 1,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  280 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:311:5 \u203a archive tag discovery \u203a 7680\u00d74320: every tag is discoverable and keyboard reachable (44.0s)"
+      },
+      {
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "devicePixelRatio": 2,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  281 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:323:5 \u203a archive tag discovery \u203a DPR 2 at 390\u00d7844: tag discovery and keyboard access (28.7s)"
+      },
+      {
+        "innerWidth": 834,
+        "innerHeight": 1112,
+        "devicePixelRatio": 2,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  282 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:323:5 \u203a archive tag discovery \u203a DPR 2 at 834\u00d71112: tag discovery and keyboard access (28.5s)"
+      },
+      {
+        "innerWidth": 1920,
+        "innerHeight": 1080,
+        "devicePixelRatio": 2,
+        "keyboardTagsChecked": 111,
+        "result": "passed",
+        "evidence": "\u2713  283 [chromium-responsive] \u203a tests/browser/viewport-audit.spec.ts:323:5 \u203a archive tag discovery \u203a DPR 2 at 1920\u00d71080: tag discovery and keyboard access (29.4s)"
+      }
+    ]
+  }
+}
