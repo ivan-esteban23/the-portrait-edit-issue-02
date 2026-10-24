@@ -14,9 +14,9 @@ test("archive search tolerates whitespace and supports exact multiword hashtags"
   const search = page.getByRole("searchbox");
   const status = page.getByRole("status");
   await search.fill("moody");
-  const ordinaryCount = await status.textContent();
+  await expect(status).toHaveText("16 studies");
   await search.fill("  MOODY  ");
-  await expect(status).toHaveText(ordinaryCount!);
+  await expect(status).toHaveText("16 studies");
   await search.fill("#moody");
   await expect(status).toHaveText("14 studies");
   await page.reload();

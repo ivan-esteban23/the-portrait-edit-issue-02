@@ -29,6 +29,10 @@ Implemented the three P1 findings from the UI/UX report on branch `fix/archive-p
 - The initial browser test sent an arrow key as soon as the URL changed, before the destination's render was ready. It now asserts the new study heading and focuses the next link before testing the shortcut; navigation assertions remain intact.
 - A subsequent browser run caught the page metadata effect resetting desktop scroll after archive restoration. The archive return now explicitly preserves scroll in that hook. The combined 18-case rerun passed without retries, relaxed assertions, added skips, or timeout increases.
 
+## Publication validation correction
+
+The first full local run and first PR CI run exposed an unsynchronized assertion in the new search test: it read the ordinary-search count immediately after input, sometimes capturing the initial 165-study count. The whitespace search correctly returned 16 studies, so comparing it to that stale baseline failed. The test now explicitly awaits 16 studies for both the ordinary and whitespace queries. No application code, assertions about intended behavior, retries, skip conditions, or timeout settings were relaxed. Full-suite and CI rerun results are recorded in the PR description and checks.
+
 ## Limits and remaining work
 
 Chromium viewport/touch emulation was used. Physical devices, other engines, and actual screen-reader applications were not checked. The checks above record the initial local implementation. The subsequent full local browser suite (including the large CSS viewport matrix) and GitHub Actions results are recorded in the publication PR description and its checks. Existing P2 recommendations and unrelated model/clipboard refinements remain outside this change. The user subsequently authorized publication and full validation. No merge or deployment is authorized or performed for this change.
