@@ -1,0 +1,106 @@
+[
+  {
+    "type": "layout",
+    "theme": "dark",
+    "width": 320,
+    "scrollWidth": 305,
+    "firstImageY": 516.046875,
+    "searchWidth": 265
+  },
+  {
+    "type": "layout",
+    "theme": "light",
+    "width": 320,
+    "scrollWidth": 305,
+    "firstImageY": 516.046875,
+    "searchWidth": 265
+  },
+  {
+    "type": "layout",
+    "theme": "dark",
+    "width": 390,
+    "scrollWidth": 375,
+    "firstImageY": 516.046875,
+    "searchWidth": 335
+  },
+  {
+    "type": "layout",
+    "theme": "light",
+    "width": 390,
+    "scrollWidth": 375,
+    "firstImageY": 516.046875,
+    "searchWidth": 335
+  },
+  {
+    "type": "search",
+    "query": "  moody  ",
+    "status": [
+      "0 studies"
+    ]
+  },
+  {
+    "type": "search",
+    "query": "moody",
+    "status": [
+      "16 studies"
+    ]
+  },
+  {
+    "type": "search",
+    "query": "#moody",
+    "status": [
+      "0 studies"
+    ]
+  },
+  {
+    "type": "opened-study",
+    "url": "https://ivan-esteban23.github.io/the-portrait-edit-issue-02/prompts/issue-02-study-001",
+    "back": "/the-portrait-edit-issue-02/prompts"
+  },
+  {
+    "type": "return-archive",
+    "url": "https://ivan-esteban23.github.io/the-portrait-edit-issue-02/prompts",
+    "status": []
+  },
+  {
+    "type": "hidden-toast-focus",
+    "focused": true
+  },
+  {
+    "type": "reader",
+    "theme": "light",
+    "text": "Page 60 of 196: Study 005 - Frost Fantasy Portrait\n☷\nDisplay\n◉\nFocus\nTools\nPortraits & Light\n14–36\nWinter\n37–52\nFolk & Landscape\n53–57\nFantasy & Period\n58–71\nRunway\n72–89\nKnitwear & Layers\n90–126\nStudio\n127–149\nNight & Lifestyle\n150–169\nStreet & City\n170–196\nPaused\n\nSTUDY 005 / PAGE 60\n\nAdjust\nCard\nCopy link\n☆\nSave study\nFrost Fantasy Portrait\n\nRegal, mysterious, wintry\n\n🔍 Inspect\nSource: 4572.jpg\nRights check\nIMAGE PROMPT\nCopy prompt\nAnatomy / X-Ray\n/imagine\n+ Params\nMD\nAdjust\nCard\nCommand parameters\n\nOptional starting points. Select flags for your command.\n\n--ar 4:5\n--v 6.1\n--s 250\n\nA cinematic fantasy portrait of an original young woman standing near the center of the frame, cropped from the thighs up, facing the camera. Long, wavy chestnut-brown hair falls past her shoulders with lighter highlights where the light catches it. She wears a fitted, semi-sheer blue bodice with an embossed frost-like pattern and long, translucent sleeves. A high collar holds a jeweled choker and a layered pendant necklace, with small drop earrings. Her expression is calm and direct, with softly parted lips. Behind her, towering blue ice crystals fill the background, softly out of focus. Soft, directional backlight outlines her hair and shoulders in a faint glow. Cool, saturated palette of icy blues, deep indigo, and silver, with warm skin tones for contrast. Subtle film grain and shallow depth of field give it a film-still quality. Regal, mysterious, and wintry, in the style of a fantasy book cover or winter-themed editorial.\n\nText checked against the published study.\n\nWORKING NOTES\n\n- Good for book covers or poster concepts.\n- Warmer setting or different costume are easy variations.\n\nTRY THIS\n\nTry this: Try a warmer setting.\n\nRelated Studies\n\nShared ideas. Different directions.\n\nSTUDY 042\n\nFur-Collar Beret & Dark Turtleneck\n\n#wintry\n\nSTUDY 061\n\nCream Shearling Coat by the Woodpile\n\n#"
+  },
+  {
+    "type": "layout",
+    "theme": "dark",
+    "width": 834,
+    "scrollWidth": 819,
+    "firstImageY": 610.8125,
+    "searchWidth": 752.28125
+  },
+  {
+    "type": "layout",
+    "theme": "light",
+    "width": 834,
+    "scrollWidth": 819,
+    "firstImageY": 610.8125,
+    "searchWidth": 752.28125
+  },
+  {
+    "type": "layout",
+    "theme": "dark",
+    "width": 1440,
+    "scrollWidth": 1425,
+    "firstImageY": 585.8125,
+    "searchWidth": 1329
+  },
+  {
+    "type": "layout",
+    "theme": "light",
+    "width": 1440,
+    "scrollWidth": 1425,
+    "firstImageY": 585.8125,
+    "searchWidth": 1329
+  }
+]
