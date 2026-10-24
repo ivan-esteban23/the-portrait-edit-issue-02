@@ -12,6 +12,7 @@ type PageMetaOptions = {
   description?: string;
   image?: string;
   path?: string;
+  preserveScroll?: boolean;
 };
 
 type DefaultMeta = {
@@ -93,6 +94,7 @@ export function usePageMeta({
   description,
   image,
   path,
+  preserveScroll = false,
 }: PageMetaOptions) {
   const location = useLocation();
 
@@ -116,7 +118,7 @@ export function usePageMeta({
     canonical.href = path ? pageUrl : defaults.canonical;
 
     // Preserve the original top-of-page navigation behavior for non-reader routes.
-    if (!location.pathname.includes("/pages/")) {
+    if (!preserveScroll && !location.pathname.includes("/pages/")) {
       window.scrollTo({ top: 0, behavior: "instant" });
     }
 
@@ -129,5 +131,5 @@ export function usePageMeta({
       ogUrlMeta.content = defaults.ogUrl;
       canonical.href = defaults.canonical;
     };
-  }, [description, image, location.pathname, path, title]);
+  }, [description, image, location.pathname, path, title, preserveScroll]);
 }

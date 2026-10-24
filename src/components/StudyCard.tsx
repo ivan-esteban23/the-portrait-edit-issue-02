@@ -23,6 +23,7 @@ interface StudyCardProps {
   selectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
+  onOpen?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export function StudyCard({
@@ -37,6 +38,7 @@ export function StudyCard({
   selectionMode = false,
   isSelected = false,
   onToggleSelect,
+  onOpen,
 }: StudyCardProps) {
   const [copied, setCopied] = useState(false);
   const [copiedFormat, setCopiedFormat] = useState<string>("Copied!");
@@ -285,6 +287,7 @@ export function StudyCard({
       </div>
       <Link
         className="study-card-overlay"
+        data-study-id={prompt.id}
         to={to}
         aria-label={`View study ${prompt.title || prompt.id}`}
         onClick={(e) => {
@@ -292,6 +295,8 @@ export function StudyCard({
             e.preventDefault();
             e.stopPropagation();
             onToggleSelect?.(prompt.id);
+          } else {
+            onOpen?.(e);
           }
         }}
       />
