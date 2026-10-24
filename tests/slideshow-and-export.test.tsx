@@ -163,14 +163,12 @@ describe("Editorial Enhancements: Slideshow, Export, Presets & Filtering", () =>
         </MemoryRouter>,
       );
 
-      // Aspect ratio selector should exist
+      // Only metadata-backed facets are shown; style remains available.
       fireEvent.click(screen.getByText(/^More filters/));
-      const arSelect = screen.getByLabelText("Aspect Ratio");
-      expect(arSelect).toBeInTheDocument();
-
-      // Filter by studies without a recorded aspect ratio
-      fireEvent.change(arSelect, { target: { value: "none" } });
-      expect((arSelect as HTMLSelectElement).value).toBe("none");
+      expect(screen.queryByLabelText("Aspect Ratio")).not.toBeInTheDocument();
+      const styleSelect = screen.getByLabelText("Style / tag");
+      fireEvent.change(styleSelect, { target: { value: "regal" } });
+      expect((styleSelect as HTMLSelectElement).value).toBe("regal");
 
       // Reset filters button should appear
       const resetBtn = screen.getByRole("button", {
@@ -189,7 +187,7 @@ describe("Editorial Enhancements: Slideshow, Export, Presets & Filtering", () =>
 
       // Click Reset all filters
       fireEvent.click(resetBtn);
-      expect((arSelect as HTMLSelectElement).value).toBe("");
+      expect((styleSelect as HTMLSelectElement).value).toBe("");
       expect(
         screen.queryByRole("button", { name: /Reset all filters/i }),
       ).not.toBeInTheDocument();

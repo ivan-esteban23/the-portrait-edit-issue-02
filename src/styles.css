@@ -4721,9 +4721,17 @@ body::before {
 }
 .archive-secondary-filters {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
   gap: 12px;
   padding: 4px 12px 12px;
+  max-width: 864px;
+}
+.archive-metadata-note {
+  margin: 0;
+  padding: 0 12px 12px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
 }
 .archive-disclosure .archive-actions-group {
   padding: 4px 12px 12px;

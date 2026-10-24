@@ -237,9 +237,24 @@ export function ArchivePage() {
   }, [parsedParameters]);
 
   const models = useMemo(
-    () => [...new Set(prompts.map((p) => p.model ?? "Unspecified"))].sort(),
+    () =>
+      [...new Set(prompts.map((p) => p.model?.trim()))]
+        .filter((value): value is string =>
+          Boolean(value && value !== "Unspecified"),
+        )
+        .sort(),
     [],
   );
+  const hasUnspecifiedModels = prompts.some(
+    (p) => !p.model?.trim() || p.model.trim() === "Unspecified",
+  );
+  const hasUnrecordedRatios = prompts.some((p) => {
+    const ratio =
+      p.parameters?.["ar"] ||
+      p.parameters?.["--ar"] ||
+      parsedParameters.get(p.id)?.parameters.get("ar");
+    return !ratio || String(ratio).trim() === "Unspecified";
+  });
 
   const filtered = useMemo(() => {
     return prompts.filter((p) => {
@@ -375,34 +390,54 @@ export function ArchivePage() {
                   ))}
                 </select>
               </label>
-              <label>
-                Model
-                <select
-                  value={model}
-                  onChange={(e) => filter("model", e.target.value)}
-                >
-                  <option value="">{t("All models")}</option>
-                  {models.map((m) => (
-                    <option key={m}>{m}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                {t("Aspect Ratio")}
-                <select
-                  value={aspectRatio}
-                  onChange={(e) => filter("ar", e.target.value)}
-                >
-                  <option value="">{t("All aspect ratios")}</option>
-                  {aspectRatios.map((ar) => (
-                    <option key={ar} value={ar}>
-                      {ar}
-                    </option>
-                  ))}
-                  <option value={NOT_RECORDED}>{t("Not recorded")}</option>
-                </select>
-              </label>
+              {models.length > 0 && (
+                <label>
+                  Model
+                  <select
+                    value={model}
+                    onChange={(e) => filter("model", e.target.value)}
+                  >
+                    <option value="">{t("All models")}</option>
+                    {models.map((m) => (
+                      <option key={m}>{m}</option>
+                    ))}
+                    {hasUnspecifiedModels && (
+                      <option value="Unspecified">Unspecified</option>
+                    )}
+                  </select>
+                </label>
+              )}
+              {aspectRatios.length > 0 && (
+                <label>
+                  {t("Aspect Ratio")}
+                  <select
+                    value={aspectRatio}
+                    onChange={(e) => filter("ar", e.target.value)}
+                  >
+                    <option value="">{t("All aspect ratios")}</option>
+                    {aspectRatios.map((ar) => (
+                      <option key={ar} value={ar}>
+                        {ar}
+                      </option>
+                    ))}
+                    {hasUnrecordedRatios && (
+                      <option value={NOT_RECORDED}>{t("Not recorded")}</option>
+                    )}
+                  </select>
+                </label>
+              )}
             </div>
+            {(!models.length || !aspectRatios.length) && (
+              <p className="archive-metadata-note">
+                {[
+                  !models.length && "Model",
+                  !aspectRatios.length && "aspect ratio",
+                ]
+                  .filter(Boolean)
+                  .join(" and ")}{" "}
+                metadata is not yet recorded for these studies.
+              </p>
+            )}
           </details>
           <details className="archive-disclosure">
             <summary>

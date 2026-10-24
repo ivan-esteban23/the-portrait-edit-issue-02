@@ -182,14 +182,23 @@ test("archive entry stays compact from small phones through 8K CSS viewports", a
     const tools = page.getByText("Archive tools", { exact: true });
     await expect(
       page.getByRole("combobox", { name: "Model", exact: true }),
-    ).toBeHidden();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Select Prompts", exact: true }),
     ).toBeHidden();
     await filters.click();
     await expect(
-      page.getByRole("combobox", { name: "Model", exact: true }),
+      page.getByRole("combobox", { name: "Style / tag" }),
     ).toBeVisible();
+    await expect(
+      page.getByText(/Model and aspect ratio metadata is not yet recorded/),
+    ).toBeVisible();
+    const styleWidth = await page
+      .getByRole("combobox", { name: "Style / tag" })
+      .evaluate((node) => node.getBoundingClientRect().width);
+    expect(styleWidth).toBeGreaterThanOrEqual(220);
+    if (viewport.width >= 2560) expect(styleWidth).toBeLessThanOrEqual(280);
+    measurements[measurements.length - 1] = { ...metrics, styleWidth };
     await noOverflow(page);
     await filters.click();
     await tools.click();
@@ -232,10 +241,20 @@ test("archive entry also fits representative DPR 2 phone, tablet, and laptop vie
     ]) {
       await page.setViewportSize(viewport);
       const metrics = await archiveMetrics(page);
-      measurements.push(metrics);
       expect(metrics).toMatchObject({ ...viewport, dpr: 2 });
       expect(metrics.documentWidth).toBeLessThanOrEqual(viewport.width);
       expect(metrics.firstCardY).toBeLessThan(viewport.height);
+      const filters = page.getByText(/^More filters/);
+      await filters.click();
+      const style = page.getByRole("combobox", { name: "Style / tag" });
+      await expect(style).toBeVisible();
+      const styleWidth = await style.evaluate(
+        (node) => node.getBoundingClientRect().width,
+      );
+      expect(styleWidth).toBeGreaterThanOrEqual(220);
+      await noOverflow(page);
+      measurements.push({ ...metrics, styleWidth });
+      await filters.click();
     }
     await info.attach("archive-dpr-2-measurements", {
       body: JSON.stringify(measurements, null, 2),
@@ -271,6 +290,7 @@ test("archive disclosures work by keyboard and keep URL filters visible when clo
   await expect(active).toContainText("Style: #regal");
   await expect(active).toContainText("Model: Unspecified");
   await expect(active).toContainText("Aspect ratio: Not recorded");
+  await expect(page.getByRole("combobox", { name: "Model" })).toHaveCount(0);
   await page.keyboard.press("Tab");
   const tools = page.getByText("Archive tools", { exact: true });
   await expect(tools).toBeFocused();

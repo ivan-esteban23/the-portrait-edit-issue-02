@@ -25,12 +25,17 @@ it("keeps discovery visible while secondary filters and tools start closed", asy
   expect(screen.getByRole("status")).toHaveTextContent("165 studies");
   expect(screen.getByRole("button", { name: /Saved \(0\)/ })).toBeVisible();
   expect(screen.getByRole("region", { name: "Tag filters" })).toBeVisible();
-  expect(screen.getByRole("combobox", { name: "Model" })).not.toBeVisible();
+  expect(screen.queryByRole("combobox", { name: "Model" })).toBeNull();
   expect(
     screen.getByRole("button", { name: "Select Prompts" }),
   ).not.toBeVisible();
   await user.click(screen.getByText("More filters", { exact: true }));
-  expect(screen.getByRole("combobox", { name: "Model" })).toBeVisible();
+  expect(
+    screen.getByText(/Model and aspect ratio metadata is not yet recorded/),
+  ).toBeVisible();
+  expect(screen.queryByRole("combobox", { name: "Model" })).toBeNull();
+  expect(screen.queryByRole("combobox", { name: "Aspect Ratio" })).toBeNull();
+  expect(screen.getByRole("combobox", { name: "Style \/ tag" })).toBeVisible();
   await user.click(screen.getByText("Archive tools", { exact: true }));
   expect(screen.getByRole("button", { name: "Select Prompts" })).toBeVisible();
   expect(
