@@ -192,7 +192,7 @@ it("offers resume, beginning, print, and PDF on Issue Overview", () => {
     screen.getByRole("link", { name: "Start from beginning" }),
   ).toHaveAttribute("href", readerPath(currentIssue.slug));
   expect(
-    screen.getByRole("button", { name: "Print Contact Sheet 🖨" }),
+    screen.getByRole("button", { name: "Print contact sheet" }),
   ).toBeInTheDocument();
   expect(
     screen.getByRole("link", { name: /Download PDF/ }),
