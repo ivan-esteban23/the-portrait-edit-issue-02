@@ -34,6 +34,7 @@ export function ArchivePage() {
     path: "/prompts",
   });
   const archive = useRef<HTMLElement>(null);
+  const searchInput = useRef<HTMLInputElement>(null);
   const [preparingPrint, setPreparingPrint] = useState(false);
   const [printProgress, setPrintProgress] = useState<{
     loaded: number;
@@ -128,9 +129,7 @@ export function ArchivePage() {
   // Multi-select batch actions state
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [batchCopied, setBatchCopied] = useState<"" | "copied" | "failed">(
-    "",
-  );
+  const [batchCopied, setBatchCopied] = useState<"" | "copied" | "failed">("");
   const batchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -148,6 +147,8 @@ export function ArchivePage() {
   const hasActiveFilters = Boolean(
     query || tag || model || aspectRatio || savedOnly,
   );
+
+  const secondaryFilterCount = [tag, model, aspectRatio].filter(Boolean).length;
 
   const tags = useMemo(
     () => [...new Set(prompts.flatMap((p) => p.tags))].sort(),
@@ -191,9 +192,24 @@ export function ArchivePage() {
   }, [parsedParameters]);
 
   const models = useMemo(
-    () => [...new Set(prompts.map((p) => p.model ?? "Unspecified"))].sort(),
+    () =>
+      [...new Set(prompts.map((p) => p.model?.trim()))]
+        .filter((value): value is string =>
+          Boolean(value && value !== "Unspecified"),
+        )
+        .sort(),
     [],
   );
+  const hasUnspecifiedModels = prompts.some(
+    (p) => !p.model?.trim() || p.model.trim() === "Unspecified",
+  );
+  const hasUnrecordedRatios = prompts.some((p) => {
+    const ratio =
+      p.parameters?.["ar"] ||
+      p.parameters?.["--ar"] ||
+      parsedParameters.get(p.id)?.parameters.get("ar");
+    return !ratio || String(ratio).trim() === "Unspecified";
+  });
 
   const filtered = useMemo(() => {
     return prompts.filter((p) => {
@@ -303,213 +319,276 @@ export function ArchivePage() {
         <label>
           Search
           <input
+            ref={searchInput}
             type="search"
             placeholder={t("Light, texture, study number…")}
             value={query}
             onChange={(e) => filter("q", e.target.value)}
           />
         </label>
-        <label>
-          Style / tag
-          <select value={tag} onChange={(e) => filter("tag", e.target.value)}>
-            <option value="">{t("All styles")}</option>
-            {tags.map((t) => (
-              <option key={t}>{t}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Model
-          <select
-            value={model}
-            onChange={(e) => filter("model", e.target.value)}
-          >
-            <option value="">{t("All models")}</option>
-            {models.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {t("Aspect Ratio")}
-          <select
-            value={aspectRatio}
-            onChange={(e) => filter("ar", e.target.value)}
-          >
-            <option value="">{t("All aspect ratios")}</option>
-            {aspectRatios.map((ar) => (
-              <option key={ar} value={ar}>
-                {ar}
-              </option>
-            ))}
-            <option value={NOT_RECORDED}>{t("Not recorded")}</option>
-          </select>
-        </label>
-        <div className="archive-actions-group">
-          <Button
-            type="button"
-            variant="ghost"
-            className={`saved-pill-btn ${savedOnly ? "is-active" : ""}`}
-            aria-pressed={savedOnly}
-            onClick={() => filter("saved", savedOnly ? "" : "1")}
-          >
-            ★ Saved ({savedCount})
-          </Button>
-
-          {/* Multi-Select Batch Mode Toggle */}
-          <Button
-            type="button"
-            variant="ghost"
-            className={`selection-mode-toggle-btn ${selectionMode ? "is-active" : ""}`}
-            aria-pressed={selectionMode}
-            aria-label={selectionMode ? t("Cancel Selection") : t("Select Prompts")}
-            onClick={() => {
-              setSelectionMode((prev) => {
-                if (prev) setSelectedIds([]);
-                return !prev;
-              });
-            }}
-          >
-            {selectionMode ? t("Cancel Selection") : t("Select Prompts")}
-          </Button>
-
-          {selectionMode && (
-            <>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={selectAllFiltered}
-                aria-label="Select All Filtered"
-              >
-                Select All ({filtered.length})
-              </Button>
-              {selectedIds.length > 0 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={clearSelection}
-                  aria-label="Clear Selection"
+        <div className="archive-disclosures">
+          <details className="archive-disclosure">
+            <summary>
+              More filters
+              {secondaryFilterCount > 0 && ` (${secondaryFilterCount})`}
+            </summary>
+            <div className="archive-secondary-filters">
+              <label>
+                Style / tag
+                <select
+                  value={tag}
+                  onChange={(e) => filter("tag", e.target.value)}
                 >
-                  Clear Selection
-                </Button>
+                  <option value="">{t("All styles")}</option>
+                  {tags.map((t) => (
+                    <option key={t}>{t}</option>
+                  ))}
+                </select>
+              </label>
+              {models.length > 0 && (
+                <label>
+                  Model
+                  <select
+                    value={model}
+                    onChange={(e) => filter("model", e.target.value)}
+                  >
+                    <option value="">{t("All models")}</option>
+                    {models.map((m) => (
+                      <option key={m}>{m}</option>
+                    ))}
+                    {hasUnspecifiedModels && (
+                      <option value="Unspecified">Unspecified</option>
+                    )}
+                  </select>
+                </label>
               )}
-            </>
-          )}
-
-          {/* Collection Moodboard Selector */}
-          <label className="moodboard-select-label">
-            <span className="sr-only">Collection</span>
-            <select
-              aria-label="Moodboard collection"
-              value={activeCollection}
-              onChange={(e) => {
-                if (e.target.value === "__new__") {
-                  setShowNewCol(true);
-                } else {
-                  setActiveCollection(e.target.value);
-                }
-              }}
-            >
-              {collections.map((c) => (
-                <option key={c} value={c}>
-                  Collection: {c}
-                </option>
-              ))}
-              <option value="__new__">+ New Collection…</option>
-            </select>
-          </label>
-
-          {showNewCol && (
-            <div className="new-collection-inline">
-              <input
-                type="text"
-                placeholder="Collection name…"
-                value={newColName}
-                onChange={(e) => setNewColName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    if (newColName.trim()) {
-                      createCollection(newColName.trim());
-                      setNewColName("");
-                      setShowNewCol(false);
-                    }
-                  }
-                }}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  if (newColName.trim()) {
-                    createCollection(newColName.trim());
-                    setNewColName("");
-                    setShowNewCol(false);
-                  }
-                }}
-              >
-                Add
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setShowNewCol(false)}
-              >
-                Cancel
-              </Button>
+              {aspectRatios.length > 0 && (
+                <label>
+                  {t("Aspect Ratio")}
+                  <select
+                    value={aspectRatio}
+                    onChange={(e) => filter("ar", e.target.value)}
+                  >
+                    <option value="">{t("All aspect ratios")}</option>
+                    {aspectRatios.map((ar) => (
+                      <option key={ar} value={ar}>
+                        {ar}
+                      </option>
+                    ))}
+                    {hasUnrecordedRatios && (
+                      <option value={NOT_RECORDED}>{t("Not recorded")}</option>
+                    )}
+                  </select>
+                </label>
+              )}
             </div>
-          )}
-
-          <Button
-            type="button"
-            variant="ghost"
-            className="export-saved-btn print-contact-sheet-btn"
-            onClick={printSelection}
-            disabled={preparingPrint || filtered.length === 0}
-            aria-busy={preparingPrint}
-            title="Print editorial contact sheet (@media print)"
-          >
-            {preparingPrint ? t("Preparing sheet…") : t("Print Contact Sheet 🖨")}
-          </Button>
-
-          {savedCount > 0 && (
-            <>
+            {(!models.length || !aspectRatios.length) && (
+              <p className="archive-metadata-note">
+                {[
+                  !models.length && "Model",
+                  !aspectRatios.length && "aspect ratio",
+                ]
+                  .filter(Boolean)
+                  .join(" and ")}{" "}
+                metadata is not yet recorded for these studies.
+              </p>
+            )}
+          </details>
+          <details className="archive-disclosure">
+            <summary>
+              Archive tools{selectionMode ? " · Selecting" : ""}
+            </summary>
+            <div className="archive-actions-group">
+              {/* Multi-Select Batch Mode Toggle */}
               <Button
                 type="button"
                 variant="ghost"
-                className="export-saved-btn"
-                onClick={exportSaved}
-                title="Export saved studies as JSON"
+                className={`selection-mode-toggle-btn ${selectionMode ? "is-active" : ""}`}
+                aria-pressed={selectionMode}
+                aria-label={
+                  selectionMode ? t("Cancel Selection") : t("Select Prompts")
+                }
+                onClick={() => {
+                  setSelectionMode((prev) => {
+                    if (prev) setSelectedIds([]);
+                    return !prev;
+                  });
+                }}
               >
-                {t("Export JSON ↗")}
+                {selectionMode ? t("Cancel Selection") : t("Select Prompts")}
               </Button>
+
+              {selectionMode && (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={selectAllFiltered}
+                    aria-label="Select All Filtered"
+                  >
+                    Select All ({filtered.length})
+                  </Button>
+                  {selectedIds.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={clearSelection}
+                      aria-label="Clear Selection"
+                    >
+                      Clear Selection
+                    </Button>
+                  )}
+                </>
+              )}
+
+              {/* Collection Moodboard Selector */}
+              <label className="moodboard-select-label">
+                <span className="sr-only">Collection</span>
+                <select
+                  aria-label="Moodboard collection"
+                  value={activeCollection}
+                  onChange={(e) => {
+                    if (e.target.value === "__new__") {
+                      setShowNewCol(true);
+                    } else {
+                      setActiveCollection(e.target.value);
+                    }
+                  }}
+                >
+                  {collections.map((c) => (
+                    <option key={c} value={c}>
+                      Collection: {c}
+                    </option>
+                  ))}
+                  <option value="__new__">+ New Collection…</option>
+                </select>
+              </label>
+
+              {showNewCol && (
+                <div className="new-collection-inline">
+                  <input
+                    type="text"
+                    aria-label="Collection name"
+                    placeholder="Collection name…"
+                    value={newColName}
+                    onChange={(e) => setNewColName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (newColName.trim()) {
+                          createCollection(newColName.trim());
+                          setNewColName("");
+                          setShowNewCol(false);
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      if (newColName.trim()) {
+                        createCollection(newColName.trim());
+                        setNewColName("");
+                        setShowNewCol(false);
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setShowNewCol(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+
               <Button
                 type="button"
                 variant="ghost"
-                className="export-saved-btn"
-                onClick={exportMarkdown}
-                title="Export collection as Markdown"
+                className="export-saved-btn print-contact-sheet-btn"
+                onClick={printSelection}
+                disabled={preparingPrint || filtered.length === 0}
+                aria-busy={preparingPrint}
+                title="Print editorial contact sheet (@media print)"
               >
-                Export Markdown ↗
+                {preparingPrint
+                  ? t("Preparing sheet…")
+                  : t("Print Contact Sheet 🖨")}
               </Button>
-            </>
-          )}
-          {hasActiveFilters && (
-            <Button
-              type="button"
-              variant="ghost"
-              className="reset-filters-btn"
-              onClick={() => setSearch({})}
-              aria-label="Reset all filters"
-            >
-              {t("Reset all filters ✕")}
-            </Button>
-          )}
-          <Button variant="ghost" onClick={() => setSearch({})}>
-            {t("Clear filters")}
-          </Button>
+
+              {savedCount > 0 && (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="export-saved-btn"
+                    onClick={exportSaved}
+                    title="Export saved studies as JSON"
+                  >
+                    {t("Export JSON ↗")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="export-saved-btn"
+                    onClick={exportMarkdown}
+                    title="Export collection as Markdown"
+                  >
+                    Export Markdown ↗
+                  </Button>
+                </>
+              )}
+            </div>
+          </details>
         </div>
       </form>
+
+      <div className="archive-results-bar">
+        <p role="status" className="results-count">
+          {filtered.length} {filtered.length === 1 ? "study" : "studies"}
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          className={`saved-pill-btn ${savedOnly ? "is-active" : ""}`}
+          aria-pressed={savedOnly}
+          onClick={() => filter("saved", savedOnly ? "" : "1")}
+        >
+          ★ Saved ({savedCount})
+        </Button>
+
+        {hasActiveFilters && (
+          <Button
+            type="button"
+            variant="ghost"
+            className="reset-filters-btn"
+            onClick={() => {
+              setSearch({});
+              searchInput.current?.focus();
+            }}
+            aria-label="Reset all filters"
+          >
+            Reset all
+          </Button>
+        )}
+      </div>
+      {(query || tag || model || aspectRatio) && (
+        <ul className="archive-active-filters" aria-label="Active filters">
+          {query && <li>Search: “{query}”</li>}
+          {tag && <li>Style: #{tag}</li>}
+          {model && <li>Model: {model}</li>}
+          {aspectRatio && (
+            <li>
+              Aspect ratio:{" "}
+              {aspectRatio === NOT_RECORDED ? "Not recorded" : aspectRatio}
+            </li>
+          )}
+        </ul>
+      )}
 
       {/* Interactive Tag Pills */}
       <div className="archive-tag-pills" role="region" aria-label="Tag filters">
@@ -531,10 +610,6 @@ export function ArchivePage() {
           })}
         </div>
       </div>
-
-      <p role="status" className="results-count">
-        {filtered.length} {filtered.length === 1 ? "study" : "studies"}
-      </p>
 
       {/* Printable Contact Sheet Header (@media print) */}
       <div className="print-contact-sheet-header" aria-hidden="true">
@@ -591,7 +666,9 @@ export function ArchivePage() {
         <p className="empty-state">
           {savedOnly && savedCount === 0
             ? "No studies saved yet. Tap the bookmark icon on any study to add it to your curation board."
-            : t("No studies match these filters. Try a broader search or clear the filters.")}
+            : t(
+                "No studies match these filters. Try a broader search or clear the filters.",
+              )}
         </p>
       )}
 

@@ -495,7 +495,7 @@ h3,
 }
 .archive-filters {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   align-items: end;
   margin: 32px 0 16px;
@@ -1328,12 +1328,6 @@ select:hover {
   }
   .overview-cover {
     max-width: 220px;
-  }
-  .archive-filters {
-    grid-template-columns: 1fr 1fr;
-  }
-  .archive-filters label:first-child {
-    grid-column: 1/-1;
   }
   .archive-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4691,7 +4685,94 @@ body::before {
 }
 .archive-filters {
   gap: 12px;
-  margin-block: 30px 18px;
+  margin-block: 20px 12px;
+}
+/* Secondary controls stay reachable without delaying the portrait collection. */
+.archive-disclosures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.archive-disclosure {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.archive-disclosure[open] {
+  grid-column: 1 / -1;
+}
+.archive-disclosure summary {
+  padding: 12px;
+  font-size: 0.8125rem;
+  color: var(--text);
+}
+.archive-secondary-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+  padding: 4px 12px 12px;
+  max-width: 864px;
+}
+.archive-metadata-note {
+  margin: 0;
+  padding: 0 12px 12px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.archive-disclosure .archive-actions-group {
+  padding: 4px 12px 12px;
+}
+.archive-results-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.archive-results-bar .results-count {
+  margin: 0 auto 0 0;
+}
+.archive-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 4px 0 8px;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.archive-active-filters li {
+  max-width: 100%;
+}
+@media (max-width: 767px) {
+  .archive {
+    padding-top: 16px;
+  }
+  .archive header h1 {
+    margin-block: 8px;
+  }
+  .archive-filters {
+    margin-block: 12px 4px;
+    gap: 8px;
+  }
+  .archive .archive-tag-pills {
+    margin-block: 4px 12px;
+    padding-block: 2px 4px;
+  }
+}
+@media (max-width: 560px) {
+  .archive-secondary-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media print {
+  .archive-results-bar,
+  .archive-active-filters {
+    display: none !important;
+  }
 }
 .archive-filters label {
   color: var(--muted);
@@ -5058,12 +5139,14 @@ textarea {
   }
 }
 
-
 /* Keep the masthead controls balanced on narrow phones. */
 @media (max-width: 480px) {
   .masthead nav {
     display: grid;
-    grid-template-columns: minmax(60px, auto) repeat(3, minmax(0, 1fr)) minmax(76px, 84px);
+    grid-template-columns: minmax(60px, auto) repeat(3, minmax(0, 1fr)) minmax(
+        76px,
+        84px
+      );
     gap: 4px;
     flex-wrap: nowrap;
   }

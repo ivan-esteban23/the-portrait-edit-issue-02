@@ -62,12 +62,11 @@ function renderArchive(url = "/prompts") {
 
 it("never presents unrecorded aspect ratios as 4:5", () => {
   renderArchive();
-  const select = screen.getByLabelText("Aspect Ratio") as HTMLSelectElement;
-  const values = [...select.options].map((o) => o.value);
-  // No study records --ar, so no ratio is offered except "Not recorded".
-  expect(values).not.toContain("4:5");
-  expect(values).toContain("none");
-  expect(screen.getByRole("option", { name: "Not recorded" })).toBeTruthy();
+  fireEvent.click(screen.getByText(/^More filters/));
+  expect(screen.queryByLabelText("Aspect Ratio")).toBeNull();
+  expect(
+    screen.getByText(/aspect ratio metadata is not yet recorded/),
+  ).toBeVisible();
 });
 
 it("filters every study without a recorded ratio under Not recorded", () => {
@@ -81,14 +80,20 @@ it("filters every study without a recorded ratio under Not recorded", () => {
 
 it("an old ?ar=4:5 link no longer claims the whole archive", () => {
   renderArchive("/prompts?ar=4:5");
-  const select = screen.getByLabelText("Aspect Ratio") as HTMLSelectElement;
-  expect(select.value).not.toBe("4:5");
+  expect(screen.getByRole("status")).toHaveTextContent("0 studies");
+  expect(
+    screen.getByRole("list", { name: "Active filters" }),
+  ).toHaveTextContent("Aspect ratio: 4:5");
+  expect(
+    screen.getByRole("button", { name: "Reset all filters" }),
+  ).toBeVisible();
 });
 
 it("reports a failed batch copy instead of failing silently", async () => {
   stubClipboard(vi.fn().mockRejectedValue(Error("denied")));
   stubExec(false);
   renderArchive();
+  fireEvent.click(screen.getByText("Archive tools", { exact: true }));
   fireEvent.click(screen.getByRole("button", { name: "Select Prompts" }));
   fireEvent.click(screen.getByRole("button", { name: "Select All Filtered" }));
   await act(async () => {
