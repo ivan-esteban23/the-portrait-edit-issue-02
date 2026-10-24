@@ -20,18 +20,20 @@ test("Discord command selections follow card toggles and live Studio presets", a
   const aspect = card.getByRole("checkbox", { name: "--ar 4:5", exact: true });
   await expect(aspect).not.toBeChecked();
   await aspect.check();
+  await card.getByText("More actions", { exact: true }).click();
   await card
-    .getByRole("button", { name: "Discord /imagine", exact: true })
+    .getByRole("button", { name: "Copy Discord /imagine", exact: true })
     .click();
   await expect.poll(copied).toContain("--ar 4:5");
   await expect.poll(copied).toMatch(/^\/imagine prompt: /);
   await aspect.uncheck();
+  await card.getByText("More actions", { exact: true }).click();
   await card
-    .getByRole("button", { name: "Discord /imagine", exact: true })
+    .getByRole("button", { name: "Copy Discord /imagine", exact: true })
     .click();
   await expect.poll(copied).not.toContain("--ar");
   await card
-    .getByRole("button", { name: "Adjust Parameters", exact: true })
+    .getByRole("button", { name: "Customize prompt", exact: true })
     .click();
   const studio = page.getByRole("dialog", {
     name: "Prompt Studio",

@@ -42,7 +42,10 @@ test("study return and native Back preserve archive filters, disclosure, scroll,
   const query = "?q=portrait&tag=moody&model=Unspecified&ar=none&saved=1";
   await page.goto(`prompts${query}`);
   const more = page.getByRole("button", { name: /^More tags/ });
+  const compact = (await more.getAttribute("aria-haspopup")) === "dialog";
   await more.click();
+  if (compact)
+    await page.getByRole("button", { name: "Done", exact: true }).click();
   const card = page.getByRole("link", {
     name: "View study Autumn Hat Portrait",
     exact: true,
@@ -71,8 +74,8 @@ test("study return and native Back preserve archive filters, disclosure, scroll,
   await expect(page.getByRole("searchbox")).toHaveValue("portrait");
   await expect(page.getByRole("status")).toHaveText("2 studies");
   await expect(
-    page.getByRole("button", { name: "Fewer tags" }),
-  ).toHaveAttribute("aria-expanded", "true");
+    page.getByRole("button", { name: compact ? /^More tags/ : "Fewer tags" }),
+  ).toHaveAttribute("aria-expanded", compact ? "false" : "true");
   await expect(card).toBeFocused();
   await expect
     .poll(async () =>

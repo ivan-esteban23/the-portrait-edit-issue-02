@@ -145,7 +145,7 @@ test("Prompt Studio actions stay inside the drawer from phones through 8K displa
   ];
   await page.goto("prompts/issue-02-study-005");
   await page
-    .getByRole("button", { name: "Adjust Parameters", exact: true })
+    .getByRole("button", { name: "Customize prompt", exact: true })
     .click();
   const studio = page.getByRole("dialog", {
     name: "Prompt Studio",
@@ -221,8 +221,14 @@ test("masthead theme button stays reachable across phone, tablet, and desktop wi
     expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(viewport.width + 1);
     expect(bounds!.height).toBeGreaterThanOrEqual(44);
     await theme.click();
-    await expect(page.locator("html")).toHaveAttribute("data-theme", themes[index]);
-    await expect(theme).toHaveAttribute("aria-label", new RegExp(themes[index]));
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-theme",
+      themes[index],
+    );
+    await expect(theme).toHaveAttribute(
+      "aria-label",
+      new RegExp(themes[index]),
+    );
     await noOverflow(page);
   }
 });

@@ -475,10 +475,29 @@ async function auditArchiveTags(
   expect(moreBounds.x).toBeGreaterThanOrEqual(0);
   expect(moreBounds.x + moreBounds.width).toBeLessThanOrEqual(viewport.width);
 
+  const compact = (await more.getAttribute("aria-haspopup")) === "dialog";
   await more.focus();
   await page.keyboard.press("Enter");
-  await expect(more).toHaveAttribute("aria-expanded", "true");
   await expect(extra).toBeVisible();
+  if (compact) {
+    await auditPhoneTagPicker(page, viewport);
+    await info.attach("tag-filter-viewport-measurements", {
+      body: JSON.stringify(
+        {
+          ...collapsed,
+          popularCount,
+          totalTags: sourceTags.size,
+          keyboardTagsChecked: orderedTags.length,
+          picker: "dialog",
+        },
+        null,
+        2,
+      ),
+      contentType: "application/json",
+    });
+    return;
+  }
+  await expect(more).toHaveAttribute("aria-expanded", "true");
   await expect(region.getByRole("button", { name: /^#/ })).toHaveCount(
     sourceTags.size,
   );
@@ -548,6 +567,89 @@ async function auditArchiveTags(
   });
 }
 
+async function auditPhoneTagPicker(
+  page: Page,
+  viewport: { width: number; height: number },
+) {
+  const dialog = page.getByRole("dialog", { name: "Browse tags" });
+  const search = dialog.getByRole("searchbox", { name: "Find a tag" });
+  await expect(search).toBeFocused();
+  const all = dialog.getByRole("group", { name: "All tags" });
+  await expect(all.getByRole("button")).toHaveCount(sourceTags.size);
+  const bounds = (await dialog.boundingBox())!;
+  const listBounds = (await all.boundingBox())!;
+  expect(bounds.y).toBeGreaterThanOrEqual(0);
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height);
+  await all.getByRole("button").first().focus();
+  for (const [index, [name, count]] of orderedTags.entries()) {
+    if (index) await page.keyboard.press("Tab");
+    const metrics = await focusedTagMetrics(page);
+    expect(metrics.label).toBe(`#${name} (${count})`);
+    expect(metrics.nodeName).toBe("BUTTON");
+    expect(metrics.pressed).toBe("false");
+    expect(metrics.inTagRegion).toBe(true);
+    expect(metrics.left).toBeGreaterThanOrEqual(0);
+    expect(metrics.right).toBeLessThanOrEqual(viewport.width);
+    expect(metrics.top).toBeGreaterThanOrEqual(listBounds.y);
+    expect(metrics.bottom).toBeLessThanOrEqual(
+      listBounds.y + listBounds.height,
+    );
+    expect(metrics.height).toBeGreaterThanOrEqual(44);
+    if (index) expect(metrics.outline).not.toBe("none");
+  }
+  for (let index = orderedTags.length - 2; index >= 0; index--) {
+    await page.keyboard.press("Shift+Tab");
+    const metrics = await focusedTagMetrics(page);
+    expect(metrics.label).toBe(
+      `#${orderedTags[index][0]} (${orderedTags[index][1]})`,
+    );
+    expect(metrics.top).toBeGreaterThanOrEqual(listBounds.y);
+    expect(metrics.bottom).toBeLessThanOrEqual(
+      listBounds.y + listBounds.height,
+    );
+  }
+  await search.fill(" #quietly melancholic ");
+  await expect(all.getByRole("button")).toHaveCount(1);
+  const selected = all.getByRole("button", {
+    name: `#quietly melancholic (${sourceTags.get("quietly melancholic")})`,
+    exact: true,
+  });
+  await selected.click();
+  await expect(selected).toHaveAttribute("aria-pressed", "true");
+  await expect(selected).toBeFocused();
+  await dialog.getByRole("button", { name: "Done", exact: true }).focus();
+  await page.keyboard.press("Tab");
+  await expect(
+    dialog.getByRole("button", { name: "Close tag picker" }),
+  ).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(
+    dialog.getByRole("button", { name: "Done", exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toHaveCount(0);
+  const region = page.getByRole("region", { name: "Tag filters" });
+  const more = region.getByRole("button", { name: /^More tags/ });
+  await expect(more).toBeFocused();
+  await expect(page.locator(".archive-grid .study-card")).toHaveCount(
+    sourceTags.get("quietly melancholic")!,
+  );
+  await expect(
+    region.getByRole("button", { name: /^#quietly melancholic/ }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await more.click();
+  await expect(search).toHaveValue("");
+  await search.fill("not-a-real-tag");
+  await expect(dialog.getByText(/No matching tags/)).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(more).toBeFocused();
+  await region.getByRole("button", { name: "Clear tag", exact: true }).click();
+  await expect(more).toBeFocused();
+  await expect(page.locator(".archive-grid .study-card")).toHaveCount(165);
+  await noOverflow(page);
+}
+
 async function focusedTagMetrics(page: Page) {
   return page.evaluate(() => {
     const element = document.activeElement!;
@@ -557,7 +659,9 @@ async function focusedTagMetrics(page: Page) {
       label: element.textContent?.replace(/\s+/g, " ").trim(),
       nodeName: element.nodeName,
       pressed: element.getAttribute("aria-pressed"),
-      inTagRegion: !!element.closest('[aria-label="Tag filters"]'),
+      inTagRegion: !!element.closest(
+        '[aria-label="Tag filters"], [aria-label="All tags"]',
+      ),
       left: rect.left,
       right: rect.right,
       top: rect.top,

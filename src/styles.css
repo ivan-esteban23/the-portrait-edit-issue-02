@@ -5241,3 +5241,115 @@ textarea {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
+
+/* Keep tag discovery inside a focused, bounded phone dialog. */
+.tag-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: rgb(0 0 0 / 60%);
+  display: grid;
+  place-items: center;
+  padding: 12px;
+}
+.tag-picker {
+  width: min(100%, 38rem);
+  max-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font-family: var(--font-sans);
+  min-height: 0;
+}
+.tag-picker-heading,
+.tag-picker-footer > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tag-picker-heading h2 {
+  font-size: 1.25rem;
+}
+.tag-picker-search {
+  display: grid;
+  gap: 6px;
+}
+.tag-picker-search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: inherit;
+  font-size: 16px;
+}
+.tag-picker-count,
+.tag-picker-footer p {
+  font-size: 0.875rem;
+}
+.tag-picker-list {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px;
+  margin: -6px;
+  align-content: flex-start;
+}
+.tag-picker-list .tag-pill {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.tag-picker-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.tag-picker-footer p {
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+.prompt-more-actions {
+  width: 100%;
+}
+.prompt-more-actions summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 8px;
+  font: inherit;
+  font-family: var(--font-sans);
+}
+.prompt-action-list {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.prompt-action-list button {
+  justify-content: flex-start;
+  white-space: normal;
+  text-align: left;
+}
+
+@media (max-width: 767px) {
+  .prompt-copy-actions {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .prompt-copy-actions > button {
+    flex: 1;
+    min-width: 0;
+    white-space: normal;
+  }
+}
