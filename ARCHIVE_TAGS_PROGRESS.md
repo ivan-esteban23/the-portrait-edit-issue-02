@@ -6,6 +6,8 @@ Implemented and verified on the existing `fix/archive-first-screen-hierarchy` br
 
 The new worktree passed a clean `npm ci --no-audit --no-fund`, `npm test -- --maxWorkers=1` (22 files / 162 tests), `npm run build` (content validation, TypeScript, optimized thumbnails, and route generation), Prettier for all six files, and `git diff --check`. A focused serial Chromium run passed four cases covering 390 × 844, 1280 × 720, DPR 2 at 390 × 844, and deep-linked uncommon tag behavior. The unchanged base makes the earlier full serial Playwright and 22-case viewport evidence applicable. The build-generated sitemap date changes were restored; the preview server stopped automatically. GitHub Actions will run the full suite for the PR commit.
 
+The first PR CI run passed installation, TypeScript, unit tests, build, and 267 browser tests, with 18 conditional skips. Its sole failure was a 120-second timeout in the new contrast test while awaiting `document.getAnimations()` promises; no contrast assertion failed. The contrast test now uses the site's reduced-motion CSS to reach final theme colors without waiting on unrelated animations. The unchanged label/count contrast assertions passed in a focused local rerun. The full CI suite will run again on the correction.
+
 Read package/lockfile, CI, browser configuration, archive component/styles, and relevant tests. No repository/parent AGENTS.md or runtime pin file was found; user-supplied AGENTS instructions apply. Used installed mise Node 24.22.1 to match CI, npm, and Arch Chromium through the repository's configured Playwright setup.
 
 ## Observed before and implemented after

@@ -585,6 +585,7 @@ test("reverse keyboard traversal keeps tag focus below the sticky masthead", asy
 test("tag labels and counts retain text contrast in both themes and selected states", async ({
   page,
 }, info) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("prompts?tag=playful");
   const counts = page.locator(".tag-pills-primary .tag-pill-count");
@@ -595,17 +596,6 @@ test("tag labels and counts retain text contrast in both themes and selected sta
       await page.getByRole("button", { name: /Color theme:/ }).click();
     }
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    await page.evaluate(async () => {
-      await Promise.allSettled(
-        document
-          .getAnimations()
-          .filter(
-            (animation) =>
-              animation.effect?.getComputedTiming().iterations !== Infinity,
-          )
-          .map((animation) => animation.finished),
-      );
-    });
     const measurements = await counts.evaluateAll((elements) => {
       const canvas = document.createElement("canvas");
       canvas.width = canvas.height = 1;
