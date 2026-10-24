@@ -1,5 +1,18 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { assetUrl, currentIssue, prompts } from "@/content";
 import { Button } from "@/components/ui/button";
 import { StudyCard } from "@/components/StudyCard";
@@ -10,6 +23,8 @@ import { generateMarkdownDossier, downloadFile } from "@/lib/dossier";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useMedia } from "@/hooks/useReader";
 import { useLanguage } from "@/i18n/LanguageProvider";
+import { matchesArchiveSearch } from "@/lib/archiveSearch";
+import { readArchiveContext } from "@/lib/archiveNavigation";
 
 type ParsedParameters = ReturnType<typeof splitPromptParameters>;
 
@@ -27,17 +42,39 @@ const NOT_RECORDED = "none";
 
 export function ArchivePage() {
   const { t } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const returnContext = useMemo(
+    () => readArchiveContext(location.state?.archiveReturn),
+    [location.state],
+  );
   usePageMeta({
     title: `Prompt Archive (${prompts.length} Studies) | The Portrait Edit`,
     description:
       "Browse and filter all 165 portrait studies in The Portrait Edit Issue 02",
     image: assetUrl(currentIssue.cover),
     path: "/prompts",
+    preserveScroll: Boolean(returnContext),
   });
   const archive = useRef<HTMLElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const moreTagsButton = useRef<HTMLButtonElement>(null);
-  const [tagsExpanded, setTagsExpanded] = useState(false);
+  const [tagsExpanded, setTagsExpanded] = useState(
+    () => returnContext?.tagsExpanded ?? false,
+  );
+  useLayoutEffect(() => {
+    if (!returnContext) return;
+    const frame = requestAnimationFrame(() => {
+      const card = Array.from(
+        archive.current?.querySelectorAll<HTMLAnchorElement>(
+          "a[data-study-id]",
+        ) ?? [],
+      ).find((link) => link.dataset.studyId === returnContext.studyId);
+      (card ?? searchInput.current)?.focus({ preventScroll: true });
+      window.scrollTo({ top: returnContext.scrollY, behavior: "instant" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [returnContext]);
   const widePhone = useMedia("(min-width: 390px)");
   const tablet = useMedia("(min-width: 768px)");
   const desktop = useMedia("(min-width: 1024px)");
@@ -272,14 +309,7 @@ export function ArchivePage() {
             : NOT_RECORDED;
         if (recorded !== aspectRatio) return false;
       }
-      if (
-        query &&
-        !`${p.title} ${p.prompt} ${p.style} ${p.studyNumber}`
-          .toLowerCase()
-          .includes(query.toLowerCase())
-      ) {
-        return false;
-      }
+      if (!matchesArchiveSearch(p, query)) return false;
       return true;
     });
   }, [savedOnly, isSaved, tag, model, aspectRatio, query, parsedParameters]);
@@ -714,6 +744,32 @@ export function ArchivePage() {
             key={p.id}
             prompt={p}
             to={`/prompts/${p.id}`}
+            onOpen={(event) => {
+              if (
+                event.defaultPrevented ||
+                event.button !== 0 ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.altKey ||
+                event.shiftKey
+              )
+                return;
+              event.preventDefault();
+              const archiveContext = {
+                search: location.search,
+                scrollY: window.scrollY,
+                studyId: p.id,
+                tagsExpanded,
+              };
+              // Snapshot the existing entry so native Back restores it too.
+              navigate(location.pathname + location.search, {
+                replace: true,
+                state: { archiveReturn: archiveContext },
+              });
+              navigate(`/prompts/${p.id}`, {
+                state: { archiveContext },
+              });
+            }}
             headingLevel="h2"
             isSaved={isSaved(p.id)}
             onToggleSaved={toggleSaved}
