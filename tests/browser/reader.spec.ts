@@ -247,7 +247,10 @@ test("explicit themes ignore the OS preference and form controls retain cross-pl
   await page.goto(reader);
   await page.emulateMedia({ colorScheme: "light" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(18, 18, 18)");
+  await expect(page.locator("body")).toHaveCSS(
+    "background-color",
+    "rgb(18, 18, 18)",
+  );
   await settings(page);
   for (const control of await page.locator("input,select").all())
     expect(
@@ -330,7 +333,7 @@ test("Prompt Studio traps focus and blocks reader shortcuts until closed", async
   await page.goto(reader);
   await mode(page, "text");
   const opener = page.getByRole("button", {
-    name: "Adjust Parameters in Prompt Studio",
+    name: "Customize prompt",
     exact: true,
   });
   await opener.click();

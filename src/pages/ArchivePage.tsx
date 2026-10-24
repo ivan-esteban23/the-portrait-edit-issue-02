@@ -15,6 +15,7 @@ import {
 } from "react-router-dom";
 import { assetUrl, currentIssue, prompts } from "@/content";
 import { Button } from "@/components/ui/button";
+import { ArchiveTagPicker } from "@/components/ArchiveTagPicker";
 import { StudyCard } from "@/components/StudyCard";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { splitPromptParameters } from "@/lib/promptFormatter";
@@ -237,7 +238,7 @@ export function ArchivePage() {
           // A pinned tag disappears when cleared; keep focus on a visible control.
           if (
             isActive &&
-            !tagsExpanded &&
+            (!tagsExpanded || !tablet) &&
             selectedAdditionalTag?.name === name
           ) {
             moreTagsButton.current?.focus();
@@ -670,7 +671,7 @@ export function ArchivePage() {
         <span className="tag-pills-label">Tags:</span>
         <div className="tag-pills-primary">
           {popularTags.map(tagButton)}
-          {!tagsExpanded &&
+          {(!tagsExpanded || !tablet) &&
             selectedAdditionalTag &&
             tagButton(selectedAdditionalTag)}
           <button
@@ -678,10 +679,13 @@ export function ArchivePage() {
             type="button"
             className="tag-pill tag-disclosure"
             aria-expanded={tagsExpanded}
+            aria-haspopup={!tablet ? "dialog" : undefined}
             aria-controls="archive-extra-tags"
             onClick={() => setTagsExpanded((expanded) => !expanded)}
           >
-            {tagsExpanded ? "Fewer tags" : `More tags (${hiddenTagCount})`}
+            {tagsExpanded && tablet
+              ? "Fewer tags"
+              : `More tags (${hiddenTagCount})`}
           </button>
           {tag && (
             <button
@@ -696,13 +700,22 @@ export function ArchivePage() {
             </button>
           )}
         </div>
-        <div
-          id="archive-extra-tags"
-          className="tag-pills-extra"
-          hidden={!tagsExpanded}
-        >
-          {additionalTags.map(tagButton)}
-        </div>
+        {tablet ? (
+          <div
+            id="archive-extra-tags"
+            className="tag-pills-extra"
+            hidden={!tagsExpanded}
+          >
+            {additionalTags.map(tagButton)}
+          </div>
+        ) : tagsExpanded ? (
+          <ArchiveTagPicker
+            tags={tagCounts}
+            selected={tag}
+            onSelect={(value) => filter("tag", value)}
+            onClose={() => setTagsExpanded(false)}
+          />
+        ) : null}
       </div>
 
       {/* Printable Contact Sheet Header (@media print) */}

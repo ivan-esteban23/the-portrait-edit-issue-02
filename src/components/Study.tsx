@@ -1,4 +1,3 @@
-import { Icon } from "@/components/ui/Icon";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
@@ -48,6 +47,13 @@ export function PromptCard({
     recordedParameters.map((parameter) => parameter.key),
   );
   const [feedback, setFeedback] = useState("");
+  const moreActions = useRef<HTMLDetailsElement>(null);
+  function closeActions() {
+    if (moreActions.current) {
+      moreActions.current.open = false;
+      moreActions.current.querySelector("summary")?.focus();
+    }
+  }
   const [anatomyOpen, setAnatomyOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [exportingCard, setExportingCard] = useState(false);
@@ -100,6 +106,8 @@ export function PromptCard({
   }
 
   async function handleExportCard() {
+    if (timer.current) clearTimeout(timer.current);
+    setFeedback("");
     setExportingCard(true);
     try {
       await exportStudyRecipeCard(prompt);
@@ -122,7 +130,7 @@ export function PromptCard({
         <h3>Image Prompt</h3>
         <div className="prompt-copy-actions">
           <Button
-            variant="ghost"
+            variant="default"
             onClick={() => copyFormat("raw")}
             disabled={busy}
           >
@@ -132,74 +140,77 @@ export function PromptCard({
                 ? "Copying…"
                 : "Copy prompt"}
           </Button>
-          <Button
-            variant={anatomyOpen ? "outline" : "ghost"}
-            aria-pressed={anatomyOpen}
-            onClick={() => setAnatomyOpen((open) => !open)}
+          {onOpenStudio && (
+            <Button variant="outline" onClick={onOpenStudio}>
+              Customize prompt
+            </Button>
+          )}
+          <details
+            className="prompt-more-actions"
+            ref={moreActions}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.stopPropagation();
+                closeActions();
+              }
+            }}
           >
-            Anatomy / X-Ray
-          </Button>
-          <div className="prompt-secondary-actions">
-            <Button
-              variant="outline"
-              className="format-sub-btn discord-copy-btn"
-              onClick={() => copyFormat("discord")}
-              disabled={busy}
-              title="Copy Discord /imagine command"
-              aria-label="Discord /imagine"
-            >
-              <span className="btn-label-long">Discord /imagine</span>
-              <span className="btn-label-short">/imagine</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="format-sub-btn mj-copy-btn"
-              onClick={() => copyFormat("params")}
-              disabled={busy}
-              title="Copy Midjourney prompt with parameters"
-              aria-label="Midjourney (+ Params)"
-            >
-              <span className="btn-label-long">+ Params</span>
-              <span className="btn-label-short">+ Params</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="format-sub-btn"
-              onClick={() => copyFormat("markdown")}
-              disabled={busy}
-              title="Copy formatted Markdown card"
-              aria-label="Markdown"
-            >
-              <span className="btn-label-long">Markdown</span>
-              <span className="btn-label-short">MD</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="card-tool-btn adjust-params-btn"
-              onClick={() => onOpenStudio?.()}
-              title="Open Prompt Studio parameter tweaker"
-              aria-label="Adjust Parameters"
-            >
-              <span className="btn-label-long">Adjust Parameters</span>
-              <span className="btn-label-short">Adjust</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="card-tool-btn recipe-card-export-btn"
-              onClick={handleExportCard}
-              disabled={exportingCard}
-              title="Save as 1080x1350 editorial PNG recipe card"
-              aria-label="Save Recipe Card"
-            >
-              <Icon name="download" size={14} className="download-icon-svg" />
-              <span className="btn-label-long">
-                {exportingCard ? "Generating…" : "Save Recipe Card"}
-              </span>
-              <span className="btn-label-short">
-                {exportingCard ? "…" : "Card"}
-              </span>
-            </Button>
-          </div>
+            <summary>More actions</summary>
+            <div className="prompt-action-list">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  closeActions();
+                  void copyFormat("discord");
+                }}
+                disabled={busy}
+              >
+                Copy Discord /imagine
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  closeActions();
+                  void copyFormat("params");
+                }}
+                disabled={busy}
+              >
+                Copy with parameters
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  closeActions();
+                  void copyFormat("markdown");
+                }}
+                disabled={busy}
+              >
+                Copy as Markdown
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  closeActions();
+                  void handleExportCard();
+                }}
+                disabled={exportingCard}
+              >
+                {exportingCard
+                  ? "Generating recipe card…"
+                  : "Download recipe card"}
+              </Button>
+              <Button
+                variant="ghost"
+                aria-pressed={anatomyOpen}
+                onClick={() => {
+                  closeActions();
+                  setAnatomyOpen((open) => !open);
+                }}
+              >
+                Analyze prompt
+              </Button>
+            </div>
+          </details>
         </div>
       </div>
       <CommandParameters
@@ -236,18 +247,6 @@ export function Study({
   const saved = isSaved(prompt.id);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [studioOpen, setStudioOpen] = useState(false);
-  const [exportingCard, setExportingCard] = useState(false);
-
-  const handleExportCard = async () => {
-    setExportingCard(true);
-    try {
-      await exportStudyRecipeCard(prompt);
-    } catch {
-      /* ignore */
-    } finally {
-      setExportingCard(false);
-    }
-  };
 
   return (
     <article className="study-article">
@@ -258,32 +257,6 @@ export function Study({
             <span> / Page {prompt.page}</span>
           </p>
           <div className="study-header-actions">
-            <Button
-              variant="ghost"
-              className="study-header-tool-btn"
-              onClick={() => setStudioOpen(true)}
-              aria-label="Adjust Parameters in Prompt Studio"
-              title="Open Prompt Studio drawer"
-            >
-              <span className="btn-label-long">Adjust Parameters</span>
-              <span className="btn-label-short">Adjust</span>
-            </Button>
-            <Button
-              variant="ghost"
-              className="study-header-tool-btn recipe-card-header-btn"
-              onClick={handleExportCard}
-              disabled={exportingCard}
-              aria-label="Save Recipe Card as PNG"
-              title="Export 1080x1350 editorial recipe card PNG"
-            >
-              <Icon name="download" size={14} className="download-icon-svg" />
-              <span className="btn-label-long">
-                {exportingCard ? "Generating…" : "Save Recipe Card"}
-              </span>
-              <span className="btn-label-short">
-                {exportingCard ? "…" : "Card"}
-              </span>
-            </Button>
             <CopyLinkButton path={`/prompts/${prompt.id}`} />
             {canShare() && (
               <Button

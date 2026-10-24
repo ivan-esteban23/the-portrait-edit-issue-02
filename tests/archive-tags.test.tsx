@@ -27,65 +27,55 @@ function renderArchive(url = "/prompts") {
 
 beforeEach(() => localStorage.clear());
 
-it("announces additional tags and exposes every tag and count through a keyboard disclosure", async () => {
-  const user = userEvent.setup();
-  const tags = renderArchive();
-  const more = tags.getByRole("button", {
-    name: `More tags (${counts.size - 1})`,
-  });
-  expect(more).toHaveAttribute("aria-expanded", "false");
-  expect(
-    document.getElementById(more.getAttribute("aria-controls")!),
-  ).not.toBeVisible();
-  expect(
-    tags.queryByRole("button", { name: tagName("quietly melancholic") }),
-  ).toBeNull();
-  more.focus();
-  await user.keyboard("{Enter}");
-  expect(more).toHaveAttribute("aria-expanded", "true");
-  expect(more).toHaveTextContent("Fewer tags");
-  for (const name of counts.keys()) {
-    expect(tags.getByRole("button", { name: tagName(name) })).toBeVisible();
-  }
-  await user.tab();
-  expect(tags.getByRole("button", { name: tagName("bold") })).toHaveFocus();
-  more.focus();
-  await user.keyboard(" ");
-  expect(more).toHaveAttribute("aria-expanded", "false");
-  expect(more).toHaveFocus();
-});
-
-it("filters by a formerly hidden tag, pins its selected state when collapsed, and clears only the tag", async () => {
+it("searches all tags in a dialog, retains selection, and restores focus on completion", async () => {
   const user = userEvent.setup();
   const tags = renderArchive("/prompts?model=Unspecified&ar=none");
   const more = tags.getByRole("button", { name: /^More tags/ });
-  await user.click(more);
-  const selected = tags.getByRole("button", {
+  expect(more).toHaveAttribute("aria-expanded", "false");
+  more.focus();
+  await user.keyboard("{Enter}");
+  const picker = within(screen.getByRole("dialog", { name: "Browse tags" }));
+  const search = picker.getByRole("searchbox", { name: "Find a tag" });
+  expect(search).toHaveFocus();
+  for (const name of counts.keys())
+    expect(picker.getByRole("button", { name: tagName(name) })).toBeVisible();
+  await user.type(search, " #quietly melancholic ");
+  expect(picker.getAllByRole("button", { name: /^#/ })).toHaveLength(1);
+  const selected = picker.getByRole("button", {
     name: tagName("quietly melancholic"),
   });
   await user.click(selected);
   expect(selected).toHaveAttribute("aria-pressed", "true");
-  expect(selected).toHaveFocus();
-  expect(screen.getByRole("status")).toHaveTextContent(
-    `${counts.get("quietly melancholic")} study`,
-  );
   expect(screen.getByTestId("query-string").textContent).toContain(
     "tag=quietly+melancholic",
   );
-  await user.click(more);
+  await user.click(picker.getByRole("button", { name: "Done" }));
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(more).toHaveFocus();
   expect(
-    tags.getByRole("button", {
-      name: tagName("quietly melancholic"),
-    }),
+    tags.getByRole("button", { name: tagName("quietly melancholic") }),
   ).toHaveAttribute("aria-pressed", "true");
-  expect(more).toHaveTextContent(`More tags (${counts.size - 2})`);
   await user.click(tags.getByRole("button", { name: "Clear tag" }));
   expect(screen.getByTestId("query-string")).toHaveTextContent(
     "?model=Unspecified&ar=none",
   );
-  expect(screen.getByRole("status")).toHaveTextContent("165 studies");
   expect(more).toHaveFocus();
-  expect(tags.queryByRole("button", { name: "Clear tag" })).toBeNull();
+});
+
+it("explains empty tag searches and dismisses with Escape without changing archive filters", async () => {
+  const user = userEvent.setup();
+  const tags = renderArchive("/prompts?q=portrait&tag=moody");
+  const more = tags.getByRole("button", { name: /^More tags/ });
+  await user.click(more);
+  const search = screen.getByRole("searchbox", { name: "Find a tag" });
+  await user.type(search, "no-such-tag");
+  expect(screen.getByText(/No matching tags/)).toBeVisible();
+  await user.keyboard("{Escape}");
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(more).toHaveFocus();
+  expect(screen.getByTestId("query-string")).toHaveTextContent(
+    "?q=portrait&tag=moody",
+  );
 });
 
 it("keeps a deep-linked tag visible and restores focus when its pinned toggle is cleared", async () => {

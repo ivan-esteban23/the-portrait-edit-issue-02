@@ -46,7 +46,7 @@ export function ModalContent({
   onClose: () => void;
   overlayClassName: string;
   className: string;
-  initialFocus: RefObject<HTMLButtonElement | null>;
+  initialFocus: RefObject<HTMLElement | null>;
   children: ReactNode;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
 }) {

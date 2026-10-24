@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
+import * as cardExport from "../src/lib/cardExport";
 import { PromptCard } from "../src/components/Study";
 import { PromptStudioDrawer } from "../src/components/PromptStudioDrawer";
 import { RelatedStudies } from "../src/components/RelatedStudies";
@@ -48,14 +49,18 @@ it("omits deselected inline flags and can copy a command with no parameters", ()
 it("uses the card's selected parameters for Discord while keeping raw copying exact", async () => {
   render(<PromptCard prompt={flagged} />);
   fireEvent.click(screen.getByRole("checkbox", { name: "--ar 4:5" }));
+  fireEvent.click(screen.getByText("More actions"));
   await act(async () =>
-    fireEvent.click(screen.getByRole("button", { name: "Discord /imagine" })),
+    fireEvent.click(
+      screen.getByRole("button", { name: "Copy Discord /imagine" }),
+    ),
   );
   expect(writeText.mock.calls[0][0]).not.toContain("--ar");
   expect(writeText.mock.calls[0][0]).toContain("--s 250");
+  fireEvent.click(screen.getByText("More actions"));
   await act(async () =>
     fireEvent.click(
-      screen.getByRole("button", { name: "Midjourney (+ Params)" }),
+      screen.getByRole("button", { name: "Copy with parameters" }),
     ),
   );
   expect(writeText.mock.calls[1][0]).not.toContain("--ar");
@@ -73,15 +78,21 @@ it("offers unchecked optional starting points for studies without recorded param
   render(<PromptCard prompt={original} />);
   const aspect = screen.getByRole("checkbox", { name: "--ar 4:5" });
   expect(aspect).not.toBeChecked();
+  fireEvent.click(screen.getByText("More actions"));
   await act(async () =>
-    fireEvent.click(screen.getByRole("button", { name: "Discord /imagine" })),
+    fireEvent.click(
+      screen.getByRole("button", { name: "Copy Discord /imagine" }),
+    ),
   );
   expect(writeText).toHaveBeenLastCalledWith(
     `/imagine prompt: ${original.prompt}`,
   );
   fireEvent.click(aspect);
+  fireEvent.click(screen.getByText("More actions"));
   await act(async () =>
-    fireEvent.click(screen.getByRole("button", { name: "Discord /imagine" })),
+    fireEvent.click(
+      screen.getByRole("button", { name: "Copy Discord /imagine" }),
+    ),
   );
   expect(writeText).toHaveBeenLastCalledWith(
     `/imagine prompt: ${original.prompt} --ar 4:5`,
@@ -231,4 +242,21 @@ it("falls back to empty remix history when storage access is denied", () => {
   render(<PromptStudioDrawer prompt={original} isOpen onClose={() => {}} />);
   expect(screen.getByText("Recent Remixes (0)")).toBeInTheDocument();
   expect(warn).toHaveBeenCalledWith(expect.stringContaining("Storage denied"));
+});
+
+it("reports recipe card export failure from the secondary action group", async () => {
+  vi.spyOn(cardExport, "exportStudyRecipeCard").mockRejectedValueOnce(
+    new Error("Export failed"),
+  );
+  render(<PromptCard prompt={original} />);
+  fireEvent.click(screen.getByText("More actions"));
+  await act(async () =>
+    fireEvent.click(
+      screen.getByRole("button", { name: "Download recipe card" }),
+    ),
+  );
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Unable to export recipe card.",
+  );
+  expect(screen.getByText("More actions")).toHaveFocus();
 });
