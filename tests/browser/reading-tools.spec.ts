@@ -199,6 +199,7 @@ test("Archive multi-select mode and floating batch actions toolbar", async ({
   page,
 }) => {
   await page.goto("prompts?q=Frost%20Fantasy%20Portrait");
+  await page.getByText("Archive tools", { exact: true }).click();
   const selectModeBtn = page.getByRole("button", {
     name: "Select Prompts",
     exact: true,
@@ -223,4 +224,3 @@ test("Archive multi-select mode and floating batch actions toolbar", async ({
   await toolbar.getByRole("button", { name: "Clear", exact: true }).click();
   await expect(toolbar).toBeHidden();
 });
-

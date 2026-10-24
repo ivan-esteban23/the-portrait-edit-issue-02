@@ -1,4 +1,10 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { CommandPalette } from "../src/components/CommandPalette";
@@ -305,6 +311,7 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
         </MemoryRouter>,
       );
 
+      fireEvent.click(screen.getByText("Archive tools", { exact: true }));
       const printBtn = screen.getByText(/Print Contact Sheet/i);
       expect(printBtn).toBeInTheDocument();
 
@@ -315,7 +322,9 @@ describe("Next-Gen Creative Tools & Publication Polish", () => {
       expect(screen.getByText("EDITORIAL CONTACT SHEET")).toBeInTheDocument();
 
       // Printing waits until the selected images and fonts are ready.
-      await act(async () => { fireEvent.click(printBtn); });
+      await act(async () => {
+        fireEvent.click(printBtn);
+      });
       await waitFor(() => expect(window.print).toHaveBeenCalled());
     });
 
