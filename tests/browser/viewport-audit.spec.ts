@@ -1,4 +1,9 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type TestInfo } from "@playwright/test";
+import { readdirSync, readFileSync } from "node:fs";
+
+// Keep DOM traces and failure screenshots without recording large filmstrip
+// frames for every action in the high-resolution viewport cases.
+test.use({ trace: { mode: "retain-on-failure", screenshots: false } });
 
 const viewports = [
   360, 375, 393, 412, 430, 440, 768, 800, 834, 924, 1024, 1180, 1280, 1366,
@@ -315,4 +320,388 @@ test("archive disclosures work by keyboard and keep URL filters visible when clo
     page.getByRole("searchbox", { name: "Search", exact: true }),
   ).toBeFocused();
   await expect(page.locator(".archive-grid .study-card")).toHaveCount(165);
+});
+
+// Compare the exposed filters with the source inventory, including uncommon tags.
+// These cases run serially because the matrix includes very large CSS viewports.
+test.describe("archive tag discovery", () => {
+  test.describe.configure({ mode: "serial" });
+
+  for (const viewport of archiveViewports) {
+    test(`${viewport.width}×${viewport.height}: every tag is discoverable and keyboard reachable`, async ({
+      page,
+    }, info) => {
+      await auditArchiveTags(page, viewport, 1, info);
+    });
+  }
+
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 834, height: 1112 },
+    { width: 1920, height: 1080 },
+  ]) {
+    test(`DPR 2 at ${viewport.width}×${viewport.height}: tag discovery and keyboard access`, async ({
+      browser,
+      baseURL,
+    }, info) => {
+      const context = await browser.newContext({
+        baseURL,
+        viewport,
+        deviceScaleFactor: 2,
+        hasTouch: true,
+      });
+      try {
+        await auditArchiveTags(await context.newPage(), viewport, 2, info);
+      } finally {
+        await context.close();
+      }
+    });
+  }
+
+  test("a deep-linked uncommon tag stays visible and Clear tag preserves other URL filters", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(
+      "prompts?q=Portrait&model=Unspecified&tag=victorian-inspired",
+    );
+    const region = page.getByRole("region", { name: "Tag filters" });
+    const selected = region.getByRole("button", {
+      name: /^#victorian-inspired \(/,
+    });
+    await expect(selected).toHaveAttribute("aria-pressed", "true");
+    await expect(selected).toBeVisible();
+    await selected.focus();
+    await page.keyboard.press("Space");
+    const more = region.getByRole("button", { name: /^More tags/ });
+    await expect(more).toBeFocused();
+    await expect(page).toHaveURL(/q=Portrait&model=Unspecified$/);
+    await page.goto(
+      "prompts?q=Portrait&model=Unspecified&tag=victorian-inspired",
+    );
+    await more.focus();
+    await page.keyboard.press("Tab");
+    await expect(
+      region.getByRole("button", { name: "Clear tag", exact: true }),
+    ).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(more).toBeFocused();
+    await expect(page).toHaveURL(/q=Portrait&model=Unspecified$/);
+    await expect(
+      page.getByRole("searchbox", { name: "Search", exact: true }),
+    ).toHaveValue("Portrait");
+  });
+});
+
+const sourceTags = new Map<string, number>();
+const promptDirectory = new URL("../../src/content/prompts/", import.meta.url);
+for (const file of readdirSync(promptDirectory).filter((file) =>
+  file.endsWith(".json"),
+)) {
+  const prompt = JSON.parse(
+    readFileSync(new URL(file, promptDirectory), "utf8"),
+  );
+  for (const tag of prompt.tags as string[])
+    sourceTags.set(tag, (sourceTags.get(tag) ?? 0) + 1);
+}
+const orderedTags = [...sourceTags].sort(
+  (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
+);
+
+async function auditArchiveTags(
+  page: Page,
+  viewport: { width: number; height: number },
+  dpr: number,
+  info: TestInfo,
+) {
+  await page.setViewportSize(viewport);
+  await page.goto("prompts");
+  await page.evaluate(() => document.fonts.ready);
+  const region = page.getByRole("region", { name: "Tag filters" });
+  const popularCount =
+    viewport.width >= 1024
+      ? 6
+      : viewport.width >= 768
+        ? 3
+        : viewport.width >= 390
+          ? 2
+          : 1;
+  const more = region.getByRole("button", {
+    name: /^(More tags \(\d+\)|Fewer tags)$/,
+  });
+  await expect(more).toHaveAttribute("aria-expanded", "false");
+  await expect(more).toHaveText(
+    `More tags (${sourceTags.size - popularCount})`,
+  );
+  await expect(region.getByRole("button", { name: /^#/ })).toHaveCount(
+    popularCount,
+  );
+  const extra = page.locator(`#${await more.getAttribute("aria-controls")}`);
+  await expect(extra).toBeHidden();
+  const collapsed = await page.evaluate(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    const region = document.querySelector(".archive-tag-pills")!;
+    const bounds = region.getBoundingClientRect();
+    return {
+      width: innerWidth,
+      height: innerHeight,
+      dpr: devicePixelRatio,
+      documentWidth: document.documentElement.scrollWidth,
+      publicationWidth: document
+        .querySelector(".publication")!
+        .getBoundingClientRect().width,
+      tagRegionWidth: bounds.width,
+      tagRegionScrollWidth: region.scrollWidth,
+      tagRegionX: bounds.left,
+      searchX: document
+        .querySelector<HTMLInputElement>('input[type="search"]')!
+        .getBoundingClientRect().left,
+      firstCardY: document
+        .querySelector(".archive-grid .study-card")!
+        .getBoundingClientRect().top,
+    };
+  });
+  expect(collapsed).toMatchObject({ ...viewport, dpr });
+  expect(collapsed.documentWidth).toBeLessThanOrEqual(viewport.width);
+  expect(collapsed.publicationWidth).toBeLessThanOrEqual(1440);
+  expect(collapsed.tagRegionWidth).toBeLessThanOrEqual(1152);
+  expect(collapsed.tagRegionScrollWidth).toBeLessThanOrEqual(
+    Math.ceil(collapsed.tagRegionWidth),
+  );
+  expect(Math.abs(collapsed.tagRegionX - collapsed.searchX)).toBeLessThan(1);
+  if (viewport.height >= 568)
+    expect(collapsed.firstCardY).toBeLessThan(viewport.height);
+  const moreBounds = (await more.boundingBox())!;
+  expect(moreBounds.x).toBeGreaterThanOrEqual(0);
+  expect(moreBounds.x + moreBounds.width).toBeLessThanOrEqual(viewport.width);
+
+  await more.focus();
+  await page.keyboard.press("Enter");
+  await expect(more).toHaveAttribute("aria-expanded", "true");
+  await expect(extra).toBeVisible();
+  await expect(region.getByRole("button", { name: /^#/ })).toHaveCount(
+    sourceTags.size,
+  );
+  const first = region.getByRole("button", {
+    name: `#${orderedTags[0][0]} (${orderedTags[0][1]})`,
+    exact: true,
+  });
+  await first.focus();
+  // Traverse every tag with native Tab, including tags below the viewport.
+  for (const [index, [name, count]] of orderedTags.entries()) {
+    if (index > 0) await page.keyboard.press("Tab");
+    if (index === popularCount) {
+      await expect(more).toBeFocused();
+      await page.keyboard.press("Tab");
+    }
+    // Inspect the element native Tab actually focused, without repeatedly
+    // rebuilding the accessibility tree for the entire archive.
+    const metrics = await focusedTagMetrics(page);
+    expect(metrics.label).toBe(`#${name} (${count})`);
+    expect(metrics.nodeName).toBe("BUTTON");
+    expect(metrics.pressed).toBe("false");
+    expect(metrics.inTagRegion).toBe(true);
+    expect(metrics.left).toBeGreaterThanOrEqual(0);
+    expect(metrics.right).toBeLessThanOrEqual(viewport.width);
+    expect(metrics.top).toBeGreaterThanOrEqual(0);
+    expect(metrics.bottom).toBeLessThanOrEqual(viewport.height);
+    expect(metrics.height).toBeGreaterThanOrEqual(44);
+    if (index > 0) expect(metrics.outline).not.toBe("none");
+  }
+  await noOverflow(page);
+  const last = orderedTags.at(-1)!;
+  const lastTag = region.getByRole("button", {
+    name: `#${last[0]} (${last[1]})`,
+    exact: true,
+  });
+  await page.keyboard.press("Space");
+  await expect(lastTag).toHaveAttribute("aria-pressed", "true");
+  expect(new URL(page.url()).searchParams.get("tag")).toBe(last[0]);
+  await expect(page.locator(".archive-grid .study-card")).toHaveCount(last[1]);
+  await expect(lastTag).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(lastTag).toHaveAttribute("aria-pressed", "false");
+  expect(new URL(page.url()).searchParams.has("tag")).toBe(false);
+  await more.focus();
+  await page.keyboard.press("Space");
+  await expect(more).toHaveAttribute("aria-expanded", "false");
+  await expect(more).toBeFocused();
+  await expect(extra).toBeHidden();
+  await page.keyboard.press("Tab");
+  expect(
+    await page.evaluate(
+      () => document.activeElement?.closest("#archive-extra-tags") === null,
+    ),
+  ).toBe(true);
+  await info.attach("tag-filter-viewport-measurements", {
+    body: JSON.stringify(
+      {
+        ...collapsed,
+        popularCount,
+        totalTags: sourceTags.size,
+        keyboardTagsChecked: orderedTags.length,
+      },
+      null,
+      2,
+    ),
+    contentType: "application/json",
+  });
+}
+
+async function focusedTagMetrics(page: Page) {
+  return page.evaluate(() => {
+    const element = document.activeElement!;
+    const rect = element.getBoundingClientRect();
+    const header = document.querySelector(".masthead")!;
+    return {
+      label: element.textContent?.replace(/\s+/g, " ").trim(),
+      nodeName: element.nodeName,
+      pressed: element.getAttribute("aria-pressed"),
+      inTagRegion: !!element.closest('[aria-label="Tag filters"]'),
+      left: rect.left,
+      right: rect.right,
+      top: rect.top,
+      bottom: rect.bottom,
+      height: rect.height,
+      outline: getComputedStyle(element).outlineStyle,
+      headerBottom:
+        getComputedStyle(header).position === "sticky"
+          ? header.getBoundingClientRect().bottom
+          : 0,
+    };
+  });
+}
+
+test("reverse keyboard traversal keeps tag focus below the sticky masthead", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("prompts");
+  const region = page.getByRole("region", { name: "Tag filters" });
+  const more = region.getByRole("button", {
+    name: /^(More tags \(\d+\)|Fewer tags)$/,
+  });
+  await more.focus();
+  await page.keyboard.press("Enter");
+  const last = orderedTags.at(-1)!;
+  await region
+    .getByRole("button", { name: `#${last[0]} (${last[1]})`, exact: true })
+    .focus();
+  for (let index = orderedTags.length - 2; index >= 0; index--) {
+    await page.keyboard.press("Shift+Tab");
+    if (index === 5) {
+      await expect(more).toBeFocused();
+      await page.keyboard.press("Shift+Tab");
+    }
+    const metrics = await focusedTagMetrics(page);
+    expect(metrics.label).toBe(
+      `#${orderedTags[index][0]} (${orderedTags[index][1]})`,
+    );
+    expect(metrics.top).toBeGreaterThanOrEqual(metrics.headerBottom + 4);
+    expect(metrics.bottom).toBeLessThanOrEqual(720);
+  }
+});
+
+test("tag labels and counts retain text contrast in both themes and selected states", async ({
+  page,
+}, info) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("prompts?tag=playful");
+  const counts = page.locator(".tag-pills-primary .tag-pill-count");
+  await expect(counts).toHaveCount(2);
+  const results = [];
+  for (const theme of ["dark", "light"]) {
+    if ((await page.locator("html").getAttribute("data-theme")) !== theme) {
+      await page.getByRole("button", { name: /Color theme:/ }).click();
+    }
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    const measurements = await counts.evaluateAll((elements) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 1;
+      const context = canvas.getContext("2d", { willReadFrequently: true })!;
+      const rgba = (color: string) => {
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = color;
+        context.fillRect(0, 0, 1, 1);
+        return [...context.getImageData(0, 0, 1, 1).data].map(
+          (channel) => channel / 255,
+        );
+      };
+      const over = (foreground: number[], background: number[]) => [
+        ...foreground
+          .slice(0, 3)
+          .map(
+            (channel, index) =>
+              channel * foreground[3] + background[index] * (1 - foreground[3]),
+          ),
+        1,
+      ];
+      const background = (element: Element) => {
+        const ancestors: Element[] = [];
+        for (
+          let node: Element | null = element;
+          node;
+          node = node.parentElement
+        )
+          ancestors.unshift(node);
+        return ancestors.reduce(
+          (color, node) =>
+            over(rgba(getComputedStyle(node).backgroundColor), color),
+          [1, 1, 1, 1],
+        );
+      };
+      const luminance = (color: number[]) =>
+        color
+          .slice(0, 3)
+          .map((channel) =>
+            channel <= 0.04045
+              ? channel / 12.92
+              : ((channel + 0.055) / 1.055) ** 2.4,
+          )
+          .reduce(
+            (sum, channel, index) =>
+              sum + channel * [0.2126, 0.7152, 0.0722][index],
+            0,
+          );
+      const contrast = (foreground: number[], background: number[]) =>
+        (Math.max(luminance(foreground), luminance(background)) + 0.05) /
+        (Math.min(luminance(foreground), luminance(background)) + 0.05);
+      return elements.map((element) => {
+        const style = getComputedStyle(element);
+        const button = element.parentElement!;
+        const bg = background(element);
+        const countColor = rgba(style.color);
+        countColor[3] *= Number(style.opacity);
+        return {
+          tag: button.textContent?.trim(),
+          pressed: button.getAttribute("aria-pressed"),
+          countContrast: contrast(over(countColor, bg), bg),
+          labelContrast: contrast(
+            over(rgba(getComputedStyle(button).color), bg),
+            bg,
+          ),
+        };
+      });
+    });
+    expect(measurements.map(({ pressed }) => pressed)).toEqual([
+      "true",
+      "false",
+    ]);
+    for (const measurement of measurements) {
+      expect(
+        measurement.countContrast,
+        `${theme}: ${measurement.tag} count`,
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        measurement.labelContrast,
+        `${theme}: ${measurement.tag} label`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+    results.push({ theme, measurements });
+  }
+  await info.attach("tag-label-count-contrast", {
+    body: JSON.stringify(results, null, 2),
+    contentType: "application/json",
+  });
 });

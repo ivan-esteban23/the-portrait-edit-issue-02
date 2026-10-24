@@ -61,3 +61,15 @@ Commands use the repository's npm scripts and existing Playwright installation. 
 - Phone and 720p laptop before/after captures are saved in `~/Images/the-portrait-edit-archive-{before,after}-{390x844,1280x720}-2026-10-23.png`.
 - Chromium was tested; physical devices and other browser engines were not tested. The original one-worker full-suite invocation reached its unchanged 20-minute limit, and the remaining tests passed separately.
 - Task-owned preview server on port 4173 stopped; verified no listener remains.
+
+## Publication validation — 2026-10-23
+
+- The original branch also contains four commits belonging to draft PR #39. Preserved that branch and its working tree. Created the isolated `fix/archive-first-screen-hierarchy` worktree from current `main` (`23cc334`), then applied only the archive implementation, tests, and this note. The latest main includes the merged archive image optimization from PR #38.
+- Added the four original phone/laptop captures under `review/archive-hierarchy/` so the PR can link to real repository files. These are the earlier design captures; browser validation below runs against the latest image optimization.
+- `mise exec node@24 -- npm ci` — passed, 174 packages installed, zero audit vulnerabilities; package manifests and lockfile unchanged.
+- `mise exec node@24 -- npx prettier --check src/pages/ArchivePage.tsx src/styles.css tests/archive-hierarchy.test.tsx tests/browser/viewport-audit.spec.ts tests/browser/editorial-tools.spec.ts tests/browser/reading-tools.spec.ts tests/new-features.test.tsx tests/reliability.test.tsx tests/slideshow-and-export.test.tsx ARCHIVE_HIERARCHY_PROGRESS.md` — passed before this publication note was appended; recheck before committing.
+- `mise exec node@24 -- npm run typecheck` — passed.
+- `mise exec node@24 -- npm test -- --maxWorkers=1` — 21 files / 159 tests passed in 145.50 seconds on the isolated publication branch. Existing JSDOM scrollTo warnings remain non-fatal. The same command also passed on the preserved original branch (159 tests).
+- `mise exec node@24 -- npm run build` — passed, including validation, TypeScript, 165 optimized card thumbnails, and static route generation. Restored the build-generated sitemap dates to their clean starting versions.
+- `mise exec node@24 -- npx playwright test tests/browser/viewport-audit.spec.ts tests/browser/editorial-tools.spec.ts tests/browser/reading-tools.spec.ts tests/browser/archive-cards.spec.ts --workers=1` — all 64 focused browser tests passed. Covers the 19 CSS viewports, representative DPR 2 cases, keyboard/filter behavior, print, selection, and optimized card images. The preview server was managed and stopped by Playwright.
+- Full CI, merge, and Pages deployment are pending at commit time. The PR and final publication report will record their outcomes. Local CLI push authentication is unavailable; the authenticated GitHub connector will publish the exact reviewed file tree.

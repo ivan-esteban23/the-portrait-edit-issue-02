@@ -2,7 +2,7 @@ import { Icon } from "@/components/ui/Icon";
 import { useState, useRef, useEffect, useId, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import type { Prompt } from "@/content/schema";
-import { assetUrl } from "@/content";
+import { cardImageUrl } from "@/content";
 import { copyText } from "@/lib/utils";
 import {
   formatPromptText,
@@ -139,7 +139,7 @@ export function StudyCard({
           </div>
         )}
         <img
-          src={assetUrl(prompt.referenceImage)}
+          src={cardImageUrl(prompt.referenceImage)}
           alt={prompt.title}
           loading="lazy"
         />

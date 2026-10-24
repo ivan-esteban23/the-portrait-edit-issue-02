@@ -13,6 +13,17 @@ if (!requiredIssue) {
 }
 export const currentIssue = requiredIssue;
 export const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+
+/**
+ * Archive cards use build-generated WebP renditions in production. The original
+ * reference remains the source in development and on the study detail page.
+ */
+export const cardImageUrl = (path: string) => {
+  if (import.meta.env.DEV) return assetUrl(path);
+  const filename = path.split("/").pop();
+  if (!filename) return assetUrl(path);
+  return assetUrl(`references/cards/${filename}.webp`);
+};
 export const readerPath = (slug: string, page = 1) =>
   `/issues/${slug}/pages/${page}`;
 export function chapterAt(issue: typeof currentIssue, page: number) {

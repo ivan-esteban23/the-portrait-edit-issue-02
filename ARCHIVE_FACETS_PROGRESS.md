@@ -47,3 +47,14 @@ CSS viewport sizes, not physical monitor resolutions. `innerWidth`, `innerHeight
 - No lint script exists in `package.json` or CI. Prettier and `git diff --check` are the applicable formatting checks; final results recorded at task completion.
 
 No branch, PR, push, or deployment was created. Chromium emulation was used; physical devices and other browser engines were not checked.
+
+## PR branch validation against current main — 2026-10-24
+
+- Merged `origin/main` (`d6e79c5`) into the existing `fix/ci-validation-2026-10-23` branch. Preserved its newer archive hierarchy, tag discovery, card thumbnail optimization, and CI changes. No new branch was created.
+- `mise exec node@24 -- npm ci` — passed with the current main lockfile, 174 packages installed.
+- `mise exec node@24 -- npx prettier --check src/pages/ArchivePage.tsx src/styles.css tests/archive-hierarchy.test.tsx tests/archive-populated-facets.test.tsx tests/browser/viewport-audit.spec.ts tests/reliability.test.tsx tests/slideshow-and-export.test.tsx ARCHIVE_FACETS_PROGRESS.md ARCHIVE_HIERARCHY_PROGRESS.md` — passed before this addendum; rechecked before commit.
+- `mise exec node@24 -- npm run typecheck` — passed.
+- `mise exec node@24 -- npm test -- --maxWorkers=1` — 23 files and 163 tests passed. Nonfatal JSDOM `scrollTo` warnings remain.
+- `mise exec node@24 -- npm run build` — passed with content validation, typecheck, Vite build, 165 card thumbnails, and static route generation. Restored generated sitemap date changes.
+- `mise exec node@24 -- npx playwright test tests/browser/viewport-audit.spec.ts --project=chromium-responsive --workers=1` — 30 passed in 17.4 minutes. Includes the complete requested CSS matrix and DPR 2 facet checks together with current-main tag discovery, keyboard, deep-link, and contrast checks.
+- Full browser suite on the merged branch will run in GitHub CI after the PR push; the earlier local full run passed before merging the latest main.

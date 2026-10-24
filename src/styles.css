@@ -4233,23 +4233,33 @@ select:hover {
    Aspect Ratio & Tag Filtering in Archive
    ========================================================================== */
 .archive-tag-pills {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: start;
+  gap: 6px 12px;
+  max-width: 72rem;
   margin: 12px 0 16px;
-  overflow-x: auto;
   padding: 4px 0 8px;
 }
 .tag-pills-label {
+  padding-block: 14px;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--muted);
   white-space: nowrap;
 }
-.tag-pills-scroll {
+.tag-pills-primary,
+.tag-pills-extra {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 6px;
+  min-width: 0;
+}
+.tag-pills-extra {
+  grid-column: 2;
+}
+.tag-pills-extra[hidden] {
+  display: none;
 }
 .tag-pill {
   padding: 4px 10px;
@@ -4259,7 +4269,10 @@ select:hover {
   color: var(--muted);
   font: 0.75rem var(--mono);
   cursor: pointer;
-  white-space: nowrap;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  scroll-margin-block: 16px;
   transition: all 120ms ease;
 }
 .tag-pill:hover {
@@ -4272,7 +4285,6 @@ select:hover {
   border-color: var(--text);
 }
 .tag-pill-count {
-  opacity: 0.75;
   font-size: 0.6875rem;
 }
 .reset-filters-btn {
@@ -4804,16 +4816,32 @@ body::before {
   box-shadow: 6px 6px 0 -5px var(--muted);
   pointer-events: none;
 }
-.archive-tag-pills {
-  gap: 12px;
-}
 .tag-pill {
   min-height: 44px;
   padding: 7px 13px;
   background: color-mix(in srgb, var(--surface) 84%, transparent);
 }
+.tag-disclosure {
+  font-family: inherit;
+  color: var(--text);
+}
+@media (max-width: 767px) {
+  .archive-tag-pills {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tag-pills-label {
+    display: none;
+  }
+  .tag-pills-extra {
+    grid-column: 1;
+  }
+  .tag-disclosure {
+    flex: 0 0 88px;
+    padding: 5px 8px;
+  }
+}
 .tag-pill.is-active {
-  color: var(--bg);
+  color: var(--surface);
   background: var(--accent);
   border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);

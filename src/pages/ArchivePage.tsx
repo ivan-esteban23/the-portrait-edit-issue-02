@@ -8,6 +8,7 @@ import { splitPromptParameters } from "@/lib/promptFormatter";
 import { copyText } from "@/lib/utils";
 import { generateMarkdownDossier, downloadFile } from "@/lib/dossier";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useMedia } from "@/hooks/useReader";
 import { useLanguage } from "@/i18n/LanguageProvider";
 
 type ParsedParameters = ReturnType<typeof splitPromptParameters>;
@@ -35,6 +36,11 @@ export function ArchivePage() {
   });
   const archive = useRef<HTMLElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
+  const moreTagsButton = useRef<HTMLButtonElement>(null);
+  const [tagsExpanded, setTagsExpanded] = useState(false);
+  const widePhone = useMedia("(min-width: 390px)");
+  const tablet = useMedia("(min-width: 768px)");
+  const desktop = useMedia("(min-width: 1024px)");
   const [preparingPrint, setPreparingPrint] = useState(false);
   const [printProgress, setPrintProgress] = useState<{
     loaded: number;
@@ -166,6 +172,45 @@ export function ArchivePage() {
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([name, count]) => ({ name, count }));
   }, []);
+
+  const popularTagCount = desktop ? 6 : tablet ? 3 : widePhone ? 2 : 1;
+  const popularTags = tagCounts.slice(0, popularTagCount);
+  const additionalTags = tagCounts.slice(popularTagCount);
+  const selectedAdditionalTag = additionalTags.find(({ name }) => name === tag);
+  const hiddenTagCount =
+    additionalTags.length - (selectedAdditionalTag ? 1 : 0);
+
+  function tagButton({ name, count }: { name: string; count: number }) {
+    const isActive = tag === name;
+    return (
+      <button
+        key={name}
+        type="button"
+        className={`tag-pill ${isActive ? "is-active" : ""}`}
+        aria-pressed={isActive}
+        onFocus={(event) =>
+          event.currentTarget.scrollIntoView?.({
+            block: "nearest",
+            inline: "nearest",
+            behavior: "instant",
+          })
+        }
+        onClick={() => {
+          filter("tag", isActive ? "" : name);
+          // A pinned tag disappears when cleared; keep focus on a visible control.
+          if (
+            isActive &&
+            !tagsExpanded &&
+            selectedAdditionalTag?.name === name
+          ) {
+            moreTagsButton.current?.focus();
+          }
+        }}
+      >
+        #{name} <span className="tag-pill-count">({count})</span>
+      </button>
+    );
+  }
 
   const parsedParameters = useMemo(
     () =>
@@ -593,21 +638,40 @@ export function ArchivePage() {
       {/* Interactive Tag Pills */}
       <div className="archive-tag-pills" role="region" aria-label="Tag filters">
         <span className="tag-pills-label">Tags:</span>
-        <div className="tag-pills-scroll">
-          {tagCounts.slice(0, 16).map(({ name, count }) => {
-            const isActive = tag === name;
-            return (
-              <button
-                key={name}
-                type="button"
-                className={`tag-pill ${isActive ? "is-active" : ""}`}
-                aria-pressed={isActive}
-                onClick={() => filter("tag", isActive ? "" : name)}
-              >
-                #{name} <span className="tag-pill-count">({count})</span>
-              </button>
-            );
-          })}
+        <div className="tag-pills-primary">
+          {popularTags.map(tagButton)}
+          {!tagsExpanded &&
+            selectedAdditionalTag &&
+            tagButton(selectedAdditionalTag)}
+          <button
+            ref={moreTagsButton}
+            type="button"
+            className="tag-pill tag-disclosure"
+            aria-expanded={tagsExpanded}
+            aria-controls="archive-extra-tags"
+            onClick={() => setTagsExpanded((expanded) => !expanded)}
+          >
+            {tagsExpanded ? "Fewer tags" : `More tags (${hiddenTagCount})`}
+          </button>
+          {tag && (
+            <button
+              type="button"
+              className="tag-pill"
+              onClick={() => {
+                filter("tag", "");
+                moreTagsButton.current?.focus();
+              }}
+            >
+              Clear tag
+            </button>
+          )}
+        </div>
+        <div
+          id="archive-extra-tags"
+          className="tag-pills-extra"
+          hidden={!tagsExpanded}
+        >
+          {additionalTags.map(tagButton)}
         </div>
       </div>
 
