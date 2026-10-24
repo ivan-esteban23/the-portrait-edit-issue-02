@@ -110,6 +110,7 @@ test("Archive print keeps the current filter and renders a clean two-column cont
   });
   await page.goto("prompts?q=Frost%20Fantasy%20Portrait");
   await expect(page.locator(".archive-grid .study-card")).toHaveCount(1);
+  await page.getByText("Archive tools", { exact: true }).click();
   await page
     .getByRole("button", { name: "Print Contact Sheet 🖨", exact: true })
     .click();
