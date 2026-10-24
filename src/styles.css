@@ -471,6 +471,18 @@ h3,
   gap: 64px;
   margin-top: 40px;
 }
+.overview-chapter-link {
+  margin-bottom: 16px;
+  font-family: var(--font-sans);
+}
+.chapter-directory h2 {
+  margin-bottom: 8px;
+  scroll-margin-top: 8rem;
+}
+.chapter-directory h2:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+}
 .overview-cover {
   max-width: 300px;
   box-shadow: var(--shadow);
