@@ -11,7 +11,10 @@ export function RelatedStudies({
   prompt: Prompt;
   context: "detail" | "reader";
 }) {
-  const related = useMemo(() => getRelatedStudies(prompt, prompts), [prompt.id]);
+  const related = useMemo(
+    () => getRelatedStudies(prompt, prompts),
+    [prompt.id],
+  );
   if (!related.length) return null;
   const tags = new Set(prompt.tags.map((tag) => tag.trim().toLowerCase()));
   return (
@@ -30,6 +33,7 @@ export function RelatedStudies({
                   : `/prompts/${study.id}`
               }
             >
+              {/* The visible study title names the link; the thumbnail is decorative. */}
               <img
                 src={assetUrl(study.referenceImage)}
                 alt=""
