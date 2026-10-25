@@ -619,6 +619,9 @@ issues/the-prompt-issue/pages/6,dark,default,True,1280,0,0
 issues/the-prompt-issue/pages/6,dark,default,False,1280,0,0
 issues/the-prompt-issue/pages/6,dark,static-text,False,1280,0,0
 issues/the-prompt-issue/pages/6,dark,text,True,1280,0,0
+issues/the-prompt-issue/pages/60?focus=1,dark,reader-focus,True,1280,0,0
+issues/the-prompt-issue/pages/60?focus=1,dark,reader-focus,True,390,0,0
+issues/the-prompt-issue/pages/60?focus=1,dark,reader-focus-idle,True,1280,0,0
 issues/the-prompt-issue/pages/60,dark,default,True,1280,0,0
 issues/the-prompt-issue/pages/60,dark,default,False,1280,0,0
 issues/the-prompt-issue/pages/60,dark,reader-chapter-drawer,True,1280,0,0
@@ -1779,6 +1782,9 @@ issues/the-prompt-issue/pages/6,light,default,True,1280,0,0
 issues/the-prompt-issue/pages/6,light,default,False,1280,0,0
 issues/the-prompt-issue/pages/6,light,static-text,False,1280,0,0
 issues/the-prompt-issue/pages/6,light,text,True,1280,0,0
+issues/the-prompt-issue/pages/60?focus=1,light,reader-focus,True,1280,0,0
+issues/the-prompt-issue/pages/60?focus=1,light,reader-focus,True,390,0,0
+issues/the-prompt-issue/pages/60?focus=1,light,reader-focus-idle,True,1280,0,0
 issues/the-prompt-issue/pages/60,light,default,True,1280,0,0
 issues/the-prompt-issue/pages/60,light,default,False,1280,0,0
 issues/the-prompt-issue/pages/60,light,reader-chapter-drawer,True,1280,0,0

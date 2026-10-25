@@ -113,11 +113,7 @@ export async function checkRenderedContrast(page, incomplete) {
         selector === ".reader-bottom"
           ? ["--text", "--muted", "--accent"].map((token) => ({
               token,
-              color: rgba(
-                getComputedStyle(document.documentElement).getPropertyValue(
-                  token,
-                ),
-              ),
+              color: rgba(getComputedStyle(node).getPropertyValue(token)),
             }))
           : [{ token: "color", color: rgba(style.color) }];
       for (const { token, color } of colors) {

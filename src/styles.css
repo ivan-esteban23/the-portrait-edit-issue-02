@@ -20,6 +20,7 @@
   --surface-raised: #181818;
   --text: #f3f3f3;
   --muted: #8e8e93;
+  --idle-text: #b4b4b8;
   --border: rgb(255 255 255 / 8%);
   --border-hover: rgb(255 255 255 / 20%);
   --surface-hover: #202020;
@@ -56,6 +57,7 @@
   --surface-raised: #fffdf8;
   --text: #1a1917;
   --muted: #5c5955;
+  --idle-text: #5c5955;
   --border: rgb(26 25 23 / 8%);
   --border-hover: rgb(26 25 23 / 22%);
   --surface-hover: #ede8de;
@@ -1080,7 +1082,8 @@ select:hover {
 }
 .chrome-idle .reader-top,
 .chrome-idle .reader-bottom {
-  opacity: 0.25;
+  opacity: 1;
+  --text: var(--idle-text);
 }
 .chrome-idle .reader-top:focus-within,
 .chrome-idle .reader-bottom:focus-within {
@@ -4608,7 +4611,7 @@ body::before {
 }
 .chrome-idle #reader-toolbar,
 .chrome-idle .reader-bottom {
-  opacity: 0.2;
+  opacity: 1;
 }
 .chrome-idle #reader-toolbar {
   transform: translateY(-2px);

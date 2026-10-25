@@ -441,6 +441,17 @@ try {
           .click();
         await capture("reader-chapter-drawer");
         await page.keyboard.press("Escape");
+        await go("issues/the-prompt-issue/pages/60?focus=1");
+        await page
+          .getByRole("button", { name: "Exit Focus", exact: true })
+          .waitFor();
+        await capture("reader-focus");
+        if (width > 1100) {
+          await page.locator(".reader-canvas").focus();
+          await page.mouse.move(width - 20, 700);
+          await page.locator(".reader.chrome-idle").waitFor({ timeout: 6000 });
+          await capture("reader-focus-idle");
+        }
         await go("prompts");
         await page.locator(".tag-pill").first().click();
         await capture("archive-selected-tag");

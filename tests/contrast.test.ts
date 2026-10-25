@@ -46,6 +46,7 @@ test.each(["light", "dark"])(
     for (const foreground of [
       "--text",
       "--muted",
+      "--idle-text",
       "--accent",
       "--danger",
       "--success",
