@@ -169,6 +169,22 @@ test("empty collections explain active filters, support named collections, and B
   await expect(
     page.getByRole("searchbox", { name: "Search", exact: true }),
   ).toBeFocused();
+
+  await page.goto("prompts?q=portrait&tag=moody&model=Unspecified");
+  const active = page.getByRole("list", { name: "Active filters" });
+  await active
+    .getByRole("button", {
+      name: "Remove Search: “portrait” filter",
+      exact: true,
+    })
+    .click();
+  await expect(page).toHaveURL(/prompts\?tag=moody&model=Unspecified$/);
+  await expect(active).not.toContainText("Search: “portrait”");
+  await expect(active).toContainText("Style: #moody");
+  await expect(active).toContainText("Model: Unspecified");
+  await expect(
+    page.getByRole("searchbox", { name: "Search", exact: true }),
+  ).toBeFocused();
 });
 
 test("study cards explain clipboard failures with manual copy and recover on retry", async ({

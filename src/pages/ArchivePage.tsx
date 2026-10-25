@@ -661,15 +661,36 @@ export function ArchivePage() {
       </div>
       {(query || tag || model || aspectRatio) && (
         <ul className="archive-active-filters" aria-label="Active filters">
-          {query && <li>Search: “{query}”</li>}
-          {tag && <li>Style: #{tag}</li>}
-          {model && <li>Model: {model}</li>}
-          {aspectRatio && (
-            <li>
-              Aspect ratio:{" "}
-              {aspectRatio === NOT_RECORDED ? "Not recorded" : aspectRatio}
-            </li>
-          )}
+          {[
+            query && { key: "q", label: `Search: “${query}”` },
+            tag && { key: "tag", label: `Style: #${tag}` },
+            model && { key: "model", label: `Model: ${model}` },
+            aspectRatio && {
+              key: "ar",
+              label: `Aspect ratio: ${aspectRatio === NOT_RECORDED ? "Not recorded" : aspectRatio}`,
+            },
+          ]
+            .filter((item): item is { key: string; label: string } =>
+              Boolean(item),
+            )
+            .map((item) => (
+              <li key={item.key}>
+                <button
+                  type="button"
+                  className="active-filter-chip"
+                  aria-label={`Remove ${item.label} filter`}
+                  onClick={() => {
+                    filter(item.key, "");
+                    searchInput.current?.focus();
+                  }}
+                >
+                  <span>{item.label}</span>
+                  <span className="active-filter-remove" aria-hidden="true">
+                    ×
+                  </span>
+                </button>
+              </li>
+            ))}
         </ul>
       )}
 

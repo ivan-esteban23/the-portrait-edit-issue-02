@@ -217,10 +217,11 @@ export function PromptCard({
         parameters={parameters}
         enabled={enabledParameters}
         onChange={setEnabledParameters}
+        isOptionalPreset={!recordedParameters.length}
         hint={
           recordedParameters.length
             ? undefined
-            : "Optional starting points. Select flags for your command."
+            : "Optional starting points (not recorded in the study). Select flags for your command."
         }
       />
       {anatomyOpen ? (
