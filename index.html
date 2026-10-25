@@ -46,16 +46,37 @@
   </head>
   <body>
     <div id="root"></div>
-    <noscript
-      ><main>
+    <noscript>
+      <main style="max-width: 60rem; margin: auto; padding: 2rem">
         <h1>The Portrait Edit</h1>
-        <p>The interactive reader needs JavaScript.</p>
-        <a
-          href="https://github.com/ivan-esteban23/the-portrait-edit-issue-02/releases/download/noir-editorial-1/The_Portrait_Edit_Issue_02.pdf"
-          >Download the complete magazine PDF</a
-        >
-      </main></noscript
-    >
+        <p>Read The Prompt Issue online or open the complete original PDF.</p>
+        <ul>
+          <li>
+            <a href="%BASE_URL%issues/the-prompt-issue/pages/1/"
+              >Read the issue</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/ivan-esteban23/the-portrait-edit-issue-02/releases/download/noir-editorial-1/The_Portrait_Edit_Issue_02.pdf"
+              >Download original PDF</a
+            >
+          </li>
+          <li>
+            <a href="https://github.com/ivan-esteban23/the-portrait-edit"
+              >Source &amp; production notes</a
+            >
+          </li>
+        </ul>
+        <img
+          src="%BASE_URL%cover.webp"
+          alt="The Prompt Issue cover"
+          width="480"
+          height="622"
+          style="max-width: 100%; height: auto"
+        />
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
