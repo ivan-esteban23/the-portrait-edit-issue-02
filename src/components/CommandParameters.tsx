@@ -5,17 +5,28 @@ export function CommandParameters({
   enabled,
   onChange,
   hint,
+  isOptionalPreset = false,
 }: {
   parameters: readonly CommandParameter[];
   enabled: readonly string[];
   onChange: (keys: string[]) => void;
   hint?: string;
+  isOptionalPreset?: boolean;
 }) {
   if (!parameters.length) return null;
   return (
-    <fieldset className="command-parameters">
-      <legend>Command parameters</legend>
-      <p>{hint || "Choose flags for Discord and Midjourney copies."}</p>
+    <fieldset
+      className={`command-parameters${isOptionalPreset ? " is-optional-preset" : ""}`}
+    >
+      <legend>
+        {isOptionalPreset
+          ? "Optional command flags"
+          : "Recorded command parameters"}
+      </legend>
+      <p>
+        {hint ||
+          "Recorded in the study. Uncheck flags to omit them when copying a command."}
+      </p>
       <div className="command-parameter-options">
         {parameters.map(({ key, value }) => (
           <label key={key}>

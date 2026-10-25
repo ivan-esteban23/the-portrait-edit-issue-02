@@ -63,6 +63,17 @@ it("shows deep-linked filter values outside the closed disclosure and clears the
   expect(
     screen.getByRole("button", { name: "Reset all filters" }),
   ).toHaveTextContent("Reset all");
+  await user.click(
+    within(active).getByRole("button", {
+      name: "Remove Search: “Frost” filter",
+    }),
+  );
+  expect(screen.getByTestId("query-string")).toHaveTextContent(
+    "?tag=regal&model=Unspecified&ar=none&saved=1",
+  );
+  expect(within(active).queryByText("Search: “Frost”")).toBeNull();
+  expect(within(active).getByText("Style: #regal")).toBeVisible();
+  expect(screen.getByRole("searchbox", { name: "Search" })).toHaveFocus();
   await user.click(screen.getByRole("button", { name: "Reset all filters" }));
   expect(screen.getByTestId("query-string")).toBeEmptyDOMElement();
   expect(screen.getByRole("searchbox", { name: "Search" })).toHaveFocus();

@@ -76,6 +76,12 @@ it("uses the card's selected parameters for Discord while keeping raw copying ex
 });
 it("offers unchecked optional starting points for studies without recorded parameters", async () => {
   render(<PromptCard prompt={original} />);
+  expect(
+    screen.getByRole("group", { name: "Optional command flags" }),
+  ).toBeVisible();
+  expect(
+    screen.getByText(/Optional starting points \(not recorded in the study\)/),
+  ).toBeVisible();
   const aspect = screen.getByRole("checkbox", { name: "--ar 4:5" });
   expect(aspect).not.toBeChecked();
   fireEvent.click(screen.getByText("More actions"));
