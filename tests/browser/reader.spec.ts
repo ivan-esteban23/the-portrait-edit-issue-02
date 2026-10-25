@@ -923,3 +923,35 @@ test("accessibility: spread announcements describe both studies and the unpaired
   await page.keyboard.press("End");
   await expect(live).toHaveText(/Page 196 of 196: Study \d{3} - .+/);
 });
+
+test("phone text mode shows page art for front matter and a structured chapter opener", async ({
+  page,
+}) => {
+  test.skip(
+    (page.viewportSize()?.width ?? 0) > 767,
+    "Text mode is the phone default",
+  );
+  await page.goto("issues/the-prompt-issue/pages/2");
+  const art = page.locator(".page-art");
+  await expect(art).toBeVisible();
+  await expect(art).toHaveAttribute("src", /pages\/002\.webp$/);
+  await expect(
+    page.getByText("Read this page as text", { exact: true }),
+  ).toBeVisible();
+  await page.locator(".page-text-details summary").click();
+  await expect(page.locator(".raw-page pre")).toContainText("EDITOR'S LETTER");
+  await noOverflow(page);
+
+  await page.goto("issues/the-prompt-issue/pages/14");
+  await expect(page.locator(".chapter-opener")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Portraits & Light", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".chapter-opener img")).toHaveCount(3);
+  await expect(
+    page.getByRole("link", { name: /Start chapter · page 015/ }),
+  ).toBeVisible();
+  await noOverflow(page);
+  await page.getByRole("link", { name: /Start chapter/ }).click();
+  await expect(page).toHaveURL(/pages\/15$/);
+});

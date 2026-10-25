@@ -4,7 +4,14 @@ import { useSwipeGestures } from "@/hooks/useSwipeGestures";
 import { ReaderToolbar } from "./reader/ReaderToolbar";
 import { ReaderChapterDrawer } from "./reader/ReaderChapterDrawer";
 import { ReaderScrubber } from "./reader/ReaderScrubber";
-import { RawText, OriginalPage, SpreadPage } from "./reader/ReaderPages";
+import {
+  RawText,
+  OriginalPage,
+  SpreadPage,
+  PageFallback,
+  CoverFallback,
+} from "./reader/ReaderPages";
+import { ChapterOpener } from "./reader/ChapterOpener";
 import {
   lazy,
   Suspense,
@@ -15,7 +22,14 @@ import {
   type CSSProperties,
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { assetUrl, chapterAt, issues, prompts, readerPath } from "@/content";
+import {
+  assetUrl,
+  chapterAt,
+  issues,
+  pageEyebrow,
+  prompts,
+  readerPath,
+} from "@/content";
 import type { Issue } from "@/content/schema";
 import { lightHaptic } from "@/lib/utils";
 import { useIdleChrome, useMedia } from "@/hooks/useReader";
@@ -271,6 +285,13 @@ function ReaderView({
   const strip = useRef<HTMLElement>(null);
   const idle = useIdleChrome(focus && desktop && !settings);
   const chapter = chapterAt(issue, page);
+  const chapterIndex = issue.chapters.findIndex((c) => c.startPage === page);
+  const openerChapter =
+    chapterIndex >= 0 &&
+    issue.chapters[chapterIndex].intro &&
+    issue.chapters[chapterIndex].featuredStudies?.length === 3
+      ? issue.chapters[chapterIndex]
+      : null;
   const handleInspect = useCallback(
     (targetPage: number) => {
       setLightbox({
@@ -708,22 +729,23 @@ function ReaderView({
           )
         ) : study ? (
           <Study key={study.id} prompt={study} context="reader" />
+        ) : openerChapter ? (
+          <ChapterOpener
+            issue={issue}
+            chapter={openerChapter}
+            chapterIndex={chapterIndex}
+            prompts={prompts}
+            onInspect={handleInspect}
+          />
+        ) : page === 1 ? (
+          <CoverFallback issue={issue} />
         ) : (
-          <>
-            {page === 1 && (
-              <img
-                className="reading-cover"
-                src={assetUrl(issue.cover)}
-                alt={`${issue.title} cover`}
-              />
-            )}
-            <RawText
-              key={page}
-              page={page}
-              pdfUrl={issue.pdfUrl}
-              pageDirectory={issue.pageDirectory}
-            />
-          </>
+          <PageFallback
+            page={page}
+            issue={issue}
+            label={pageEyebrow(issue, page)}
+            onInspect={handleInspect}
+          />
         )}
       </div>
       <ReaderScrubber
