@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import study from "../../src/content/prompts/issue-02-study-001.json" with { type: "json" };
 
 test.beforeEach(async ({ page }, info) => {
   await page.addInitScript(
@@ -138,4 +139,101 @@ test("phone tag picker fits landscape, restores focus, and preserves other filte
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+});
+
+test("empty collections explain active filters, support named collections, and Browse studies clears only saved", async ({
+  page,
+}) => {
+  await page.goto("prompts?saved=1&tag=moody");
+  const emptyState = page.locator(".empty-state");
+  await expect(emptyState).toContainText(
+    "No saved studies in your Default collection yet. Select the bookmark icon on any study to save it to this collection.",
+  );
+  await expect(emptyState).toContainText(
+    "Active filters remain applied: Style: #moody.",
+  );
+
+  await page.getByText("Archive tools", { exact: true }).click();
+  await page
+    .getByRole("combobox", { name: "Moodboard collection", exact: true })
+    .selectOption("Studio Lighting");
+  await expect(emptyState).toContainText(
+    "No saved studies in your “Studio Lighting” collection yet. Select the bookmark icon on any study to save it to this collection.",
+  );
+
+  await emptyState
+    .getByRole("button", { name: "Browse studies", exact: true })
+    .click();
+  await expect(page).toHaveURL(/prompts\?tag=moody$/);
+  await expect(page.locator(".archive-grid .study-card")).toHaveCount(14);
+  await expect(
+    page.getByRole("searchbox", { name: "Search", exact: true }),
+  ).toBeFocused();
+});
+
+test("study cards explain clipboard failures with manual copy and recover on retry", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => {
+          const state = window as Window & {
+            cardCopied?: string;
+            rejectCardCopy?: boolean;
+          };
+          if (state.rejectCardCopy) throw new Error("Clipboard denied");
+          state.cardCopied = text;
+        },
+      },
+    });
+  });
+  await page.goto("prompts");
+  await page.evaluate(() => {
+    (window as Window & { rejectCardCopy?: boolean }).rejectCardCopy = true;
+    document.execCommand = () => false;
+  });
+
+  const card = page.locator(".archive-grid .study-card").first();
+  await card
+    .getByRole("button", { name: "Copy prompt for Study 1", exact: true })
+    .click();
+  await expect(card.getByRole("status")).toHaveText(
+    "Copy unavailable for Study 1. Select the prompt text below to copy it.",
+  );
+  const manualInput = card.getByRole("textbox", {
+    name: "Prompt to copy for Study 1",
+    exact: true,
+  });
+  await expect(manualInput).toHaveValue(study.prompt);
+  await manualInput.click();
+  await expect(page).toHaveURL(/\/prompts$/);
+  expect(
+    await manualInput.evaluate(
+      (input: HTMLInputElement) =>
+        (input.selectionEnd ?? 0) - (input.selectionStart ?? 0),
+    ),
+  ).toBe(study.prompt.length);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  ).toBe(true);
+
+  await page.evaluate(() => {
+    (window as Window & { rejectCardCopy?: boolean }).rejectCardCopy = false;
+  });
+  await card
+    .getByRole("button", { name: "Copy prompt for Study 1", exact: true })
+    .click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { cardCopied?: string }).cardCopied,
+      ),
+    )
+    .toBe(study.prompt);
+  await expect(manualInput).toHaveCount(0);
+  await expect(card.getByRole("status")).toHaveText("Copied! Study 1 prompt.");
 });

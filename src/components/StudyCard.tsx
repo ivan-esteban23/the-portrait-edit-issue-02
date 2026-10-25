@@ -42,11 +42,15 @@ export function StudyCard({
 }: StudyCardProps) {
   const [copied, setCopied] = useState(false);
   const [copiedFormat, setCopiedFormat] = useState<string>("Copied!");
+  const [copyErrorText, setCopyErrorText] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const actionsId = useId();
   const actionsRef = useRef<HTMLDivElement>(null);
   const moreTrigger = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const copyRequest = useRef(0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const closeMenu = () => {
     setMenuOpen(false);
     moreTrigger.current?.focus({ preventScroll: true });
@@ -71,22 +75,33 @@ export function StudyCard({
       document.removeEventListener("focusin", dismissOutside);
     };
   }, [menuOpen]);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    setCopied(false);
+    setCopyErrorText(null);
     return () => {
-      if (timer.current) clearTimeout(timer.current);
+      copyRequest.current += 1;
+      if (timer.current) {
+        clearTimeout(timer.current);
+        timer.current = null;
+      }
     };
-  }, []);
+  }, [prompt.id]);
 
   const handleCopy = async (e: MouseEvent, format: CopyFormat = "raw") => {
     e.preventDefault();
     e.stopPropagation();
-    if (timer.current) clearTimeout(timer.current);
+    const current = ++copyRequest.current;
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
     if (menuOpen) closeMenu();
+    const text = formatPromptText(prompt, format);
     try {
-      const text = formatPromptText(prompt, format);
       await copyText(text);
+      if (current !== copyRequest.current) return;
+      setCopyErrorText(null);
       setCopied(true);
       setCopiedFormat(
         format === "raw"
@@ -95,9 +110,15 @@ export function StudyCard({
             ? "Copied +Params!"
             : "Copied MD!",
       );
-      timer.current = setTimeout(() => setCopied(false), 1600);
+      timer.current = setTimeout(() => {
+        if (current === copyRequest.current) {
+          setCopied(false);
+        }
+      }, 1600);
     } catch {
-      /* clipboard write failed */
+      if (current !== copyRequest.current) return;
+      setCopied(false);
+      setCopyErrorText(text);
     }
   };
 
@@ -178,16 +199,32 @@ export function StudyCard({
         role="group"
         aria-label={`Actions for Study ${prompt.studyNumber}`}
         onKeyDown={(event) => {
-          if (!menuOpen || event.key !== "Escape") return;
-          event.preventDefault();
-          event.stopPropagation();
-          closeMenu();
+          if (event.key === "Escape" && menuOpen) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeMenu();
+          }
+        }}
+        onBlur={(event) => {
+          if (
+            event.relatedTarget instanceof Node &&
+            actionsRef.current?.contains(event.relatedTarget)
+          ) {
+            return;
+          }
+          setMenuOpen(false);
         }}
       >
         <button
           type="button"
-          className={`card-action-btn copy-btn ${copied ? "is-copied" : ""}`}
-          title={copied ? copiedFormat : "Copy prompt"}
+          className={`card-action-btn copy-btn ${copied ? "is-copied" : ""} ${copyErrorText !== null ? "is-copy-failed" : ""}`}
+          title={
+            copied
+              ? copiedFormat
+              : copyErrorText !== null
+                ? "Copy unavailable"
+                : "Copy prompt"
+          }
           aria-label={`${copied ? "Copied" : "Copy"} prompt for Study ${prompt.studyNumber}`}
           onClick={(event) => handleCopy(event, "raw")}
         >
@@ -285,6 +322,38 @@ export function StudyCard({
           </div>
         )}
       </div>
+      {(copied || copyErrorText !== null) && (
+        <div
+          className={`study-card-copy-feedback${copyErrorText !== null ? " is-visible" : ""}`}
+        >
+          <p
+            className={
+              copyErrorText !== null ? "study-card-copy-error" : "sr-only"
+            }
+            role="status"
+            aria-live="polite"
+          >
+            {copyErrorText !== null
+              ? `Copy unavailable for Study ${prompt.studyNumber}. Select the prompt text below to copy it.`
+              : `${copiedFormat} Study ${prompt.studyNumber} prompt.`}
+          </p>
+          {copyErrorText !== null && (
+            <input
+              type="text"
+              className="study-card-manual-copy"
+              aria-label={`Prompt to copy for Study ${prompt.studyNumber}`}
+              readOnly
+              value={copyErrorText}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                event.currentTarget.select();
+              }}
+              onFocus={(event) => event.currentTarget.select()}
+            />
+          )}
+        </div>
+      )}
       <Link
         className="study-card-overlay"
         data-study-id={prompt.id}

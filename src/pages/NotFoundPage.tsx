@@ -17,9 +17,14 @@ export function NotFoundPage() {
         in the archive.
       </h1>
       <p>The page or study may not exist. The magazine is still here.</p>
-      <Button asChild variant="default">
-        <Link to={readerPath(currentIssue.slug)}>Back to the reader</Link>
-      </Button>
+      <div className="not-found-actions">
+        <Button asChild variant="default">
+          <Link to={readerPath(currentIssue.slug)}>Back to the reader</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to="/prompts">Browse the archive</Link>
+        </Button>
+      </div>
     </section>
   );
 }

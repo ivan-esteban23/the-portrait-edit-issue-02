@@ -4,23 +4,73 @@ import { openReaderTools } from "./helpers/reader-tools";
 test("homepage routes readers into the magazine, archive, and saved collection", async ({
   page,
 }) => {
-  await page.addInitScript(() => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("./");
+  const startReading = page.getByRole("link", {
+    name: "Start reading ↗",
+    exact: true,
+  });
+  const browseStudies = page.getByRole("link", {
+    name: "Browse studies",
+    exact: true,
+  });
+  await expect(startReading).toBeVisible();
+  await expect(browseStudies).toBeVisible();
+  const startBox = (await startReading.boundingBox())!;
+  const browseBox = (await browseStudies.boundingBox())!;
+  expect(startBox.y + startBox.height).toBeLessThanOrEqual(568);
+  expect(browseBox.y + browseBox.height).toBeLessThanOrEqual(568);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  ).toBe(true);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const archiveSectionY = await page
+    .getByRole("heading", { name: "From the archive", exact: true })
+    .evaluate((el) => el.getBoundingClientRect().top);
+  const onboardingSectionY = await page
+    .getByRole("heading", { name: "Make the issue yours", exact: true })
+    .evaluate((el) => el.getBoundingClientRect().top);
+  expect(archiveSectionY).toBeLessThan(844);
+  expect(archiveSectionY).toBeLessThan(onboardingSectionY);
+
+  await browseStudies.click();
+  await expect(
+    page.getByRole("heading", { name: "Portrait prompts", exact: true }),
+  ).toBeVisible();
+
+  await page.evaluate(() => {
     localStorage.setItem(
       "portrait-edit-last-read",
-      JSON.stringify({ "the-prompt-issue": 60 }),
+      JSON.stringify({ "the-prompt-issue": 196 }),
     );
     localStorage.setItem(
       "portrait-edit-saved",
       JSON.stringify(["issue-02-study-001"]),
     );
   });
+  await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("./");
   await expect(
-    page.getByRole("heading", { name: "Make the issue yours" }),
+    page.getByRole("link", {
+      name: "Resume reading · Page 196 ↗",
+      exact: true,
+    }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Browse studies", exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  ).toBe(true);
+
   const home = page.url();
-  await page.getByRole("link", { name: /Continue on page 60/ }).click();
-  await expect(page).toHaveURL(/pages\/60$/);
+  await page.getByRole("link", { name: /Continue on page 196/ }).click();
+  await expect(page).toHaveURL(/pages\/196$/);
   await page.goto(home);
   await page.getByRole("link", { name: /Browse 165 studies/ }).click();
   await expect(

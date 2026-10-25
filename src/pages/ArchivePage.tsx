@@ -298,7 +298,14 @@ export function ArchivePage() {
     return prompts.filter((p) => {
       if (savedOnly && !isSaved(p.id)) return false;
       if (tag && !p.tags.includes(tag)) return false;
-      if (model && (p.model ?? "Unspecified") !== model) return false;
+      if (model) {
+        const normalizedModel = p.model?.trim();
+        const recordedModel =
+          normalizedModel && normalizedModel !== "Unspecified"
+            ? normalizedModel
+            : "Unspecified";
+        if (recordedModel !== model) return false;
+      }
       if (aspectRatio) {
         const pAr =
           p.parameters?.["ar"] ||
@@ -603,7 +610,7 @@ export function ArchivePage() {
                     variant="ghost"
                     className="export-saved-btn"
                     onClick={exportSaved}
-                    title="Export saved studies as JSON"
+                    title="Export collection as JSON"
                   >
                     {t("Export JSON ↗")}
                   </Button>
@@ -796,13 +803,50 @@ export function ArchivePage() {
         ))}
       </div>
       {!filtered.length && (
-        <p className="empty-state">
-          {savedOnly && savedCount === 0
-            ? "No studies saved yet. Tap the bookmark icon on any study to add it to your curation board."
-            : t(
-                "No studies match these filters. Try a broader search or clear the filters.",
-              )}
-        </p>
+        <div className="empty-state">
+          <p>
+            {savedOnly
+              ? savedCount === 0
+                ? activeCollection === "Default"
+                  ? "No saved studies in your Default collection yet. Select the bookmark icon on any study to save it to this collection."
+                  : `No saved studies in your “${activeCollection}” collection yet. Select the bookmark icon on any study to save it to this collection.`
+                : activeCollection === "Default"
+                  ? "No saved studies in your Default collection match these filters."
+                  : `No saved studies in your “${activeCollection}” collection match these filters.`
+              : t(
+                  "No studies match these filters. Try a broader search or clear the filters.",
+                )}
+          </p>
+          {savedOnly && (query || tag || model || aspectRatio) && (
+            <p className="empty-state-filters">
+              Active filters remain applied:{" "}
+              {[
+                query && `Search: “${query}”`,
+                tag && `Style: #${tag}`,
+                model && `Model: ${model}`,
+                aspectRatio &&
+                  `Aspect ratio: ${aspectRatio === NOT_RECORDED ? "Not recorded" : aspectRatio}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              .
+            </p>
+          )}
+          {savedOnly && (
+            <div className="empty-state-actions">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  filter("saved", "");
+                  searchInput.current?.focus();
+                }}
+              >
+                {t("Browse studies")}
+              </Button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Floating comparison dock */}

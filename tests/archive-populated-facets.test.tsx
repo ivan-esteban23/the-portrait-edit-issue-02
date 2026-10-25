@@ -9,10 +9,12 @@ vi.mock("../src/content", async (importOriginal) => {
     ...original,
     prompts: original.prompts.map((prompt, index) =>
       index === 0
-        ? { ...prompt, model: "Model A", parameters: { ar: "4:5" } }
+        ? { ...prompt, model: "  Model A  ", parameters: { ar: "4:5" } }
         : index === 1
           ? { ...prompt, model: "Model B", prompt: `${prompt.prompt} --ar 3:2` }
-          : prompt,
+          : index === 2
+            ? { ...prompt, model: "   " }
+            : prompt,
     ),
   };
 });
@@ -55,6 +57,9 @@ it("offers recorded model and ratio values alongside missing metadata, with work
     "model=Model+A&ar=4%3A5",
   );
   expect(screen.getByRole("status")).toHaveTextContent("1 study");
+  await user.selectOptions(ratio, "");
+  await user.selectOptions(model, "Unspecified");
+  expect(screen.getByRole("status")).toHaveTextContent("163 studies");
   await user.click(screen.getByRole("button", { name: "Reset all filters" }));
   expect(screen.getByTestId("query-string")).toBeEmptyDOMElement();
   expect(screen.getByRole("searchbox", { name: "Search" })).toHaveFocus();
