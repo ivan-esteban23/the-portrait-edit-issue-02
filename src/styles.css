@@ -5637,3 +5637,38 @@ textarea {
   border-style: dashed;
   color: var(--muted);
 }
+
+/* Native links and the static reader remain usable without application scripts. */
+.noscript-main {
+  max-width: 60rem;
+  margin: auto;
+  padding: 2rem;
+  overflow-wrap: anywhere;
+  background: var(--bg);
+  color: var(--text);
+}
+.noscript-main a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.noscript-main a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.noscript-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.noscript-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.noscript-page-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+}

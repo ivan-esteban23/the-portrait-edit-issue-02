@@ -27,6 +27,51 @@ test("publication links navigate without JavaScript", async ({ page }) => {
   await expect(page).toHaveURL(notes);
 });
 
+test("home fallback preserves its content and scoped build URLs", async ({
+  page,
+  request,
+}) => {
+  const response = await page.goto("./");
+  expect(response?.status()).toBe(200);
+  const fallback = page.locator("noscript main");
+  await expect(fallback.getByRole("heading", { level: 1 })).toHaveText(
+    "The Portrait Edit",
+  );
+  await expect(fallback.locator("p")).toHaveText(
+    "Read The Prompt Issue online or open the complete original PDF.",
+  );
+  await expect(fallback.getByRole("link")).toHaveCount(3);
+  await expect(fallback.locator("[style]")).toHaveCount(0);
+  const cover = fallback.getByRole("img", {
+    name: "The Prompt Issue cover",
+    exact: true,
+  });
+  await expect(cover).toHaveAttribute(
+    "src",
+    "/the-portrait-edit-issue-02/cover.webp",
+  );
+  for (const target of ["issues/the-prompt-issue/pages/1/", "cover.webp"]) {
+    const resource = await request.get(`/the-portrait-edit-issue-02/${target}`);
+    expect(resource.status()).toBe(200);
+  }
+  const read = fallback.getByRole("link", {
+    name: "Read the issue",
+    exact: true,
+  });
+  await expect(read).toHaveAttribute(
+    "href",
+    "/the-portrait-edit-issue-02/issues/the-prompt-issue/pages/1/",
+  );
+  const [reader] = await Promise.all([page.waitForNavigation(), read.click()]);
+  expect(reader?.status()).toBe(200);
+  await expect(
+    page.getByRole("heading", { name: "Page 1 of 196", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "Issue 02, page 1", exact: true }),
+  ).toBeVisible();
+});
+
 test("static reader serves page images, text, chapters and bounded navigation", async ({
   page,
 }) => {
