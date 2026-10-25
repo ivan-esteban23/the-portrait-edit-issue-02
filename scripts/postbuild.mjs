@@ -6,6 +6,17 @@ const { readFileSync, readdirSync } = await import("node:fs");
 const template = readFileSync("dist/index.html", "utf8");
 const base = template.match(/href="([^"]*)manifest\.webmanifest"/)?.[1];
 if (!base) throw new Error("Cannot find the built site's base URL");
+// Materialize manifest URLs from the same Vite base used by the head assets.
+const manifest = JSON.parse(readFileSync("dist/manifest.webmanifest", "utf8"));
+const site = new URL(base, "https://build.invalid");
+const scopedPath = (value) => new URL(value, site).pathname;
+manifest.start_url = scopedPath(manifest.start_url);
+manifest.scope = scopedPath(manifest.scope);
+manifest.icons = manifest.icons.map((icon) => ({
+  ...icon,
+  src: scopedPath(icon.src),
+}));
+writeFileSync("dist/manifest.webmanifest", JSON.stringify(manifest, null, 2) + "\n");
 const withReader = (issue, page) =>
   template.replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/, () =>
     staticReader(issue, base, page),
