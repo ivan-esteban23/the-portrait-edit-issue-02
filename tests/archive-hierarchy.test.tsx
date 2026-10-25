@@ -35,7 +35,7 @@ it("keeps discovery visible while secondary filters and tools start closed", asy
   ).toBeVisible();
   expect(screen.queryByRole("combobox", { name: "Model" })).toBeNull();
   expect(screen.queryByRole("combobox", { name: "Aspect Ratio" })).toBeNull();
-  expect(screen.getByRole("combobox", { name: "Style \/ tag" })).toBeVisible();
+  expect(screen.getByRole("combobox", { name: "Style / tag" })).toBeVisible();
   await user.click(screen.getByText("Archive tools", { exact: true }));
   expect(screen.getByRole("button", { name: "Select Prompts" })).toBeVisible();
   expect(
@@ -68,4 +68,24 @@ it("shows deep-linked filter values outside the closed disclosure and clears the
   expect(screen.getByRole("searchbox", { name: "Search" })).toHaveFocus();
   expect(screen.queryByRole("list", { name: "Active filters" })).toBeNull();
   expect(screen.getByRole("status")).toHaveTextContent("165 studies");
+});
+
+it("offers Browse studies in empty collections while preserving active filters and naming the collection", async () => {
+  const user = userEvent.setup();
+  localStorage.setItem("portrait-edit-active-collection", "Studio Lighting");
+  renderArchive("/prompts?saved=1&tag=moody");
+
+  expect(
+    screen.getByText(
+      /No saved studies in your “Studio Lighting” collection yet\. Select the bookmark icon on any study to save it to this collection\./,
+    ),
+  ).toBeVisible();
+  expect(
+    screen.getByText("Active filters remain applied: Style: #moody."),
+  ).toBeVisible();
+
+  await user.click(screen.getByRole("button", { name: "Browse studies" }));
+  expect(screen.getByTestId("query-string")).toHaveTextContent("?tag=moody");
+  expect(screen.getByRole("status")).toHaveTextContent("14 studies");
+  expect(screen.getByRole("searchbox", { name: "Search" })).toHaveFocus();
 });

@@ -1,13 +1,40 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CopyLinkButton } from "../src/components/CopyLinkButton";
 import { HomePage } from "../src/pages/HomePage";
+import { NotFoundPage } from "../src/pages/NotFoundPage";
 import { currentIssue, readerPath } from "../src/content";
 import { saveReadingProgress } from "../src/hooks/useReadingProgress";
 
 describe("homepage discovery and direct sharing", () => {
   beforeEach(() => localStorage.clear());
+
+  it("exposes Browse studies in the hero and places selected studies before onboarding cards", () => {
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>,
+    );
+    const startReading = screen.getByRole("link", { name: "Start reading ↗" });
+    const browseStudies = screen.getByRole("link", { name: "Browse studies" });
+    expect(startReading).toHaveAttribute(
+      "href",
+      readerPath(currentIssue.slug, 1),
+    );
+    expect(browseStudies).toHaveAttribute("href", "/prompts");
+
+    const fromArchiveHeading = screen.getByRole("heading", {
+      name: "From the archive",
+    });
+    const onboardingHeading = screen.getByRole("heading", {
+      name: "Make the issue yours",
+    });
+    expect(
+      fromArchiveHeading.compareDocumentPosition(onboardingHeading) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
 
   it("points returning readers to their page and active saved collection", () => {
     saveReadingProgress(currentIssue.slug, 60);
@@ -21,6 +48,12 @@ describe("homepage discovery and direct sharing", () => {
       </MemoryRouter>,
     );
     expect(
+      screen.getByRole("link", { name: "Resume reading · Page 60 ↗" }),
+    ).toHaveAttribute("href", readerPath(currentIssue.slug, 60));
+    expect(
+      screen.getByRole("link", { name: "Browse studies" }),
+    ).toHaveAttribute("href", "/prompts");
+    expect(
       screen.getByRole("link", { name: /Continue on page 60/ }),
     ).toHaveAttribute("href", readerPath(currentIssue.slug, 60));
     expect(
@@ -29,6 +62,22 @@ describe("homepage discovery and direct sharing", () => {
     expect(
       screen.getByRole("link", { name: /Your saved studies \(1\)/ }),
     ).toHaveAttribute("href", "/prompts?saved=1");
+  });
+
+  it("offers both reader and archive recovery links on the 404 page", () => {
+    render(
+      <MemoryRouter initialEntries={["/prompts/missing-study"]}>
+        <Routes>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(
+      screen.getByRole("link", { name: "Back to the reader" }),
+    ).toHaveAttribute("href", readerPath(currentIssue.slug));
+    expect(
+      screen.getByRole("link", { name: "Browse the archive" }),
+    ).toHaveAttribute("href", "/prompts");
   });
 
   it("copies a canonical link, resets feedback on navigation, and ignores old copy results", async () => {

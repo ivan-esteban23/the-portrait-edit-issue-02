@@ -67,6 +67,9 @@ export function HomePage() {
                   : t("Start reading ↗")}
               </Link>
             </Button>
+            <Button asChild variant="outline">
+              <Link to="/prompts">{t("Browse studies")}</Link>
+            </Button>
             {lastReadPage > 1 && (
               <Button asChild variant="outline">
                 <Link to={readerPath(currentIssue.slug)}>
@@ -93,63 +96,6 @@ export function HomePage() {
           <span>Issue 02 — The Prompt Issue</span>
         </Link>
       </section>
-      <section className="home-start" aria-labelledby="home-start-title">
-        <h2 id="home-start-title">{t("Make the issue yours")}</h2>
-        <div className="home-start-grid">
-          <Link
-            className="home-start-card"
-            to={readerPath(currentIssue.slug, lastReadPage)}
-          >
-            <span className="eyebrow">01 / {t("Read")}</span>
-            <h3>
-              {lastReadPage > 1
-                ? t("Continue on page {page}", { page: lastReadPage })
-                : t("Read the magazine")}
-            </h3>
-            <p>
-              {t(
-                "Turn the pages, explore the chapters, and return where you left off.",
-              )}
-            </p>
-            <span className="home-start-action">{t("Open reader")} ↗</span>
-          </Link>
-          <Link className="home-start-card" to="/prompts">
-            <span className="eyebrow">02 / {t("Explore")}</span>
-            <h3>
-              {t("Browse {count} studies", { count: currentIssue.studies })}
-            </h3>
-            <p>
-              {t(
-                "Find a visual direction, copy a prompt, or adjust it in Prompt Studio.",
-              )}
-            </p>
-            <span className="home-start-action">
-              {t("Explore the archive")} ↗
-            </span>
-          </Link>
-          <Link className="home-start-card" to="/prompts?saved=1">
-            <span className="eyebrow">03 / {t("Collect")}</span>
-            <h3>
-              {savedCount > 0
-                ? t("Your saved studies ({count})", { count: savedCount })
-                : t("Build your collection")}
-            </h3>
-            <p>
-              {t(
-                "Save studies as you explore. Return to your collection and export it for later.",
-              )}
-            </p>
-            <span className="home-start-action">
-              {t("View saved studies")} ↗
-            </span>
-          </Link>
-        </div>
-        <p className="home-storage-note">
-          {t(
-            "Reading progress and collections are saved in this browser. Export your collection from the archive to keep a copy.",
-          )}
-        </p>
-      </section>
       <section className="selected-section">
         <div className="section-title">
           <h2>{t("From the archive")}</h2>
@@ -170,6 +116,57 @@ export function HomePage() {
             />
           ))}
         </div>
+      </section>
+      <section className="home-start" aria-labelledby="home-start-title">
+        <h2 id="home-start-title">{t("Make the issue yours")}</h2>
+        <div className="home-start-grid">
+          <Link
+            className="home-start-card"
+            to={readerPath(currentIssue.slug, lastReadPage)}
+          >
+            <span className="eyebrow">01 / {t("Read")}</span>
+            <h3>
+              {lastReadPage > 1
+                ? t("Continue on page {page}", { page: lastReadPage })
+                : t("Read the magazine")}
+            </h3>
+            <p>{t("Jump by chapter or pick up on your last page.")}</p>
+            <span className="home-start-action">{t("Open reader")} ↗</span>
+          </Link>
+          <Link className="home-start-card" to="/prompts">
+            <span className="eyebrow">02 / {t("Explore")}</span>
+            <h3>
+              {t("Browse {count} studies", { count: currentIssue.studies })}
+            </h3>
+            <p>
+              {t("Filter by style tag, copy prompts, or open Prompt Studio.")}
+            </p>
+            <span className="home-start-action">
+              {t("Explore the archive")} ↗
+            </span>
+          </Link>
+          <Link className="home-start-card" to="/prompts?saved=1">
+            <span className="eyebrow">03 / {t("Collect")}</span>
+            <h3>
+              {savedCount > 0
+                ? t("Your saved studies ({count})", { count: savedCount })
+                : t("Build your collection")}
+            </h3>
+            <p>
+              {t(
+                "Save studies to your collection to compare, print, or export.",
+              )}
+            </p>
+            <span className="home-start-action">
+              {t("View saved studies")} ↗
+            </span>
+          </Link>
+        </div>
+        <p className="home-storage-note">
+          {t(
+            "Reading progress and collections are saved in this browser. Export your collection from the archive to keep a copy.",
+          )}
+        </p>
       </section>
     </>
   );
