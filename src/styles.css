@@ -15,16 +15,25 @@
 :root {
   color-scheme: dark;
   --bg: #080808;
-  --body-background: #121212;
+  --body-background: var(--bg);
   --surface: #121212;
   --surface-raised: #181818;
   --text: #f3f3f3;
   --muted: #8e8e93;
+  --idle-text: #b4b4b8;
   --border: rgb(255 255 255 / 8%);
   --border-hover: rgb(255 255 255 / 20%);
   --surface-hover: #202020;
   --focus-paper: #101010;
   --accent: #e2c799;
+  --danger: #ff9b8a;
+  --success: #76db99;
+  --image-label: #ffffff;
+  --image-scrim: rgb(0 0 0 / 72%);
+  --image-handle-background: #ffffff;
+  --image-handle-text: #171614;
+  --navigation-background: color-mix(in srgb, var(--bg) 96%, transparent);
+  --floating-background: color-mix(in srgb, var(--surface) 96%, transparent);
   --shadow: inset 0 1px 0 rgb(255 255 255 / 5%), 0 8px 30px rgb(0 0 0 / 28%);
   --overlay: rgb(0 0 0 / 72%);
   --space-2: 8px;
@@ -48,10 +57,13 @@
   --surface-raised: #fffdf8;
   --text: #1a1917;
   --muted: #5c5955;
+  --idle-text: #5c5955;
   --border: rgb(26 25 23 / 8%);
   --border-hover: rgb(26 25 23 / 22%);
   --surface-hover: #ede8de;
-  --accent: #8c6d3b;
+  --accent: #765a30;
+  --danger: #b42318;
+  --success: #146d30;
   --focus-paper: #efece4;
   --shadow: 0 12px 32px rgb(50 44 30 / 10%);
   --overlay: rgb(20 18 14 / 35%);
@@ -59,7 +71,7 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #080808;
-  --body-background: #121212;
+  --body-background: var(--bg);
   --surface: #121212;
   --surface-raised: #181818;
   --text: #f3f3f3;
@@ -1070,7 +1082,8 @@ select:hover {
 }
 .chrome-idle .reader-top,
 .chrome-idle .reader-bottom {
-  opacity: 0.25;
+  opacity: 1;
+  --text: var(--idle-text);
 }
 .chrome-idle .reader-top:focus-within,
 .chrome-idle .reader-bottom:focus-within {
@@ -1882,8 +1895,8 @@ select:hover {
   transform: translateY(-1px);
 }
 .card-action-btn.is-copied {
-  color: #16a34a;
-  border-color: #16a34a;
+  color: var(--success);
+  border-color: var(--success);
 }
 .card-action-btn.is-saved {
   color: var(--text);
@@ -1996,8 +2009,8 @@ select:hover {
   position: absolute;
   bottom: 12px;
   right: 12px;
-  background: var(--overlay);
-  color: var(--bg);
+  background: var(--image-scrim);
+  color: var(--image-label);
   font-size: 0.75rem;
   padding: 4px 10px;
   border-radius: 999px;
@@ -2479,8 +2492,8 @@ select:hover {
   position: absolute;
   bottom: 10px;
   right: 10px;
-  background: rgba(0, 0, 0, 0.65);
-  color: #fff;
+  background: var(--image-scrim);
+  color: var(--image-label);
   font-size: 0.75rem;
   padding: 4px 8px;
   border-radius: 4px;
@@ -2972,8 +2985,8 @@ select:hover {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-radius: 4px;
-  background: rgba(0, 0, 0, 0.72);
-  color: #fff;
+  background: var(--image-scrim);
+  color: var(--image-label);
   backdrop-filter: blur(4px);
   z-index: 5;
   pointer-events: none;
@@ -3009,8 +3022,8 @@ select:hover {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #ffffff;
-  color: #171614;
+  background: var(--image-handle-background);
+  color: var(--image-handle-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3022,7 +3035,7 @@ select:hover {
 }
 .split-curtain-frame.is-dragging .split-handle-thumb {
   transform: scale(1.1);
-  background: var(--surface);
+  background: var(--image-handle-background);
 }
 .split-slider-instructions {
   display: flex;
@@ -4179,7 +4192,7 @@ select:hover {
   border-radius: 999px;
   padding: 9px 16px;
   color: var(--text);
-  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  background: var(--floating-background);
   backdrop-filter: blur(8px);
   font: 500 0.8rem/1 var(--sans);
   opacity: 0;
@@ -4264,7 +4277,7 @@ select:hover {
 }
 .batch-copy-error {
   font-size: 0.8125rem;
-  color: var(--danger, #b42318);
+  color: var(--danger);
   max-width: 28ch;
 }
 .batch-toolbar-actions {
@@ -4459,9 +4472,7 @@ select:hover {
    -------------------------------------------------------------------------- */
 body {
   background-color: var(--body-background, var(--bg));
-  /* Keep the established computed body colors while painting from the new
-     editorial tokens; this preserves existing browser theme integrations. */
-  background-image: linear-gradient(var(--bg), var(--bg));
+  /* A solid canvas preserves the paint and lets contrast tools resolve it. */
 }
 body::before {
   content: "";
@@ -4478,7 +4489,7 @@ body::before {
   z-index: 30;
   gap: clamp(16px, 3vw, 42px);
   padding-block: max(12px, env(safe-area-inset-top)) 12px;
-  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  background: var(--navigation-background);
   border-bottom-color: var(--border);
   box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--text) 3%, transparent);
   backdrop-filter: blur(16px);
@@ -4555,7 +4566,7 @@ body::before {
   padding: 6px 12px;
   border: 1px solid var(--border);
   border-radius: 20px;
-  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  background: var(--floating-background);
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -4600,7 +4611,7 @@ body::before {
 }
 .chrome-idle #reader-toolbar,
 .chrome-idle .reader-bottom {
-  opacity: 0.2;
+  opacity: 1;
 }
 .chrome-idle #reader-toolbar {
   transform: translateY(-2px);
@@ -5086,7 +5097,7 @@ body::before {
   width: 44px;
   height: 44px;
   border: 1px solid rgb(255 255 255 / 62%);
-  color: #171614;
+  color: var(--image-handle-text);
   box-shadow: 0 6px 24px rgb(0 0 0 / 42%);
 }
 .split-side-badge {
@@ -5186,7 +5197,7 @@ textarea {
   }
   .reader-bottom {
     padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
-    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    background: var(--floating-background);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }

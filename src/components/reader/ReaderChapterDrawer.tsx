@@ -76,7 +76,7 @@ export function ReaderChapterDrawer({
                         src={assetUrl(
                           `${issue.pageDirectory}/${String(chapter.startPage).padStart(3, "0")}.webp`,
                         )}
-                        alt={`Page ${chapter.startPage} preview`}
+                        alt={`${chapter.title} chapter opener, page ${chapter.startPage}`}
                         loading="lazy"
                       />
                       <span className="chapter-drawer-copy">

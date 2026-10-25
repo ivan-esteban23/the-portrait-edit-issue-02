@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { assetUrl } from "@/content";
+import { assetUrl, pageEyebrow } from "@/content";
 import type { Issue } from "@/content/schema";
 import { Button } from "../ui/button";
 
@@ -181,7 +181,7 @@ export function OriginalPage({
           height="1584"
           decoding="async"
           fetchPriority="high"
-          alt={`Issue ${issue.number}, page ${page}`}
+          alt={`${issue.title} — ${pageEyebrow(issue, page)}, page ${page}`}
           onLoad={() => setState("ready")}
           onError={() => setState("error")}
           title="Click to inspect page in detail"

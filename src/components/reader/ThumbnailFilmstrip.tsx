@@ -152,11 +152,12 @@ export function ThumbnailFilmstrip({
                   }}
                   onClick={() => onPageSelect(pNum)}
                 >
+                  {/* The button's page label names this decorative preview. */}
                   <img
                     src={assetUrl(
                       `${pageDirectory}/${String(pNum).padStart(3, "0")}.webp`,
                     )}
-                    alt={`Page ${pNum}`}
+                    alt=""
                     loading="lazy"
                     decoding="async"
                     width={56}

@@ -1,0 +1,346 @@
+{
+  "complete": true,
+  "engine": {
+    "name": "axe-core",
+    "version": "4.14.0"
+  },
+  "rules": [
+    "color-contrast",
+    "image-alt"
+  ],
+  "buildFingerprint": "1c7eb7405b8f6725075aabfef7d1b3758bfe64667c554cf476706838742a4607",
+  "uniqueSiteRoutes": 366,
+  "totalStates": 2326,
+  "routeStates": 2248,
+  "interactiveStates": 70,
+  "legacyStates": 8,
+  "axeViolations": 0,
+  "missingOrEmptySources": 0,
+  "missingAlt": 0,
+  "unexpectedEmptyAlt": 0,
+  "manualChecks": 21567,
+  "manualFailures": 0,
+  "axeIncompleteNodesReviewed": 14057,
+  "colors": [
+    {
+      "token": "--accent",
+      "theme": "Light",
+      "context": "Small accent text / hover surface",
+      "beforeColor": "#8c6d3b",
+      "afterColor": "#765a30",
+      "beforeRatio": 3.9394232055843346,
+      "afterRatio": 5.250668733880274
+    },
+    {
+      "token": "--danger",
+      "theme": "Dark",
+      "context": "Copy error / surface",
+      "beforeColor": "#b42318 fallback",
+      "afterColor": "#ff9b8a",
+      "beforeRatio": 2.8495347555191284,
+      "afterRatio": 9.195136618286966
+    },
+    {
+      "token": "--danger",
+      "theme": "Light",
+      "context": "Error role / surface",
+      "beforeColor": "#b42318 fallback",
+      "afterColor": "#b42318",
+      "beforeRatio": 6.467088285402974,
+      "afterRatio": 6.467088285402974
+    },
+    {
+      "token": "--success",
+      "theme": "Light",
+      "context": "Success role / hover surface",
+      "beforeColor": "#16a34a",
+      "afterColor": "#146d30",
+      "beforeRatio": 2.6991015179408366,
+      "afterRatio": 5.2757568263341605
+    },
+    {
+      "token": "--success",
+      "theme": "Dark",
+      "context": "Success role / hover surface",
+      "beforeColor": "#16a34a",
+      "afterColor": "#76db99",
+      "beforeRatio": 4.943741609525382,
+      "afterRatio": 9.591993881695885
+    },
+    {
+      "token": "--idle-text + idle opacity removal",
+      "theme": "Light",
+      "context": "Focus idle labels: minimum across matched elements",
+      "beforeColor": "20% opacity",
+      "afterColor": "opaque shared idle text",
+      "beforeRatio": 1.31,
+      "afterRatio": 5.89
+    },
+    {
+      "token": "--idle-text + idle opacity removal",
+      "theme": "Dark",
+      "context": "Focus idle labels: minimum across matched elements",
+      "beforeColor": "20% opacity",
+      "afterColor": "opaque shared idle text",
+      "beforeRatio": 1.3,
+      "afterRatio": 5.74
+    },
+    {
+      "token": "--image-label + --image-scrim",
+      "theme": "Light",
+      "context": "Worst image pixel",
+      "beforeColor": "page background text / 35% dark scrim",
+      "afterColor": "#ffffff / 72% black",
+      "beforeRatio": 2.0628982126891215,
+      "afterRatio": 9.23289622342997
+    },
+    {
+      "token": "--image-label + --image-scrim",
+      "theme": "Dark",
+      "context": "Worst image pixel",
+      "beforeColor": "page background text / 72% black scrim",
+      "afterColor": "#ffffff / 72% black",
+      "beforeRatio": 1.0,
+      "afterRatio": 9.23289622342997
+    },
+    {
+      "token": "--image-handle-text + --image-handle-background",
+      "theme": "Dark",
+      "context": "Comparison handle while dragging",
+      "beforeColor": "#171614 / #121212",
+      "afterColor": "#171614 / #ffffff",
+      "beforeRatio": 1.0359687546284906,
+      "afterRatio": 18.083232548474577
+    },
+    {
+      "token": "--image-handle-text + --image-handle-background",
+      "theme": "Light",
+      "context": "Comparison handle while dragging",
+      "beforeColor": "#171614 / #fffdf8",
+      "afterColor": "#171614 / #ffffff",
+      "beforeRatio": 17.788367413527762,
+      "afterRatio": 18.083232548474577
+    },
+    {
+      "token": "--navigation-background",
+      "theme": "Light",
+      "context": "Muted text over worst image",
+      "beforeColor": "84% canvas",
+      "afterColor": "96% canvas",
+      "beforeRatio": 4.382005028963315,
+      "afterRatio": 5.805567145214868
+    },
+    {
+      "token": "--floating-background",
+      "theme": "Light",
+      "context": "Reader toolbar muted text over worst image",
+      "beforeColor": "84% surface",
+      "afterColor": "96% surface",
+      "beforeRatio": 4.725638387284744,
+      "afterRatio": 6.273812554371368
+    },
+    {
+      "token": "--navigation-background",
+      "theme": "Dark",
+      "context": "Muted text over worst image",
+      "beforeColor": "84% canvas",
+      "afterColor": "96% canvas",
+      "beforeRatio": 4.075816499460922,
+      "afterRatio": 5.751158402878805
+    },
+    {
+      "token": "--floating-background",
+      "theme": "Dark",
+      "context": "Reader toolbar muted text over worst image",
+      "beforeColor": "84% surface",
+      "afterColor": "96% surface",
+      "beforeRatio": 3.6006404859796644,
+      "afterRatio": 5.255943845216015
+    },
+    {
+      "token": "--body-background",
+      "theme": "Dark",
+      "context": "Body text / computed canvas",
+      "beforeColor": "#121212 + flat #080808 gradient",
+      "afterColor": "var(--bg) = #080808",
+      "beforeRatio": 16.882944788312933,
+      "afterRatio": 18.048856664313426
+    }
+  ],
+  "layout": {
+    "baseCommit": "2d88eaa",
+    "unchangedNonPaintDeclarations": 2786,
+    "beforeHash": "48c2c941c8204df21a716bc8662b4e50d98f8bc508fd390db0e24b8c2e576ee0",
+    "afterHash": "48c2c941c8204df21a716bc8662b4e50d98f8bc508fd390db0e24b8c2e576ee0",
+    "samples": [
+      {
+        "theme": "light",
+        "width": 390,
+        "route": "",
+        "comparedElements": 6,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 390,
+        "route": "prompts",
+        "comparedElements": 168,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 390,
+        "route": "prompts/issue-02-study-005",
+        "comparedElements": 3,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 390,
+        "route": "issues/the-prompt-issue",
+        "comparedElements": 167,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 390,
+        "route": "issues/the-prompt-issue/pages/14",
+        "comparedElements": 4,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 390,
+        "route": "issues/the-prompt-issue/pages/60?focus=1",
+        "comparedElements": 4,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 1280,
+        "route": "",
+        "comparedElements": 6,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 1280,
+        "route": "prompts",
+        "comparedElements": 168,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 1280,
+        "route": "prompts/issue-02-study-005",
+        "comparedElements": 3,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 1280,
+        "route": "issues/the-prompt-issue",
+        "comparedElements": 167,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 1280,
+        "route": "issues/the-prompt-issue/pages/14",
+        "comparedElements": 4,
+        "changes": 0
+      },
+      {
+        "theme": "light",
+        "width": 1280,
+        "route": "issues/the-prompt-issue/pages/60?focus=1",
+        "comparedElements": 3,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 390,
+        "route": "",
+        "comparedElements": 6,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 390,
+        "route": "prompts",
+        "comparedElements": 168,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 390,
+        "route": "prompts/issue-02-study-005",
+        "comparedElements": 3,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 390,
+        "route": "issues/the-prompt-issue",
+        "comparedElements": 167,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 390,
+        "route": "issues/the-prompt-issue/pages/14",
+        "comparedElements": 4,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 390,
+        "route": "issues/the-prompt-issue/pages/60?focus=1",
+        "comparedElements": 4,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 1280,
+        "route": "",
+        "comparedElements": 6,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 1280,
+        "route": "prompts",
+        "comparedElements": 168,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 1280,
+        "route": "prompts/issue-02-study-005",
+        "comparedElements": 3,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 1280,
+        "route": "issues/the-prompt-issue",
+        "comparedElements": 167,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 1280,
+        "route": "issues/the-prompt-issue/pages/14",
+        "comparedElements": 4,
+        "changes": 0
+      },
+      {
+        "theme": "dark",
+        "width": 1280,
+        "route": "issues/the-prompt-issue/pages/60?focus=1",
+        "comparedElements": 3,
+        "changes": 0
+      }
+    ]
+  }
+}

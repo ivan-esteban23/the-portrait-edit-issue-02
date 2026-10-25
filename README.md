@@ -104,6 +104,14 @@ The workflow follows the [Vite GitHub Pages deployment guide](https://vite.dev/g
 
 ## QA scope
 
+### Contrast and image alternatives
+
+Run `npm run build`, start `npm run preview -- --host 127.0.0.1 --port 4173`, then run `npm run audit:accessibility` in another terminal. The audit covers every generated route plus the 404 fallback in light and dark themes, reader page/text modes, static page/text snapshots, and representative phone/desktop dialogs and controls. It writes the CSS inventory and per-page results to `/tmp/portrait-contrast-audit.json`; use `--output <path>` to choose another destination.
+
+The checked axe rules are `color-contrast` and `image-alt`. Transparent card-link overlaps that axe cannot resolve receive an additional computed contrast check. Image labels and floating controls are checked against black/white image pixels and the decorative grain overlay. Static documents are first parsed with JavaScript disabled; application scripts are removed before enabling only audit instrumentation, preserving the static DOM and an empty application root. `--resume` reuses completed routes only if the CSS inventory and built HTML/scripts/styles still match.
+
+`tests/contrast.test.ts` checks body, caption, accent, idle and status tokens against all shared surfaces, plus image labels and the dragging comparison handle. Browser regression tests also check the idle Focus toolbar in both themes. Decorative thumbnails intentionally use `alt=""` where a visible study title or an explicit page-button label supplies the accessible name. See [the contrast and alt-text audit](review/CONTRAST_ALT_AUDIT_2026-10-25.md) for changed colors, measured ratios, full coverage and layout verification.
+
 See [Responsive reader QA](RESPONSIVE_QA.md) for the Chromium responsive matrix and the separate physical-device release checklist.
 
 The active suite includes Zod diagnostics, full content/asset preservation, copy fallback/stale-response isolation, and Chromium browser tests at 320, 390, 430, 834, 1194, 1280 and 1440px in light/dark variants. Browser tests exercise route entry, legacy hashes, archive filtering, Focus, modes, zoom, sizing, copying, keyboard, scrubber, swipes and image retry, and capture review screenshots in ignored `test-results/`.

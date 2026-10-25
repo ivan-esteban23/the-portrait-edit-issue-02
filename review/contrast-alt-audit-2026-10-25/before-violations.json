@@ -1,0 +1,571 @@
+{
+  "method": "Original rendered colors; the visually constant body gradient was flattened solely to let axe calculate the original canvas contrast.",
+  "results": [
+    {
+      "theme": "light",
+      "route": "issues/the-prompt-issue/pages/14",
+      "state": "text",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                ".chapter-opener-kicker"
+              ],
+              "html": "<p class=\"chapter-opener-kicker\">Chapter 01 \u00b7 014</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.37 (foreground color: #8c6d3b, background color: #f6f4ef, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#8c6d3b",
+                    "bgColor": "#f6f4ef",
+                    "contrastRatio": 4.37,
+                    "fontSize": "6.8pt (9px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 4.37 (foreground color: #8c6d3b, background color: #f6f4ef, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".chapter-opener-actions > a[data-discover=\"true\"]"
+              ],
+              "html": "<a href=\"/the-portrait-edit-issue-02/issues/the-prompt-issue/pages/15\" data-discover=\"true\">Start chapter \u00b7 page 015 \u2192</a>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.37 (foreground color: #8c6d3b, background color: #f6f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#8c6d3b",
+                    "bgColor": "#f6f4ef",
+                    "contrastRatio": 4.37,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 4.37 (foreground color: #8c6d3b, background color: #f6f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".chapter-opener-actions > button[type=\"button\"]"
+              ],
+              "html": "<button type=\"button\">View original 014</button>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.37 (foreground color: #8c6d3b, background color: #f6f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#8c6d3b",
+                    "bgColor": "#f6f4ef",
+                    "contrastRatio": 4.37,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 4.37 (foreground color: #8c6d3b, background color: #f6f4ef, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "route": "prompts",
+      "state": "batch-copy-error",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                ".batch-copy-error"
+              ],
+              "html": "<span class=\"batch-copy-error\" role=\"alert\">Copy unavailable. Export the dossier or copy prompts one at a time.</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.84 (foreground color: #b42318, background color: #121212, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#b42318",
+                    "bgColor": "#121212",
+                    "contrastRatio": 2.84,
+                    "fontSize": "9.8pt (13px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 2.84 (foreground color: #b42318, background color: #121212, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "route": "prompts/issue-02-study-005",
+      "state": "image-label-hover",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                ".inspect-badge"
+              ],
+              "html": "<span class=\"inspect-badge\" aria-hidden=\"true\">\ud83d\udd0d Inspect</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.03 (foreground color: #080808, background color: #020202, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#080808",
+                    "bgColor": "#020202",
+                    "contrastRatio": 1.03,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.03 (foreground color: #080808, background color: #020202, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "route": "prompts/issue-02-study-005",
+      "state": "image-lightbox",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                ".inspect-badge"
+              ],
+              "html": "<span class=\"inspect-badge\" aria-hidden=\"true\">\ud83d\udd0d Inspect</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.03 (foreground color: #080808, background color: #020202, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#080808",
+                    "bgColor": "#020202",
+                    "contrastRatio": 1.03,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.03 (foreground color: #080808, background color: #020202, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "route": "prompts/issue-02-study-005",
+      "state": "image-label-hover",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                ".inspect-badge"
+              ],
+              "html": "<span class=\"inspect-badge\" aria-hidden=\"true\">\ud83d\udd0d Inspect</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.23 (foreground color: #f6f4ef, background color: #a7a5a0, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f4ef",
+                    "bgColor": "#a7a5a0",
+                    "contrastRatio": 2.23,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 2.23 (foreground color: #f6f4ef, background color: #a7a5a0, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "route": "prompts/issue-02-study-005",
+      "state": "image-lightbox",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                ".inspect-badge"
+              ],
+              "html": "<span class=\"inspect-badge\" aria-hidden=\"true\">\ud83d\udd0d Inspect</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.23 (foreground color: #f6f4ef, background color: #a7a5a0, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f4ef",
+                    "bgColor": "#a7a5a0",
+                    "contrastRatio": 2.23,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 2.23 (foreground color: #f6f4ef, background color: #a7a5a0, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "route": "issues/the-prompt-issue/pages/60?focus=1",
+      "state": "reader-focus-idle",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                "input[aria-label=\"Page number\"]"
+              ],
+              "html": "<input aria-label=\"Page number\" inputmode=\"numeric\" min=\"1\" max=\"196\" type=\"number\" value=\"60\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#c4c2bb",
+                    "bgColor": "#f0eee6",
+                    "contrastRatio": 1.53,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.53 (foreground color: #c4c2bb, background color: #f0eee6, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                "form > span"
+              ],
+              "html": "<span>/ 196</span>",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#d2cfc7",
+                    "bgColor": "#f0eee6",
+                    "contrastRatio": 1.34,
+                    "fontSize": "9.8pt (13px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.34 (foreground color: #d2cfc7, background color: #f0eee6, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                "button[aria-haspopup=\"dialog\"]"
+              ],
+              "html": "<button class=\"inline-flex min-h-11...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" data-state=\"closed\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#d2cfc7",
+                    "bgColor": "#f2efe8",
+                    "contrastRatio": 1.35,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.35 (foreground color: #d2cfc7, background color: #f2efe8, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".reader-tools-trigger"
+              ],
+              "html": "<button class=\"inline-flex min-h-11...\" aria-expanded=\"false\" aria-controls=\"reader-tools\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#d2cfc7",
+                    "bgColor": "#f2efe8",
+                    "contrastRatio": 1.35,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.35 (foreground color: #d2cfc7, background color: #f2efe8, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".reader-bottom > .inline-flex.min-h-11.items-center:nth-child(1)"
+              ],
+              "html": "<button class=\"inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-sm px-3 py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 disabled:pointer-events-none disabled:opacity-45 text-muted hover:bg-hover hover:text-foreground\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#d2cfc7",
+                    "bgColor": "#efece4",
+                    "contrastRatio": 1.31,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.31 (foreground color: #d2cfc7, background color: #efece4, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".reader-bottom > span"
+              ],
+              "html": "<span>60 / 196</span>",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#d2cfc7",
+                    "bgColor": "#efece4",
+                    "contrastRatio": 1.31,
+                    "fontSize": "9.8pt (13px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.31 (foreground color: #d2cfc7, background color: #efece4, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".reader-bottom > .inline-flex.min-h-11.items-center:nth-child(3)"
+              ],
+              "html": "<button class=\"inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-sm px-3 py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 disabled:pointer-events-none disabled:opacity-45 text-muted hover:bg-hover hover:text-foreground\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#d2cfc7",
+                    "bgColor": "#efece4",
+                    "contrastRatio": 1.31,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.31 (foreground color: #d2cfc7, background color: #efece4, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "route": "issues/the-prompt-issue/pages/60?focus=1",
+      "state": "reader-focus-idle",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "nodes": [
+            {
+              "target": [
+                "input[aria-label=\"Page number\"]"
+              ],
+              "html": "<input aria-label=\"Page number\" inputmode=\"numeric\" min=\"1\" max=\"196\" type=\"number\" value=\"60\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#3d3d3d",
+                    "bgColor": "#0e0e0e",
+                    "contrastRatio": 1.77,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.77 (foreground color: #3d3d3d, background color: #0e0e0e, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                "form > span"
+              ],
+              "html": "<span>/ 196</span>",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#29292a",
+                    "bgColor": "#0e0e0e",
+                    "contrastRatio": 1.32,
+                    "fontSize": "9.8pt (13px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.32 (foreground color: #29292a, background color: #0e0e0e, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                "button[aria-haspopup=\"dialog\"]"
+              ],
+              "html": "<button class=\"inline-flex min-h-11...\" type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" data-state=\"closed\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#29292a",
+                    "bgColor": "#101010",
+                    "contrastRatio": 1.3,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.3 (foreground color: #29292a, background color: #101010, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".reader-tools-trigger"
+              ],
+              "html": "<button class=\"inline-flex min-h-11...\" aria-expanded=\"false\" aria-controls=\"reader-tools\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#29292a",
+                    "bgColor": "#101010",
+                    "contrastRatio": 1.3,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.3 (foreground color: #29292a, background color: #101010, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".reader-bottom > .inline-flex.min-h-11.items-center:nth-child(1)"
+              ],
+              "html": "<button class=\"inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-sm px-3 py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 disabled:pointer-events-none disabled:opacity-45 text-muted hover:bg-hover hover:text-foreground\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#29292a",
+                    "bgColor": "#101010",
+                    "contrastRatio": 1.3,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.3 (foreground color: #29292a, background color: #101010, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".reader-bottom > span"
+              ],
+              "html": "<span>60 / 196</span>",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#29292a",
+                    "bgColor": "#101010",
+                    "contrastRatio": 1.3,
+                    "fontSize": "9.8pt (13px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.3 (foreground color: #29292a, background color: #101010, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            },
+            {
+              "target": [
+                ".reader-bottom > .inline-flex.min-h-11.items-center:nth-child(3)"
+              ],
+              "html": "<button class=\"inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-sm px-3 py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 disabled:pointer-events-none disabled:opacity-45 text-muted hover:bg-hover hover:text-foreground\">",
+              "checks": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#29292a",
+                    "bgColor": "#101010",
+                    "contrastRatio": 1.3,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "messageKey": null,
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "message": "Element has insufficient color contrast of 1.3 (foreground color: #29292a, background color: #101010, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
