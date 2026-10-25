@@ -127,3 +127,21 @@ CI uses the browser installed by the repository's Playwright version instead.
 System Chromium is verified locally, but Arch is not an officially supported
 Playwright distribution; use CI results for the supported release environment.
 Do not run `playwright install-deps` on Arch.
+
+## Homepage metadata and external link checks
+
+The HTML social descriptions use `%STUDY_COUNT%`, replaced by Vite's
+`publication-metadata` HTML transform with the number of current-issue JSON
+records in `src/content/prompts/`. This reports unique archive studies (currently
+165), rather than the 174 printed prompts that include repeated references.
+Canonical and Open Graph URLs identify the deployed GitHub Pages project.
+
+`npm test` also runs `tests/external-links.mjs` against every unique absolute URL
+in `index.html`, including social images. It follows redirects and requires HTTP
+200, verifies the release tag and exact PDF asset through GitHub's API, checks
+PDF header/end markers, and checks the source README for editorial review and
+rebuild notes. Explicit HTTP 429 and GitHub rate-limit 403 responses receive up
+to three bounded retries; persistent limits and other non-200 responses fail.
+These tests need internet access. The production-notes repository remains
+`ivan-esteban23/the-portrait-edit`: its README links the source prompts, editorial
+review, approved corrections and rebuild instructions for the publication.

@@ -13,7 +13,7 @@
     "validate": "tsx scripts/validate-content.ts",
     "build": "npm run validate && npm run typecheck && vite build && node scripts/generate-card-thumbnails.mjs && node scripts/postbuild.mjs && node scripts/generate-sitemap.js && node scripts/check-noscript.mjs",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run && node --test tests/external-links.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {
