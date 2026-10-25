@@ -2,10 +2,18 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath, URL } from "node:url";
+import { publicationMetadata } from "./scripts/publication-metadata";
 export default defineConfig({
   base: "/the-portrait-edit-issue-02/",
   publicDir: "docs",
   plugins: [
+    {
+      name: "publication-metadata",
+      transformIndexHtml: {
+        order: "pre",
+        handler: (html) => publicationMetadata(html),
+      },
+    },
     react(),
     tailwindcss(),
     {
