@@ -11,6 +11,9 @@ export const chapterSchema = z
     title: text,
     startPage: z.number().int().positive(),
     endPage: z.number().int().positive(),
+    intro: text.optional(),
+    openerNote: text.optional(),
+    featuredStudies: z.array(z.number().int().positive()).length(3).optional(),
   })
   .refine((c) => c.endPage >= c.startPage, "Chapter ends before it starts");
 export const issueSchema = z.object({

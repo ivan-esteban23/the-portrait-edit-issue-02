@@ -18,47 +18,74 @@
     {
       "title": "Portraits & Light",
       "startPage": 14,
-      "endPage": 36
+      "endPage": 36,
+      "intro": "Faces, gestures and the way light shapes a mood.",
+      "featuredStudies": [2, 42, 82],
+      "openerNote": "Follow the light from a quiet studio gesture to the warmth of a passing moment."
     },
     {
       "title": "Winter",
       "startPage": 37,
-      "endPage": 52
+      "endPage": 52,
+      "intro": "Snow, shearling and layers made for the cold.",
+      "featuredStudies": [20, 67, 165],
+      "openerNote": "Let snow, soft light and layered textures set the pace."
     },
     {
       "title": "Folk & Landscape",
       "startPage": 53,
-      "endPage": 57
+      "endPage": 57,
+      "intro": "Embroidery, adornment and portraits rooted in place.",
+      "featuredStudies": [17, 29, 32],
+      "openerNote": "Read the story in embroidery, flowers and the landscape beyond the figure."
     },
     {
       "title": "Fantasy & Period",
       "startPage": 58,
-      "endPage": 71
+      "endPage": 71,
+      "intro": "Imagined worlds, historical details and romantic atmosphere.",
+      "featuredStudies": [1, 59, 134],
+      "openerNote": "Enter imagined worlds through costume, ornament and atmosphere."
     },
     {
       "title": "Runway",
       "startPage": 72,
-      "endPage": 89
+      "endPage": 89,
+      "intro": "Tailoring, movement and silhouettes in stride.",
+      "featuredStudies": [37, 98, 145],
+      "openerNote": "Watch how a step changes the line of a coat, a skirt or a complete silhouette."
     },
     {
       "title": "Knitwear & Layers",
       "startPage": 90,
-      "endPage": 126
+      "endPage": 126,
+      "intro": "Tactile knits, playful proportions and considered layers.",
+      "featuredStudies": [7, 97, 171],
+      "openerNote": "Look closely at the dialogue between knit patterns, layers and contrasting textures."
     },
     {
       "title": "Studio",
       "startPage": 127,
-      "endPage": 149
+      "endPage": 149,
+      "intro": "Controlled backdrops and graphic clothing studies.",
+      "featuredStudies": [9, 147, 173],
+      "openerNote": "Let a controlled backdrop reveal the shape and detail of an outfit."
     },
     {
       "title": "Night & Lifestyle",
       "startPage": 150,
-      "endPage": 169
+      "endPage": 169,
+      "intro": "Interior stories, after-dark light and everyday scenes.",
+      "featuredStudies": [50, 123, 174],
+      "openerNote": "Move through lamplit interiors and city evenings, where setting carries the mood."
     },
     {
       "title": "Street & City",
       "startPage": 170,
-      "endPage": 196
+      "endPage": 196,
+      "intro": "Candid settings, urban textures and personal style.",
+      "featuredStudies": [18, 111, 172],
+      "openerNote": "Find the character of a look in the buildings, paths and passing scenes around it."
     }
   ],
   "pageDirectory": "pages"

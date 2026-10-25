@@ -35,3 +35,15 @@ export function chapterAt(issue: typeof currentIssue, page: number) {
     }
   );
 }
+
+/** Human label for pages that have no study record (text-mode fallback). */
+export function pageEyebrow(issue: typeof currentIssue, page: number) {
+  if (page === 1) return "Cover";
+  if (page === 2) return "Editor's letter";
+  if (page === 3 || page === 4) return "Glossary";
+  if (page >= 5 && page <= 13) {
+    const chapter = issue.chapters[page - 5];
+    return chapter ? `Contents · ${chapter.title}` : "Contents";
+  }
+  return chapterAt(issue, page).title;
+}

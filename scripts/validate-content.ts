@@ -139,6 +139,19 @@ for (const issue of issues) {
       studies.some((p) => p.id === id),
       `${issue.slug}: missing featured study ${id}`,
     );
+  for (const chapter of issue.chapters) {
+    if (!chapter.featuredStudies) continue;
+    for (const studyNumber of chapter.featuredStudies)
+      assert(
+        studies.some(
+          (p) =>
+            p.studyNumber === studyNumber &&
+            p.page >= chapter.startPage &&
+            p.page <= chapter.endPage,
+        ),
+        `${issue.slug}: ${chapter.title} opener references missing study ${studyNumber}`,
+      );
+  }
 }
 // The migrated publication remains byte-exact, including duplicates and review flags.
 const original = JSON.parse(readFileSync("docs/issue.json", "utf8"));

@@ -51,6 +51,71 @@ export function RawText({
     </div>
   );
 }
+export function PageFallback({
+  page,
+  issue,
+  label,
+  onInspect,
+}: {
+  page: number;
+  issue: Issue;
+  label: string;
+  onInspect?: (page: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="page-fallback">
+      <p className="page-eyebrow">{label}</p>
+      <OriginalPage
+        page={page}
+        issue={issue}
+        zoom={100}
+        onInspect={onInspect}
+      />
+      <p className="page-hint">Tap the page to inspect · pinch to zoom</p>
+      <details
+        className="extracted-text page-text-details"
+        onToggle={(event) => setOpen(event.currentTarget.open)}
+      >
+        <summary>Read this page as text</summary>
+        {open && (
+          <RawText
+            page={page}
+            pdfUrl={issue.pdfUrl}
+            pageDirectory={issue.pageDirectory}
+          />
+        )}
+      </details>
+    </div>
+  );
+}
+
+export function CoverFallback({ issue }: { issue: Issue }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <img
+        className="reading-cover"
+        src={assetUrl(issue.cover)}
+        alt={`${issue.title} cover`}
+      />
+      <details
+        className="extracted-text page-text-details"
+        onToggle={(event) => setOpen(event.currentTarget.open)}
+      >
+        <summary>Read this page as text</summary>
+        {open && (
+          <RawText
+            page={1}
+            pdfUrl={issue.pdfUrl}
+            pageDirectory={issue.pageDirectory}
+          />
+        )}
+      </details>
+    </>
+  );
+}
+
 export function OriginalPage({
   page,
   issue,
