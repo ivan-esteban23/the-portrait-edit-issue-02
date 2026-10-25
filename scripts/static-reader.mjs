@@ -27,23 +27,23 @@ export function staticReader(issue, base, page) {
     )
     .join("")}</ul></nav>`;
   let content = `<p>${escapeHtml(issue.description)}</p>
-    <a href="${reader(1)}"><img src="${href(issue.cover)}" alt="${title} cover" width="480" height="622" style="max-width: 100%; height: auto"></a>`;
+    <a href="${reader(1)}"><img src="${href(issue.cover)}" alt="${title} cover" width="480" height="622" class="noscript-image"></a>`;
   if (page !== undefined) {
     const filename = String(page).padStart(3, "0");
     const { text } = JSON.parse(
       readFileSync(`docs/${issue.pageDirectory}/${filename}.json`, "utf8"),
     );
-    const pagination = `<nav aria-label="Page navigation" style="display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0">
+    const pagination = `<nav aria-label="Page navigation" class="noscript-pagination">
       ${page > 1 ? `<a href="${reader(page - 1)}">← Previous page</a>` : ""}
       <span>Page ${page} of ${issue.pages}</span>
       ${page < issue.pages ? `<a href="${reader(page + 1)}">Next page →</a>` : ""}
     </nav>`;
     content = `<h2>Page ${page} of ${issue.pages}</h2>${pagination}
-      <img src="${href(`${issue.pageDirectory}/${filename}.webp`)}" alt="Issue ${escapeHtml(issue.number)}, page ${page}" width="1224" height="1584" style="display: block; max-width: 100%; height: auto">
-      <details><summary>Read this page as text</summary><pre style="white-space: pre-wrap; overflow-wrap: anywhere; font: inherit">${escapeHtml(text)}</pre></details>
+      <img src="${href(`${issue.pageDirectory}/${filename}.webp`)}" alt="Issue ${escapeHtml(issue.number)}, page ${page}" width="1224" height="1584" class="noscript-image">
+      <details><summary>Read this page as text</summary><pre class="noscript-page-text">${escapeHtml(text)}</pre></details>
       ${pagination}`;
   }
-  return `<noscript><main style="max-width: 60rem; margin: auto; padding: 2rem; overflow-wrap: anywhere">
+  return `<noscript><main class="noscript-main">
     <h1>The Portrait Edit — ${title}</h1>${resources}${content}${chapters}
   </main></noscript>`;
 }

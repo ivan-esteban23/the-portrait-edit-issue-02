@@ -28,7 +28,7 @@ for (const slug of readdirSync("src/content/issues")) {
 }
 if (!currentIssue)
   throw new Error("Missing current issue for the static reader");
-writeFileSync("dist/index.html", withReader(currentIssue));
+// Preserve the authored home fallback; nested issue routes get the full static reader.
 copyFileSync("dist/index.html", "dist/404.html");
 for (const file of readdirSync("src/content/prompts"))
   routes.push(`prompts/${file.slice(0, -5)}`);
