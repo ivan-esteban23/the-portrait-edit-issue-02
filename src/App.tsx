@@ -281,7 +281,9 @@ export default function App() {
             <p>{t("An independent editorial archive.")}</p>
           </div>
           <nav aria-label="Publication resources">
-            <a href={currentIssue.pdfUrl}><IconText>{t("Download Issue 02 PDF ↗")}</IconText></a>
+            <a href={currentIssue.pdfUrl}>
+              <IconText>{t("Download Issue 02 PDF ↗")}</IconText>
+            </a>
             <a href={currentIssue.otherIssueUrl}>
               <IconText>{t("Issue 01 — The Fashion Issue ↗")}</IconText>
             </a>
@@ -297,7 +299,9 @@ export default function App() {
 
       <Toast
         key={bookmarkToast?.token ?? "bookmark-toast"}
-        message={t("Study removed from {collection}", { collection: bookmarkToast?.collection ?? t("collection") })}
+        message={t("Study removed from {collection}", {
+          collection: bookmarkToast?.collection ?? t("collection"),
+        })}
         visible={Boolean(bookmarkToast)}
         onUndo={undoBookmarkRemoval}
         onDismiss={dismissBookmarkToast}

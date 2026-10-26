@@ -61,6 +61,9 @@
     color: var(--accent);
     letter-spacing: inherit;
   }
+  .publication:has(.reader) .wordmark .wordmark-issue {
+    display: inline;
+  }
   .masthead .wordmark > span:not(.wordmark-issue) {
     margin-top: 10px;
     font-size: 0.6875rem;
@@ -210,6 +213,7 @@
     box-shadow: none;
   }
   .hero-cover span {
+    display: block;
     margin: 0;
     font-size: 0.6875rem;
   }
@@ -498,7 +502,7 @@
 }
 
 /* SVG arrows keep their shape even when the text font lacks symbol glyphs. */
-.publication .text-icon {
+:root .text-icon {
   display: inline-flex;
   width: 1em;
   height: 1em;
@@ -532,5 +536,23 @@
     font-size: 0.6875rem;
     letter-spacing: 0.1em;
     line-height: 1.5;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .masthead nav {
+    /* The theme control is now an icon button, not the former wide select. */
+    grid-template-columns: 44px repeat(3, minmax(0, 1fr)) 44px;
+  }
+  .masthead nav a {
+    padding-inline: 4px;
+  }
+  .masthead nav .masthead-search-trigger {
+    justify-content: center;
+    padding-inline: 0;
+  }
+  .masthead-search-trigger .search-trigger-label,
+  .masthead-search-trigger .search-trigger-kbd {
+    display: none;
   }
 }

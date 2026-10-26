@@ -485,7 +485,9 @@ export function CommandPalette({
                       )}
                     </div>
                     {item.badge && (
-                      <span className="palette-item-badge"><IconText>{item.badge}</IconText></span>
+                      <span className="palette-item-badge">
+                        <IconText>{item.badge}</IconText>
+                      </span>
                     )}
                   </button>
                 </div>
@@ -496,7 +498,15 @@ export function CommandPalette({
 
         <footer className="palette-footer">
           <div className="palette-hints">
-            <span><kbd><IconText>↑</IconText></kbd><kbd><IconText>↓</IconText></kbd> to navigate</span>
+            <span>
+              <kbd>
+                <IconText>↑</IconText>
+              </kbd>
+              <kbd>
+                <IconText>↓</IconText>
+              </kbd>{" "}
+              to navigate
+            </span>
             <span><kbd>↵</kbd> to select</span>
             <span><kbd>esc</kbd> to close</span>
           </div>
