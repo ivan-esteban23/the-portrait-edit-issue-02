@@ -45,3 +45,23 @@ git diff --check
 ```
 
 CI validation will run on the PR; merge and deployment are not authorized.
+
+## CI follow-up
+
+- PR #55 / commit `6254f17` CI passed unit tests/build but found five browser failures (345 passed, 54 skipped, 22 did not run after a serial-group failure).
+- Reproduced the two tablet-context homepage failures locally: at 320×568 with `hasTouch: true`, global 48px touch targets increase the masthead height and push Browse studies to y=606.53. Compact phone spacing fixes the layout while preserving target sizes.
+- Archive first portraits moved below the first screen (y=643.06) after the oversized header; compact narrow-screen header/intro spacing and type restore image visibility without hiding content or filters.
+- Restored the established 1440px publication cap required by the reader and archive viewport contracts; large editorial headings and image layouts remain.
+- Added a dedicated touch-enabled desktop/tablet context test at 320×568 in both themes. Existing assertions, retries, and CI workflow remain unchanged.
+- Pending: focused reproduction tests, refreshed visual review, commit/push, latest-commit CI.
+
+CI follow-up local verification passed:
+
+- Production build, typecheck, targeted Prettier and `git diff --check` passed.
+- Focused CI reproductions plus both-theme screenshots: 11 passed, 10 expected non-owner matrix skips, no failures (4.0m). Includes both failing tablet contexts, all reader widths, compact archive from 320×568 through 8K, and complete tag discovery at 320×568.
+- Inspected refreshed touch and non-touch screenshots; primary homepage links and first archive portraits fit at 320×568. Touch targets remain at least 48px.
+- Stopped the task-owned preview server and preserved date-only generated sitemaps again.
+
+```sh
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium mise exec node@24 -- npm run test:e2e -- tests/browser/discovery-sharing.spec.ts tests/browser/editorial-layout.spec.ts tests/browser/viewport-audit.spec.ts --project=desktop-light --project=tablet-light --project=tablet-landscape-dark --project=chromium-responsive --workers=1 --grep 'editorial layouts|touch-enabled tablet|homepage routes|all requested CSS viewport widths keep the reader|archive entry stays compact|320×568: every tag'
+```

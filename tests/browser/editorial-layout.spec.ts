@@ -160,3 +160,48 @@ for (const theme of ["light", "dark"] as const) {
     });
   }
 }
+
+test("touch-enabled tablet contexts keep discovery visible at 320×568", async ({
+  browser,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "desktop-light",
+    "Explicit touch matrix runs once",
+  );
+  for (const theme of ["light", "dark"]) {
+    const context = await browser.newContext({
+      baseURL: testInfo.project.use.baseURL,
+      viewport: { width: 320, height: 568 },
+      hasTouch: true,
+    });
+    try {
+      await context.addInitScript(
+        (theme) => localStorage.setItem("portrait-edit-theme", theme),
+        theme,
+      );
+      const page = await context.newPage();
+      await page.goto("./");
+      await page.evaluate(() => document.fonts.ready);
+      for (const name of ["Start reading ↗", "Browse studies"]) {
+        const link = page.getByRole("link", { name, exact: true });
+        await expect(link).toBeVisible();
+        const box = (await link.boundingBox())!;
+        expect(box.y + box.height).toBeLessThanOrEqual(568);
+        expect(box.height).toBeGreaterThanOrEqual(48);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`home-touch-${theme}-320.png`),
+      });
+      await page.goto("prompts");
+      const firstCard = page.locator(".archive-grid .study-card").first();
+      await expect(firstCard).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      expect((await firstCard.boundingBox())!.y).toBeLessThan(568);
+      await page.screenshot({
+        path: testInfo.outputPath(`archive-touch-${theme}-320.png`),
+      });
+    } finally {
+      await context.close();
+    }
+  }
+});
