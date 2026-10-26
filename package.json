@@ -11,7 +11,7 @@
     "dev": "vite",
     "typecheck": "tsc --noEmit",
     "validate": "tsx scripts/validate-content.ts",
-    "build": "npm run validate && npm run typecheck && vite build && node scripts/generate-card-thumbnails.mjs && node scripts/postbuild.mjs && node scripts/generate-sitemap.js && node scripts/check-noscript.mjs && node scripts/check-built-assets.mjs",
+    "build": "npm run validate && npm run typecheck && vite build && node scripts/generate-card-thumbnails.mjs && tsx scripts/postbuild.mjs && node scripts/generate-sitemap.js && node scripts/check-noscript.mjs && node scripts/check-built-assets.mjs",
     "preview": "vite preview",
     "test": "vitest run && node --test tests/external-links.mjs",
     "test:e2e": "playwright test"

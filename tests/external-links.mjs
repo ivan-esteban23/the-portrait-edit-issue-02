@@ -50,7 +50,15 @@ const urls = [
           node.getAttribute("src") ??
           node.getAttribute("content"),
       )
-      .filter((value) => /^https?:\/\//.test(value)),
+      .filter((value) => /^https?:\/\//.test(value))
+      // Candidate first-party assets are validated locally by check-built-assets;
+      // they may not exist on the live site until this PR is deployed.
+      .filter(
+        (value) =>
+          !value.startsWith(
+            "https://ivan-esteban23.github.io/the-portrait-edit-issue-02/",
+          ) || value.endsWith("/"),
+      ),
   ),
 ];
 const pdfLinks = urls.filter((url) => url.includes("/releases/download/"));
