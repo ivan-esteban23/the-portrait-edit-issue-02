@@ -4,8 +4,8 @@ export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "portrait-edit-theme";
 const THEME_COLORS: Record<Theme, string> = {
-  light: "#f7f5f0",
-  dark: "#121212",
+  light: "#f7f6f2",
+  dark: "#101010",
 };
 const THEME_EVENT = "portrait-edit-theme-change";
 let transientTheme: Theme | null = null;

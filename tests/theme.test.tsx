@@ -135,10 +135,10 @@ describe("browser toolbar colors", () => {
       document.head.appendChild(meta);
     }
     const { result } = renderHook(() => useTheme());
-    expect(toolbarColors()).toEqual(["#121212", "#121212"]);
+    expect(toolbarColors()).toEqual(["#101010", "#101010"]);
     for (const [theme, color] of [
-      ["light", "#f7f5f0"],
-      ["dark", "#121212"],
+      ["light", "#f7f6f2"],
+      ["dark", "#101010"],
     ] as const) {
       act(() => result.current.setTheme(theme));
       expect(toolbarColors()).toEqual([color, color]);
@@ -148,8 +148,8 @@ describe("browser toolbar colors", () => {
 
   it("creates a dark toolbar color by default without consulting the OS", () => {
     const { unmount } = renderHook(() => useTheme());
-    expect(toolbarColors()).toEqual(["#121212"]);
+    expect(toolbarColors()).toEqual(["#101010"]);
     unmount();
-    expect(toolbarColors()).toEqual(["#121212"]);
+    expect(toolbarColors()).toEqual(["#101010"]);
   });
 });

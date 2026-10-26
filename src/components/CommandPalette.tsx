@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { Icon } from "@/components/ui/Icon";
 import { useState, useEffect, useLayoutEffect, useRef, useId, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -484,7 +485,7 @@ export function CommandPalette({
                       )}
                     </div>
                     {item.badge && (
-                      <span className="palette-item-badge">{item.badge}</span>
+                      <span className="palette-item-badge"><IconText>{item.badge}</IconText></span>
                     )}
                   </button>
                 </div>
@@ -495,7 +496,7 @@ export function CommandPalette({
 
         <footer className="palette-footer">
           <div className="palette-hints">
-            <span><kbd>↑</kbd><kbd>↓</kbd> to navigate</span>
+            <span><kbd><IconText>↑</IconText></kbd><kbd><IconText>↓</IconText></kbd> to navigate</span>
             <span><kbd>↵</kbd> to select</span>
             <span><kbd>esc</kbd> to close</span>
           </div>

@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { Icon } from "@/components/ui/Icon";
 import {
   lazy,
@@ -197,7 +198,7 @@ export default function App() {
       {!focused && (
         <header className="masthead">
           <Link className="wordmark" to="/">
-            THE PORTRAIT EDIT — ISSUE 02
+            THE PORTRAIT EDIT<span className="wordmark-issue"> / 02</span>
             <span>{t("Independent portrait studies")}</span>
           </Link>
           <nav aria-label="Publication">
@@ -280,15 +281,15 @@ export default function App() {
             <p>{t("An independent editorial archive.")}</p>
           </div>
           <nav aria-label="Publication resources">
-            <a href={currentIssue.pdfUrl}>{t("Download Issue 02 PDF ↗")}</a>
+            <a href={currentIssue.pdfUrl}><IconText>{t("Download Issue 02 PDF ↗")}</IconText></a>
             <a href={currentIssue.otherIssueUrl}>
-              {t("Issue 01 — The Fashion Issue ↗")}
+              <IconText>{t("Issue 01 — The Fashion Issue ↗")}</IconText>
             </a>
             <Link to={`/issues/${currentIssue.slug}`}>
               {t("Issue 02 — The Prompt Issue")}
             </Link>
             <a href="https://github.com/ivan-esteban23/the-portrait-edit">
-              {t("Source & production notes ↗")}
+              <IconText>{t("Source & production notes ↗")}</IconText>
             </a>
           </nav>
         </footer>

@@ -33,7 +33,11 @@ test("homepage routes readers into the magazine, archive, and saved collection",
   const onboardingSectionY = await page
     .getByRole("heading", { name: "Make the issue yours", exact: true })
     .evaluate((el) => el.getBoundingClientRect().top);
-  expect(archiveSectionY).toBeLessThan(844);
+  const heroBottom = await page
+    .locator(".home-hero")
+    .evaluate((el) => el.getBoundingClientRect().bottom);
+  expect(archiveSectionY).toBeGreaterThanOrEqual(heroBottom);
+  expect(archiveSectionY - heroBottom).toBeLessThan(128);
   expect(archiveSectionY).toBeLessThan(onboardingSectionY);
 
   await browseStudies.click();

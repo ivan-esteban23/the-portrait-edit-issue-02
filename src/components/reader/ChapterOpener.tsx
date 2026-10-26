@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { Link } from "react-router-dom";
 import { assetUrl, readerPath } from "@/content";
 import type { Issue, Prompt } from "@/content/schema";
@@ -90,7 +91,7 @@ export function ChapterOpener({
       )}
       <div className="chapter-opener-actions">
         <Link to={readerPath(issue.slug, firstStudy.page)}>
-          Start chapter · page {pad(firstStudy.page)} →
+          <IconText>Start chapter · page {pad(firstStudy.page)} →</IconText>
         </Link>
         <button type="button" onClick={() => onInspect(chapter.startPage)}>
           View original {pad(chapter.startPage)}

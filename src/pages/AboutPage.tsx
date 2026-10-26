@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { assetUrl, currentIssue } from "@/content";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
@@ -52,7 +53,7 @@ export function AboutPage() {
         </p>
         <p>
           <a href="https://github.com/ivan-esteban23/the-portrait-edit">
-            Source & production notes ↗
+            <IconText>Source & production notes ↗</IconText>
           </a>
         </p>
       </section>

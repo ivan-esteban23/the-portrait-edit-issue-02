@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import {
   lazy,
   Suspense,
@@ -612,7 +613,7 @@ export function ArchivePage() {
                     onClick={exportSaved}
                     title="Export collection as JSON"
                   >
-                    {t("Export JSON ↗")}
+                    <IconText>{t("Export JSON ↗")}</IconText>
                   </Button>
                   <Button
                     type="button"
@@ -621,7 +622,7 @@ export function ArchivePage() {
                     onClick={exportMarkdown}
                     title="Export collection as Markdown"
                   >
-                    Export Markdown ↗
+                    <IconText>Export Markdown ↗</IconText>
                   </Button>
                 </>
               )}
@@ -947,7 +948,7 @@ export function ArchivePage() {
                 aria-label="Export Markdown Dossier"
                 title="Download curated Markdown dossier (.md)"
               >
-                Export Markdown Dossier ↗
+                <IconText>Export Markdown Dossier ↗</IconText>
               </Button>
               <Button
                 type="button"
@@ -957,7 +958,7 @@ export function ArchivePage() {
                 aria-label="Export JSON"
                 title="Download selection as JSON (.json)"
               >
-                Export JSON ↗
+                <IconText>Export JSON ↗</IconText>
               </Button>
               <Button
                 type="button"

@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { assetUrl, currentIssue, prompts, readerPath } from "@/content";
 import { Study } from "@/components/Study";
@@ -68,10 +69,10 @@ export function StudyPage() {
           to={{ pathname: "/prompts", search: archiveContext?.search ?? "" }}
           state={archiveContext ? { archiveReturn: archiveContext } : undefined}
         >
-          ← Prompt archive
+          <IconText>← Prompt archive</IconText>
         </Link>
         <Link to={readerPath(prompt.issueSlug, prompt.page)}>
-          Read in the issue ↗
+          <IconText>Read in the issue ↗</IconText>
         </Link>
       </div>
       <nav className="study-sequence-nav" aria-label="Study navigation">
@@ -81,24 +82,32 @@ export function StudyPage() {
             state={studyState}
             rel="prev"
           >
-            <span>← Previous study</span>
+            <span>
+              <IconText>← Previous study</IconText>
+            </span>
             <strong>
               #{String(previousPrompt.studyNumber).padStart(3, "0")} ·{" "}
               {previousPrompt.title}
             </strong>
-            <kbd>←</kbd>
+            <kbd>
+              <IconText>←</IconText>
+            </kbd>
           </Link>
         ) : (
           <span />
         )}
         {nextPrompt ? (
           <Link to={`/prompts/${nextPrompt.id}`} state={studyState} rel="next">
-            <span>Next study →</span>
+            <span>
+              <IconText>Next study →</IconText>
+            </span>
             <strong>
               #{String(nextPrompt.studyNumber).padStart(3, "0")} ·{" "}
               {nextPrompt.title}
             </strong>
-            <kbd>→</kbd>
+            <kbd>
+              <IconText>→</IconText>
+            </kbd>
           </Link>
         ) : (
           <span />
