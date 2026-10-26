@@ -200,6 +200,26 @@ test("touch-enabled tablet contexts keep discovery visible at 320×568", async (
       await page.screenshot({
         path: testInfo.outputPath(`archive-touch-${theme}-320.png`),
       });
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await page.goto("issues/the-prompt-issue/pages/60");
+      const toolbar = page.locator("#reader-toolbar");
+      await expect(toolbar).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      expect((await toolbar.boundingBox())!.height).toBeLessThanOrEqual(64);
+      await expect(
+        page.getByRole("button", { name: "Copy page link", exact: true }),
+      ).toBeVisible();
+      for (const control of await toolbar
+        .locator("button, input, select")
+        .all()) {
+        if (!(await control.isVisible())) continue;
+        const box = (await control.boundingBox())!;
+        expect(box.width).toBeGreaterThanOrEqual(48);
+        expect(box.height).toBeGreaterThanOrEqual(48);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`reader-touch-${theme}-1920.png`),
+      });
     } finally {
       await context.close();
     }

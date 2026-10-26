@@ -606,3 +606,14 @@
     gap: 6px;
   }
 }
+
+@media screen {
+  /* Let the chapter selector shrink before wrapping whole groups of controls. */
+  .reader-top:not(.reader-toolbar-compact) .reader-controls,
+  .reader-top:not(.reader-toolbar-compact) .reader-tools {
+    flex-wrap: nowrap;
+  }
+  .reader-top:not(.reader-toolbar-compact) .reader-tools {
+    flex-shrink: 0;
+  }
+}

@@ -65,3 +65,22 @@ CI follow-up local verification passed:
 ```sh
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium mise exec node@24 -- npm run test:e2e -- tests/browser/discovery-sharing.spec.ts tests/browser/editorial-layout.spec.ts tests/browser/viewport-audit.spec.ts --project=desktop-light --project=tablet-light --project=tablet-landscape-dark --project=chromium-responsive --workers=1 --grep 'editorial layouts|touch-enabled tablet|homepage routes|all requested CSS viewport widths keep the reader|archive entry stays compact|320×568: every tag'
 ```
+
+## Wide touch toolbar follow-up
+
+- Commit `7356ea0` CI passed the former homepage/archive/viewport failures and completed tag coverage: 367 browser tests passed, 60 skipped. Six failures shared one cause: the expanded toolbar wrapped to 120px on touch contexts after restoring the 1440px publication cap.
+- Reproduced at 1920×1080 with touch enabled. Flex wrapping chose a second row before allowing the chapter selector to shrink. Prevent wrapping in the expanded toolbar and retain the optional-tools group's intrinsic width; the selector absorbs the difference. Reproduction now measures a single 64px row with all controls visible and all 48px touch targets preserved.
+- Extended the touch-context regression to resize into the wide reader in both themes, require the single-row height, expose Copy page link, and measure every visible control's touch target.
+- Pending final focused sharing/responsive/visual verification and latest-commit CI. Existing assertions and workflow remain unchanged.
+
+Final wide-toolbar verification:
+
+- Production build (including typecheck and static/asset checks), targeted Prettier and `git diff --check` passed.
+- All seven discovery-sharing profiles, the complete responsive-reader suite, and the extended both-theme visual/touch matrix: 34 passed, 30 expected non-owner matrix skips, no failures (4.3m).
+- Covers copy feedback without wrapping, 48px targets, rotation, Focus, bookmarks, 200% equivalent layouts, Prompt Studio through 8K, and wide touch toolbar screenshots. Inspected the final 64px row in both themes.
+- Backed up repository config and added only `work` to the previously main-only fetch configuration; the local work branch now resolves its upstream correctly. Other worktrees and their dirty files remain intact.
+- Stopped the task-owned preview and preserved date-only sitemaps. Latest-commit full CI will run after push; do not merge/deploy.
+
+```sh
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium mise exec node@24 -- npm run test:e2e -- tests/browser/discovery-sharing.spec.ts tests/browser/responsive-reader.spec.ts tests/browser/editorial-layout.spec.ts --workers=1
+```
