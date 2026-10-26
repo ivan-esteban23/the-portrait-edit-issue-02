@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { JSDOM } from "jsdom";
 
@@ -52,7 +52,66 @@ function inspect(file) {
   document.defaultView.close();
   for (const next of nested) inspect(next);
 }
-inspect(path.resolve("dist/index.html"));
+for (const file of readdirSync("dist", { recursive: true })) {
+  if (file === "index.html" || file.endsWith("/index.html"))
+    inspect(path.resolve("dist", file));
+}
+// The 404 response retains the home reading fallback.
+inspect(path.resolve("dist/404.html"));
+const studies = readdirSync("src/content/prompts")
+  .filter((f) => f.endsWith(".json"))
+  .map((f) => JSON.parse(readFileSync(`src/content/prompts/${f}`, "utf8")))
+  .sort((a, b) => a.studyNumber - b.studyNumber);
+for (const [index, study] of studies.entries()) {
+  const dom = new JSDOM(
+    readFileSync(`dist/prompts/${study.id}/index.html`, "utf8"),
+  );
+  const document = dom.window.document;
+  const fallback = document.querySelector("noscript");
+  assert.equal(
+    document.title,
+    `Study #${study.studyNumber}: ${study.title} | The Portrait Edit`,
+  );
+  const description = study.prompt.replace(/\s+/g, " ").trim();
+  assert.equal(
+    document.querySelector('meta[name="description"]').content,
+    description.length <= 155
+      ? description
+      : description.slice(0, 154).trimEnd() + "…",
+  );
+  for (const text of [
+    study.prompt,
+    study.title,
+    study.style,
+    study.workingNotes,
+  ])
+    assert.ok(
+      fallback.textContent.includes(text),
+      `${study.id}: missing study content`,
+    );
+  assert.equal(
+    fallback.querySelector("img").getAttribute("src"),
+    `${base}${study.referenceImage}`,
+  );
+  assert.ok(
+    fallback.querySelector("img").getAttribute("alt").includes(study.title),
+  );
+  assert.ok(
+    fallback.querySelector(
+      `a[href="${base}issues/${study.issueSlug}/pages/${study.page}/"]`,
+    ),
+  );
+  for (const [rel, other] of [
+    ["prev", studies[index - 1]],
+    ["next", studies[index + 1]],
+  ]) {
+    assert.equal(
+      fallback.querySelector(`a[rel="${rel}"]`)?.getAttribute("href"),
+      other ? `${base}prompts/${other.id}/` : undefined,
+    );
+  }
+  dom.window.close();
+}
 const firstPage = readFileSync(
   "dist/issues/the-prompt-issue/pages/1/index.html",
   "utf8",

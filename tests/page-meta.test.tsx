@@ -60,10 +60,10 @@ it("updates page metadata and restores index defaults on unmount", () => {
   ).toBe(new URL("/assets/study.webp", window.location.href).href);
   expect(
     document.querySelector('meta[property="og:url"]')?.getAttribute("content"),
-  ).toBe("https://example.test/issue/prompts/study-12");
+  ).toBe(new URL("/prompts/study-12/", window.location.origin).href);
   expect(
     document.querySelector('link[rel="canonical"]')?.getAttribute("href"),
-  ).toBe("https://example.test/issue/prompts/study-12");
+  ).toBe(new URL("/prompts/study-12/", window.location.origin).href);
 
   view.unmount();
 
