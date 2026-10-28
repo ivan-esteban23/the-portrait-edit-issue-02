@@ -42,7 +42,7 @@ const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 ${routes
   .map(
     (r) => `  <url>
-    <loc>${BASE_URL}/${r.path ? `${r.path}` : ""}</loc>
+    <loc>${BASE_URL}/${r.path ? `${r.path}/` : ""}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${r.changefreq}</changefreq>
     <priority>${r.priority}</priority>

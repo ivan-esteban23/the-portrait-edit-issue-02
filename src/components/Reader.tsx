@@ -320,7 +320,9 @@ function ReaderView({
     );
   usePageMeta({
     title: `Page ${page} — ${chapter.title} | The Portrait Edit`,
-    description: study ? truncateMetaDescription(study.prompt) : undefined,
+    description: study
+      ? truncateMetaDescription(study.prompt)
+      : issue.description,
     image: assetUrl(study?.referenceImage ?? issue.cover),
     path: readerPath(issue.slug, page),
   });

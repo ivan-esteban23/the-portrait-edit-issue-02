@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { absolutePageUrl, pageStructuredData } from "../lib/pageMeta";
+export { truncateMetaDescription } from "../lib/pageMeta";
 
 // 1. Reader: /issues/:slug/pages/:page
 // 2. Study detail: /prompts/:id
@@ -76,19 +78,6 @@ function absoluteImageUrl(image: string) {
   return new URL(image, window.location.href).href;
 }
 
-function absolutePageUrl(path: string | undefined, defaultUrl: string) {
-  if (!path) return defaultUrl;
-  if (/^https?:\/\//i.test(path)) return path;
-  const baseUrl = defaultUrl.endsWith("/") ? defaultUrl : `${defaultUrl}/`;
-  return new URL(path.replace(/^\/+/, ""), baseUrl).href;
-}
-
-export function truncateMetaDescription(text: string, maxLength = 155) {
-  const normalized = text.replace(/\s+/g, " ").trim();
-  if (normalized.length <= maxLength) return normalized;
-  return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
-}
-
 export function usePageMeta({
   title,
   description,
@@ -107,13 +96,41 @@ export function usePageMeta({
     const ogUrlMeta = metaElement("property", "og:url");
     const canonical = canonicalElement();
     const pageDescription = description ?? defaults.description;
-    const pageUrl = absolutePageUrl(path, defaults.ogUrl);
+    const siteUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
+      .href;
+    const pageUrl = absolutePageUrl(path, siteUrl);
 
     document.title = title;
     descriptionMeta.content = pageDescription;
     ogTitleMeta.content = title;
-    ogDescriptionMeta.content = description ?? defaults.ogDescription;
-    ogImageMeta.content = image ? absoluteImageUrl(image) : defaults.ogImage;
+    ogDescriptionMeta.content = pageDescription;
+    const shareImage =
+      image && !image.endsWith("/cover.webp")
+        ? absoluteImageUrl(image)
+        : new URL("social-card.png", siteUrl).href;
+    ogImageMeta.content = shareImage;
+    metaElement("name", "twitter:title").content = title;
+    metaElement("name", "twitter:description").content = pageDescription;
+    metaElement("name", "twitter:image").content = shareImage;
+    for (const [key, value] of Object.entries({
+      width: "1200",
+      height: "630",
+    })) {
+      const element = metaElement("property", `og:image:${key}`);
+      if (shareImage.endsWith("/social-card.png")) element.content = value;
+      else element.remove();
+    }
+    let jsonLd = document.querySelector<HTMLScriptElement>(
+      'script[type="application/ld+json"]',
+    );
+    if (!jsonLd) {
+      jsonLd = document.createElement("script");
+      jsonLd.type = "application/ld+json";
+      document.head.append(jsonLd);
+    }
+    jsonLd.textContent = JSON.stringify(
+      pageStructuredData(title, pageDescription, pageUrl, shareImage),
+    );
     ogUrlMeta.content = pageUrl;
     canonical.href = path ? pageUrl : defaults.canonical;
 
