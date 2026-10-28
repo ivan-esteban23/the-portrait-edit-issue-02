@@ -249,7 +249,7 @@ test("explicit themes ignore the OS preference and form controls retain cross-pl
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.locator("body")).toHaveCSS(
     "background-color",
-    "rgb(8, 8, 8)",
+    "rgb(16, 16, 16)",
   );
   await settings(page);
   for (const control of await page.locator("input,select").all())
@@ -539,7 +539,7 @@ test("theme controls, shortcuts, and browser tabs share the same preference", as
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("body")).toHaveCSS(
     "background-color",
-    "rgb(246, 244, 239)",
+    "rgb(247, 246, 242)",
   );
   await mastheadTheme.click();
   await expect(mastheadTheme).toHaveAttribute("aria-label", /dark/);

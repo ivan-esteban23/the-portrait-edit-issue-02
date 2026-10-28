@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
@@ -267,7 +268,7 @@ export function Study({
                 aria-label="Share study"
                 title="Share study"
               >
-                Share ↗
+                <IconText>Share ↗</IconText>
               </Button>
             )}
             <Button

@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { useCallback, useEffect, useRef } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { assetUrl, currentIssue, issues, prompts, readerPath } from "@/content";
@@ -63,7 +64,7 @@ export function IssueOverviewPage() {
                 browseChapters();
             }}
           >
-            Browse chapters ↓
+            <IconText>Browse chapters ↓</IconText>
           </Link>
         </Button>
         <p className="editorial-intro">{issue.description}</p>
@@ -78,9 +79,11 @@ export function IssueOverviewPage() {
           <div className="hero-actions">
             <Button asChild variant="default">
               <Link to={readerPath(issue.slug, lastReadPage)}>
-                {lastReadPage > 1
-                  ? `Resume reading (Page ${lastReadPage}) ↗`
-                  : "Start reading"}
+                <IconText>
+                  {lastReadPage > 1
+                    ? `Resume reading (Page ${lastReadPage}) ↗`
+                    : "Start reading"}
+                </IconText>
               </Link>
             </Button>
             {lastReadPage > 1 && (
@@ -99,7 +102,9 @@ export function IssueOverviewPage() {
               Print contact sheet
             </Button>
             <a href={issue.pdfUrl}>
-              Download PDF · {(issue.pdfBytes / 1e6).toFixed(1)} MB ↗
+              <IconText>
+                Download PDF · {(issue.pdfBytes / 1e6).toFixed(1)} MB ↗
+              </IconText>
             </a>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { useSlideshow } from "@/hooks/useSlideshow";
 import { useReaderKeyboard } from "@/hooks/useReaderKeyboard";
 import { useSwipeGestures } from "@/hooks/useSwipeGestures";
@@ -643,7 +644,9 @@ function ReaderView({
           aria-live="polite"
           aria-label="Swipe gesture hint"
         >
-          <span className="touch-swipe-text">← Swipe to turn pages →</span>
+          <span className="touch-swipe-text">
+            <IconText>← Swipe to turn pages →</IconText>
+          </span>
           <button
             type="button"
             className="touch-swipe-dismiss"
@@ -787,7 +790,7 @@ function ReaderView({
           disabled={firstVisible === 1}
           onClick={() => turnPage(-1)}
         >
-          ← Previous
+          <IconText>← Previous</IconText>
         </Button>
         <span>
           {pageLabel} / {issue.pages}
@@ -797,7 +800,7 @@ function ReaderView({
           disabled={lastVisible === issue.pages}
           onClick={() => turnPage(1)}
         >
-          Next →
+          <IconText>Next →</IconText>
         </Button>
       </nav>
       {lightbox && (

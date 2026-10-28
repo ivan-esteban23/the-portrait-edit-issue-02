@@ -2,6 +2,11 @@ const bookmark = <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />;
 const straightBookmark = <path d="M6 3h12v18l-6-4-6 4z" />;
 
 const icons = {
+  "arrow-up-right": <path d="M7 17 17 7M7 7h10v10" />,
+  "arrow-right": <path d="M4 12h16m-6-6 6 6-6 6" />,
+  "arrow-left": <path d="M20 12H4m6-6-6 6 6 6" />,
+  "arrow-down": <path d="M12 4v16m-6-6 6 6 6-6" />,
+  "arrow-up": <path d="M12 20V4m-6 6 6-6 6 6" />,
   copy: (
     <>
       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />

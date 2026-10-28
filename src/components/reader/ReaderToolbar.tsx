@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { useEffect, useRef, useState } from "react";
 import { useMedia } from "@/hooks/useReader";
 import { Link } from "react-router-dom";
@@ -175,7 +176,7 @@ export function ReaderToolbar({
             disabled={firstVisible === 1}
             onClick={() => turnPage(-1)}
           >
-            ←
+            <IconText>←</IconText>
           </Button>
           <form
             onSubmit={(e) => {
@@ -204,7 +205,7 @@ export function ReaderToolbar({
             disabled={lastVisible === issue.pages}
             onClick={() => turnPage(1)}
           >
-            →
+            <IconText>→</IconText>
           </Button>
         </div>
         <Dialog open={settings} onOpenChange={openSettings}>
@@ -334,7 +335,7 @@ export function ReaderToolbar({
             <div className="keyboard-guide">
               <h3>{t("Keyboard")}</h3>
               <p>
-                ← / K previous · → / J next
+                <IconText>← / K previous · → / J next</IconText>
                 <br />
                 Home / End first and last page
                 <br />T Table of contents · R Reading view
@@ -344,7 +345,7 @@ export function ReaderToolbar({
               </p>
               {hint && (
                 <p className="keys-hint">
-                  Use ← → arrow keys to turn pages{" "}
+                  <IconText>Use ← → arrow keys to turn pages</IconText>{" "}
                   <Button
                     variant="ghost"
                     aria-label="Dismiss keyboard shortcut hint"
@@ -355,7 +356,9 @@ export function ReaderToolbar({
                 </p>
               )}
             </div>
-            <a href={issue.pdfUrl}>{t("Download original PDF ↗")}</a>
+            <a href={issue.pdfUrl}>
+              <IconText>{t("Download original PDF ↗")}</IconText>
+            </a>
           </DialogContent>
         </Dialog>
         <Button
@@ -410,7 +413,11 @@ export function ReaderToolbar({
               {t("Close tools")}
             </Button>
           )}
-          <CopyLinkButton path={readerPath(issue.slug, page)} label="Copy page link" iconOnly={!compact} />
+          <CopyLinkButton
+            path={readerPath(issue.slug, page)}
+            label="Copy page link"
+            iconOnly={!compact}
+          />
           {/* Presentation Slideshow Play/Pause Button */}
           <Button
             variant="ghost"

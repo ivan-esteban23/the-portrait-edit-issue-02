@@ -7,6 +7,7 @@ import "@fontsource-variable/newsreader/standard-italic.css";
 import "@fontsource-variable/jetbrains-mono/wght.css";
 import "@fontsource-variable/jetbrains-mono/wght-italic.css";
 import "./styles.css";
+import "./editorial.css";
 import App from "./App";
 import { LanguageProvider } from "./i18n/LanguageProvider";
 createRoot(document.getElementById("root")!).render(

@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { assetUrl, currentIssue, prompts, readerPath } from "@/content";
 import { Button } from "@/components/ui/button";
@@ -44,14 +45,16 @@ export function HomePage() {
   return (
     <>
       <section className="home-hero">
-        <div>
+        <div className="hero-copy">
           <p className="eyebrow">
             Issue {currentIssue.number} / {t("A portrait archive")}
           </p>
           <h1>
-            The
-            <br />
-            <em>Prompt</em> Issue
+            <span className="hero-title-prefix">The</span>
+            <em>Prompt</em>
+            <span className="hero-title-ending">
+              Issue<span aria-hidden="true"> / 02</span>
+            </span>
           </h1>
           <p className="hero-deck">{currentIssue.description}</p>
           <p className="issue-stats">
@@ -62,9 +65,13 @@ export function HomePage() {
           <div className="hero-actions">
             <Button asChild variant="default">
               <Link to={readerPath(currentIssue.slug, lastReadPage)}>
-                {lastReadPage > 1
-                  ? t("Resume reading · Page {page} ↗", { page: lastReadPage })
-                  : t("Start reading ↗")}
+                <IconText>
+                  {lastReadPage > 1
+                    ? t("Resume reading · Page {page} ↗", {
+                        page: lastReadPage,
+                      })
+                    : t("Start reading ↗")}
+                </IconText>
               </Link>
             </Button>
             <Button asChild variant="outline">
@@ -82,24 +89,46 @@ export function HomePage() {
             </Link>
           </div>
         </div>
-        <Link
-          className="hero-cover"
-          to={readerPath(currentIssue.slug, lastReadPage)}
-          aria-label={t("Read The Prompt Issue")}
-        >
-          <img
-            src={assetUrl(currentIssue.cover)}
-            width="480"
-            height="622"
-            alt="The Portrait Edit — Issue 02 cover"
-          />
-          <span>Issue 02 — The Prompt Issue</span>
-        </Link>
+        <div className="hero-visual">
+          <Link className="hero-portrait" to={`/prompts/${featured[0].id}`}>
+            <img
+              src={assetUrl(featured[0].referenceImage)}
+              alt={featured[0].title}
+              fetchPriority="high"
+              decoding="async"
+            />
+            <span className="hero-image-caption">
+              <span>
+                Study {String(featured[0].studyNumber).padStart(3, "0")}
+              </span>
+              <span>
+                <IconText>{featured[0].title} ↗</IconText>
+              </span>
+            </span>
+          </Link>
+          <Link
+            className="hero-cover"
+            to={readerPath(currentIssue.slug, lastReadPage)}
+            aria-label={t("Read The Prompt Issue")}
+          >
+            <img
+              src={assetUrl(currentIssue.cover)}
+              width="480"
+              height="622"
+              alt="The Portrait Edit — Issue 02 cover"
+            />
+            <span>
+              <IconText>Issue 02 — The Prompt Issue ↗</IconText>
+            </span>
+          </Link>
+        </div>
       </section>
       <section className="selected-section">
         <div className="section-title">
           <h2>{t("From the archive")}</h2>
-          <Link to="/prompts">{t("All studies ↗")}</Link>
+          <Link to="/prompts">
+            <IconText>{t("All studies ↗")}</IconText>
+          </Link>
         </div>
         <div className="selected-strip">
           {featured.map((p) => (
@@ -131,7 +160,9 @@ export function HomePage() {
                 : t("Read the magazine")}
             </h3>
             <p>{t("Jump by chapter or pick up on your last page.")}</p>
-            <span className="home-start-action">{t("Open reader")} ↗</span>
+            <span className="home-start-action">
+              <IconText>{t("Open reader")} ↗</IconText>
+            </span>
           </Link>
           <Link className="home-start-card" to="/prompts">
             <span className="eyebrow">02 / {t("Explore")}</span>
@@ -142,7 +173,7 @@ export function HomePage() {
               {t("Filter by style tag, copy prompts, or open Prompt Studio.")}
             </p>
             <span className="home-start-action">
-              {t("Explore the archive")} ↗
+              <IconText>{t("Explore the archive")} ↗</IconText>
             </span>
           </Link>
           <Link className="home-start-card" to="/prompts?saved=1">
@@ -158,7 +189,7 @@ export function HomePage() {
               )}
             </p>
             <span className="home-start-action">
-              {t("View saved studies")} ↗
+              <IconText>{t("View saved studies")} ↗</IconText>
             </span>
           </Link>
         </div>

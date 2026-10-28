@@ -1,3 +1,4 @@
+import { IconText } from "@/components/ui/IconText";
 import { useRef } from "react";
 import { Button } from "./ui/button";
 import { ModalContent, ModalTitle } from "./ui/dialog";
@@ -63,7 +64,9 @@ export function ShortcutsModal({ isOpen, onClose }: ShortcutsModalProps) {
       <div className="shortcuts-grid">
         {shortcuts.map((s) => (
           <div key={s.key} className="shortcut-row">
-            <kbd className="shortcut-kbd">{s.key}</kbd>
+            <kbd className="shortcut-kbd">
+              <IconText>{s.key}</IconText>
+            </kbd>
             <span className="shortcut-label">{s.label}</span>
           </div>
         ))}
