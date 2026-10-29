@@ -509,6 +509,7 @@ h3,
   outline-offset: 6px;
 }
 .overview-cover {
+  margin-top: var(--space-6);
   max-width: 300px;
   box-shadow: var(--shadow);
 }
@@ -985,7 +986,7 @@ select:hover {
   padding-top: var(--space-6);
   border-top: 1px solid var(--border);
 }
-.article-section h3 {
+.article-section h2 {
   margin-bottom: 16px;
 }
 .preserve-text {
@@ -1431,8 +1432,8 @@ select:hover {
     align-items: flex-start;
     gap: 12px;
   }
-  .prompt-card-heading h3 {
-    font-size: 0.6875rem;
+  .prompt-card-heading h2 {
+    font-size: var(--type-caption);
   }
   .prompt-copy-actions {
     display: flex;

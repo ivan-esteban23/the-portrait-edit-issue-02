@@ -128,7 +128,7 @@ export function PromptCard({
   return (
     <section className="prompt-card" aria-label="Image prompt">
       <div className="prompt-card-heading">
-        <h3>Image Prompt</h3>
+        <h2>Image Prompt</h2>
         <div className="prompt-copy-actions">
           <Button
             variant="default"
@@ -342,11 +342,11 @@ export function Study({
         onOpenStudio={() => setStudioOpen(true)}
       />
       <section className="article-section">
-        <h3>Working notes</h3>
+        <h2>Working notes</h2>
         <p className="preserve-text">{prompt.workingNotes}</p>
       </section>
       <section className="article-section">
-        <h3>Try this</h3>
+        <h2>Try this</h2>
         <p className="preserve-text">{prompt.tryThis}</p>
       </section>
       <RelatedStudies prompt={prompt} context={context} />
