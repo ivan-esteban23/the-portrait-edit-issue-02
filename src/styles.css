@@ -5702,3 +5702,17 @@ textarea {
   opacity: 0.45;
   cursor: default;
 }
+
+/* Keep the Studio's scrollable workspace usable in short landscape windows. */
+@media (max-height: 420px) and (min-width: 521px) {
+  .prompt-studio-header {
+    padding-block: calc(8px + env(safe-area-inset-top)) 8px;
+  }
+  .prompt-studio-footer {
+    gap: 4px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  }
+  .studio-copy-feedback {
+    min-height: 1.7em;
+  }
+}
