@@ -71,11 +71,6 @@ export function IssueOverviewPage() {
       </header>
       <div className="overview-grid">
         <div>
-          <img
-            className="overview-cover"
-            src={assetUrl(issue.cover)}
-            alt={`${issue.title} cover`}
-          />
           <div className="hero-actions">
             <Button asChild variant="default">
               <Link to={readerPath(issue.slug, lastReadPage)}>
@@ -107,6 +102,11 @@ export function IssueOverviewPage() {
               </IconText>
             </a>
           </div>
+          <img
+            className="overview-cover"
+            src={assetUrl(issue.cover)}
+            alt={`${issue.title} cover`}
+          />
         </div>
         <nav className="chapter-directory" aria-label="Issue chapters">
           <h2 id="issue-chapters" ref={chapterHeading} tabIndex={-1}>
