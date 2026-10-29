@@ -60,7 +60,9 @@ export function ThumbnailFilmstrip({
     const frame = requestAnimationFrame(() => {
       const slot = scroll.current?.children[currentPageIndex];
       slot?.scrollIntoView?.({
-        behavior: "smooth",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
         block: "nearest",
         inline: "center",
       });

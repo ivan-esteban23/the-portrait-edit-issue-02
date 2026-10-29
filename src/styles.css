@@ -979,8 +979,8 @@ select:hover {
   color: var(--muted);
   margin-top: 16px;
 }
-.copy-feedback:empty {
-  display: none;
+.copy-feedback {
+  min-height: 3.5em;
 }
 .article-section {
   padding-top: var(--space-6);
@@ -1901,7 +1901,11 @@ select:hover {
   border: 1px solid var(--border);
   border-radius: 4px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: all 140ms ease;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
   cursor: pointer;
 }
 .card-action-btn:hover {
@@ -1960,7 +1964,10 @@ select:hover {
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 999px;
-  transition: all 120ms ease;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
   cursor: pointer;
 }
 .tag-badge:hover {
@@ -3845,13 +3852,10 @@ select:hover {
   font-family: var(--mono);
 }
 .anatomy-feedback {
-  min-height: 1em;
+  min-height: 1.4em;
   margin: 0;
   color: var(--muted);
   font: 0.75rem/1.4 var(--font-sans);
-}
-.anatomy-feedback:empty {
-  display: none;
 }
 .prompt-diff-grid {
   display: grid;
@@ -4096,13 +4100,11 @@ select:hover {
   }
 }
 .studio-copy-feedback {
-  min-height: 1.5em;
+  flex-basis: 100%;
+  grid-column: 1 / -1;
+  min-height: 3.4em;
   font-size: 0.8125rem;
   color: var(--muted);
-}
-.studio-copy-feedback:empty {
-  min-height: 0;
-  margin-block: -11px;
 }
 .related-studies {
   margin-top: 48px;
@@ -5687,4 +5689,16 @@ textarea {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font: inherit;
+}
+
+.compare-copy-feedback {
+  flex-basis: 100%;
+  min-height: 3em;
+  font-size: var(--type-ui);
+  line-height: 1.5;
+}
+
+.prompt-card [aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
 }
