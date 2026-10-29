@@ -34,6 +34,9 @@
     --border-hover: rgb(23 23 21 / 45%);
     --shadow: 0 16px 36px rgb(23 23 21 / 9%);
   }
+  :root[data-theme="light"] #reader-toolbar {
+    --muted: #54524e;
+  }
   .publication {
     max-width: 1440px;
     border-inline: 1px solid var(--border);
