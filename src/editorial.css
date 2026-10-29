@@ -71,7 +71,7 @@
   }
   .masthead nav a {
     border-radius: 0;
-    font-size: 0.75rem;
+    font-size: var(--type-caption);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.07em;
@@ -86,7 +86,7 @@
     background: transparent;
   }
   .eyebrow {
-    font-size: 0.6875rem;
+    font-size: var(--type-caption);
     font-weight: 600;
     letter-spacing: 0.14em;
   }
@@ -152,11 +152,11 @@
   }
   .home-hero .issue-stats {
     width: 100%;
-    padding-top: 20px;
-    margin-top: 28px;
+    padding-top: var(--space-4);
+    margin-top: var(--space-6);
     border-top: 1px solid var(--border);
     font-family: var(--mono);
-    font-size: 0.6875rem;
+    font-size: var(--type-caption);
   }
   .home-hero .hero-actions {
     gap: 12px 20px;
@@ -194,7 +194,7 @@
     gap: 4px 16px;
     padding: 12px 0;
     border-bottom: 1px solid var(--text);
-    font-size: 0.6875rem;
+    font-size: var(--type-caption);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -215,11 +215,11 @@
   .hero-cover span {
     display: block;
     margin: 0;
-    font-size: 0.6875rem;
+    font-size: var(--type-caption);
   }
   .selected-section,
   .home-start {
-    padding-block: 48px 64px;
+    padding-block: var(--space-12) var(--space-16);
     border-top: 2px solid var(--text);
   }
   .section-title h2,
@@ -277,7 +277,7 @@
   .home-start-card {
     border: 0;
     border-right: 1px solid var(--border);
-    padding: 28px;
+    padding: var(--space-8);
   }
   .home-start-card:first-child {
     padding-left: 0;
@@ -301,8 +301,8 @@
   .archive > header,
   .overview > header {
     border-bottom: 2px solid var(--text);
-    padding-bottom: 32px;
-    margin-bottom: 32px;
+    padding-bottom: var(--space-8);
+    margin-bottom: var(--space-8);
   }
   .archive header h1,
   .overview header h1,
@@ -360,7 +360,7 @@
   .study-links {
     padding-bottom: 20px;
     border-bottom: 2px solid var(--text);
-    font-size: 0.75rem;
+    font-size: var(--type-caption);
   }
   .prompt-card,
   .parameters {
@@ -409,7 +409,7 @@
   }
   .masthead nav a {
     padding-inline: 8px;
-    font-size: 0.6875rem;
+    font-size: var(--type-caption);
     min-height: 44px;
   }
   .home-hero {
@@ -441,6 +441,7 @@
     padding-top: 12px;
   }
   .home-hero .hero-actions {
+    gap: var(--space-3);
     margin-top: 16px;
   }
   .hero-portrait {
@@ -490,8 +491,8 @@
   }
   .archive > header,
   .overview > header {
-    padding-bottom: 24px;
-    margin-bottom: 24px;
+    padding-bottom: var(--space-6);
+    margin-bottom: var(--space-6);
   }
   .chapter-directory a {
     font-size: 1.15rem;
@@ -533,7 +534,7 @@
   }
   .study-card > .eyebrow,
   .archive-grid .study-card > .eyebrow {
-    font-size: 0.6875rem;
+    font-size: var(--type-caption);
     letter-spacing: 0.1em;
     line-height: 1.5;
   }
@@ -564,11 +565,12 @@
     gap: 8px;
   }
   .masthead nav {
-    grid-template-columns: 48px repeat(3, minmax(0, 1fr)) 48px;
+    /* Intrinsic label minima keep 12px uppercase text inside the same cells. */
+    grid-template-columns: 48px repeat(3, minmax(min-content, 1fr)) 48px;
   }
   .masthead nav a {
-    padding-inline: 2px;
-    letter-spacing: 0.02em;
+    padding-inline: 0;
+    letter-spacing: normal;
   }
   .home-hero {
     padding-top: 16px;

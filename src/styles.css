@@ -36,7 +36,20 @@
   --floating-background: color-mix(in srgb, var(--surface) 96%, transparent);
   --shadow: inset 0 1px 0 rgb(255 255 255 / 5%), 0 8px 30px rgb(0 0 0 / 28%);
   --overlay: rgb(0 0 0 / 72%);
-  --space-2: 8px;
+  /* Shared rhythm; keep fluid gutters and safe-area expressions independent. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --type-caption: 0.75rem;
+  --type-ui: 0.8125rem;
+  --type-body: 1.0625rem;
+  --leading-caption: 1.5;
+  --leading-reading: 1.75;
   /* Editorial serif with resilient print-grade fallbacks. */
   --serif:
     "Newsreader Variable", Newsreader, "Source Serif 4", "Charter",
@@ -100,7 +113,7 @@ body {
   font-family: var(--font-sans);
   color: var(--text);
   background: var(--bg);
-  font-size: 17px;
+  font-size: var(--type-body);
   line-height: 1.7;
   font-kerning: normal;
   font-variant-ligatures: common-ligatures;
@@ -293,7 +306,7 @@ h3,
   align-items: center;
   gap: 24px;
   margin-top: 28px;
-  font-size: 0.8125rem;
+  font-size: var(--type-ui);
 }
 .hero-cover {
   display: block;
@@ -396,7 +409,7 @@ h3,
 .copy-link-control input {
   width: 100%;
   min-width: 0;
-  font-size: 0.875rem;
+  font-size: max(16px, 1rem);
 }
 @media (max-width: 767px) {
   .home-start-grid {
@@ -527,7 +540,7 @@ h3,
 label {
   display: grid;
   gap: 6px;
-  font-size: 0.8125rem;
+  font-size: var(--type-ui);
   color: var(--muted);
 }
 input,
@@ -564,7 +577,7 @@ select:hover {
   display: flex;
   justify-content: space-between;
   gap: 20px;
-  font-size: 0.8125rem;
+  font-size: var(--type-ui);
   margin-bottom: 32px;
 }
 .study-sequence-nav {
@@ -670,7 +683,7 @@ select:hover {
   padding: 40px var(--gutter);
   border-top: 1px solid var(--border);
   color: var(--muted);
-  font-size: 0.8125rem;
+  font-size: var(--type-ui);
 }
 .site-footer p {
   margin-top: 8px;
@@ -792,7 +805,7 @@ select:hover {
 }
 .chapter-strip span {
   display: block;
-  font-size: 0.6875rem;
+  font-size: var(--type-caption);
   font-variant-numeric: tabular-nums;
 }
 .chapter-strip [aria-current] {
@@ -878,13 +891,13 @@ select:hover {
 .study-article {
   font-family: var(--serif);
   font-size: var(--reading-size, 18px);
-  line-height: 1.75;
-  max-width: min(68ch, 100%);
+  line-height: var(--leading-reading);
+  max-width: var(--measure);
   padding: 32px clamp(8px, 2vw, 32px);
   margin: auto;
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: var(--space-8);
 }
 .study-article h1 {
   font-size: clamp(2rem, 4vw, 3.3rem);
@@ -908,15 +921,15 @@ select:hover {
 }
 .study-article figcaption {
   font-family: var(--font-sans);
-  font-size: 0.6875rem;
+  font-size: var(--type-caption);
   color: var(--muted);
-  line-height: 1.65;
-  margin-top: 14px;
+  line-height: var(--leading-caption);
+  margin-top: var(--space-3);
   overflow-wrap: anywhere;
 }
 .study-article figcaption span {
   display: block;
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 .prompt-card {
   padding: clamp(16px, 3vw, 28px);
@@ -960,7 +973,7 @@ select:hover {
 .source-note,
 .copy-feedback {
   font-family: var(--font-sans);
-  font-size: 0.6875rem;
+  font-size: var(--type-caption);
   line-height: 1.6;
   color: var(--muted);
   margin-top: 16px;
@@ -969,7 +982,7 @@ select:hover {
   display: none;
 }
 .article-section {
-  padding-top: 28px;
+  padding-top: var(--space-6);
   border-top: 1px solid var(--border);
 }
 .article-section h3 {
@@ -1402,7 +1415,7 @@ select:hover {
   }
   .study-article {
     padding: 24px 12px;
-    gap: 28px;
+    gap: var(--space-8);
   }
   .study-article h1 {
     font-size: 2rem;
@@ -1568,7 +1581,7 @@ select:hover {
   margin: 0;
   padding: 14px 20px 8px;
   font-family: var(--mono);
-  font-size: 0.5625rem;
+  font-size: var(--type-caption);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
@@ -1576,7 +1589,7 @@ select:hover {
 .page-hint {
   margin: 9px 0 0;
   text-align: center;
-  font-size: 0.65625rem;
+  font-size: var(--type-caption);
   letter-spacing: 0.02em;
   color: var(--muted);
 }
@@ -1590,14 +1603,14 @@ select:hover {
 
 /* Structured chapter opener (text mode). */
 .chapter-opener {
-  max-width: 68ch;
+  max-width: var(--measure);
   margin: 0 auto;
   padding: 20px clamp(16px, 4vw, 48px) 0;
 }
 .chapter-opener-kicker {
   margin: 0;
   font-family: var(--mono);
-  font-size: 0.5625rem;
+  font-size: var(--type-caption);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--accent);
@@ -1626,7 +1639,7 @@ select:hover {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
   font-family: var(--mono);
-  font-size: 0.53125rem;
+  font-size: var(--type-caption);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
@@ -1647,17 +1660,19 @@ select:hover {
   box-shadow: 0 10px 24px rgb(0 0 0 / 18%);
 }
 .chapter-opener figcaption {
-  margin-top: 5px;
+  margin-top: var(--space-2);
   font-family: var(--mono);
-  font-size: 0.46875rem;
+  font-size: var(--type-caption);
   letter-spacing: 0.06em;
+  line-height: var(--leading-caption);
+  overflow-wrap: anywhere;
   color: var(--muted);
 }
 .chapter-opener-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 9px;
-  margin-top: 10px;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
 }
 .chapter-opener-pair figure {
   margin: 0;
@@ -1938,7 +1953,7 @@ select:hover {
   align-items: center;
   min-height: 24px;
   padding: 2px 8px;
-  font-size: 0.6875rem;
+  font-size: var(--type-caption);
   font-family: var(--font-sans);
   color: var(--muted);
   background: transparent;
@@ -4673,12 +4688,12 @@ body::before {
 }
 .study-article,
 .raw-page {
-  max-width: min(68ch, 100%);
+  max-width: var(--measure);
   padding-inline: clamp(16px, 4vw, 48px);
 }
 .study-article p,
 .raw-page pre {
-  line-height: 1.75;
+  line-height: var(--leading-reading);
 }
 .study-article h1,
 .study-article h2,
@@ -4840,7 +4855,7 @@ body::before {
   padding: 0 2px;
   border: 0;
   border-radius: 0;
-  font-size: 0.6875rem;
+  font-size: var(--type-caption);
   line-height: 1.3;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -4886,7 +4901,7 @@ body::before {
 }
 .archive-disclosure summary {
   padding: 12px;
-  font-size: 0.8125rem;
+  font-size: var(--type-ui);
   color: var(--text);
 }
 .archive-secondary-filters {
@@ -5580,7 +5595,7 @@ textarea {
   border-radius: 4px;
   background: var(--bg);
   color: var(--text);
-  font: 0.75rem/1.4 var(--font-mono, monospace);
+  font: max(16px, 1rem)/1.4 var(--font-mono, monospace);
 }
 
 @media (max-width: 767px) {
