@@ -176,12 +176,19 @@ export function ArchivePage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batchCopied, setBatchCopied] = useState<"" | "copied" | "failed">("");
   const batchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const batchRequest = useRef(0);
 
   useEffect(() => {
     return () => {
+      batchRequest.current += 1;
       if (batchTimer.current) clearTimeout(batchTimer.current);
     };
   }, []);
+  useEffect(() => {
+    batchRequest.current += 1;
+    setBatchCopied("");
+    if (batchTimer.current) clearTimeout(batchTimer.current);
+  }, [selectedIds]);
 
   const query = search.get("q") ?? "",
     tag = search.get("tag") ?? "",
@@ -347,12 +354,15 @@ export function ArchivePage() {
   const copySelectedPrompts = async () => {
     const selectedPrompts = prompts.filter((p) => selectedIds.includes(p.id));
     const combined = selectedPrompts.map((p) => p.prompt).join("\n\n");
+    const current = ++batchRequest.current;
     if (batchTimer.current) clearTimeout(batchTimer.current);
     try {
       await copyText(combined);
+      if (current !== batchRequest.current) return;
       setBatchCopied("copied");
       batchTimer.current = setTimeout(() => setBatchCopied(""), 2000);
     } catch {
+      if (current !== batchRequest.current) return;
       setBatchCopied("failed");
       batchTimer.current = setTimeout(() => setBatchCopied(""), 4000);
     }

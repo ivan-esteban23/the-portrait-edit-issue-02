@@ -57,8 +57,12 @@ export function PromptCard({
   }
   const [anatomyOpen, setAnatomyOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
   const [exportingCard, setExportingCard] = useState(false);
+  const feedbackRequest = useRef(0);
   useEffect(() => {
+    feedbackRequest.current += 1;
+    setFeedback("");
     setEnabledParameters(
       getCommandParameters(prompt).map((parameter) => parameter.key),
     );
@@ -70,11 +74,15 @@ export function PromptCard({
     alive.current = true;
     return () => {
       alive.current = false;
+      feedbackRequest.current += 1;
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
 
   async function copyFormat(format: CopyFormat = "raw") {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    const current = ++feedbackRequest.current;
     if (timer.current) clearTimeout(timer.current);
     setBusy(true);
     setFeedback("");
@@ -91,7 +99,7 @@ export function PromptCard({
             ? command
             : formatPromptText(prompt, format);
       await copyText(text);
-      if (!alive.current) return;
+      if (!alive.current || current !== feedbackRequest.current) return;
       let msg = "Prompt copied.";
       if (format === "discord") msg = "Discord /imagine command copied.";
       else if (format === "params") msg = "Midjourney prompt copied.";
@@ -99,25 +107,27 @@ export function PromptCard({
       setFeedback(msg);
       timer.current = setTimeout(() => setFeedback(""), 1600);
     } catch {
-      if (alive.current)
+      if (alive.current && current === feedbackRequest.current)
         setFeedback("Copy unavailable. Select the prompt text to copy it.");
     } finally {
+      busyRef.current = false;
       if (alive.current) setBusy(false);
     }
   }
 
   async function handleExportCard() {
+    const current = ++feedbackRequest.current;
     if (timer.current) clearTimeout(timer.current);
     setFeedback("");
     setExportingCard(true);
     try {
       await exportStudyRecipeCard(prompt);
-      if (alive.current) {
+      if (alive.current && current === feedbackRequest.current) {
         setFeedback("Recipe card PNG exported.");
         timer.current = setTimeout(() => setFeedback(""), 2000);
       }
     } catch {
-      if (alive.current) {
+      if (alive.current && current === feedbackRequest.current) {
         setFeedback("Unable to export recipe card.");
       }
     } finally {
@@ -133,7 +143,7 @@ export function PromptCard({
           <Button
             variant="default"
             onClick={() => copyFormat("raw")}
-            disabled={busy}
+            aria-disabled={busy}
           >
             {feedback === "Prompt copied."
               ? "Copied"
@@ -161,30 +171,33 @@ export function PromptCard({
               <Button
                 variant="ghost"
                 onClick={() => {
+                  if (busyRef.current) return;
                   closeActions();
                   void copyFormat("discord");
                 }}
-                disabled={busy}
+                aria-disabled={busy}
               >
                 Copy Discord /imagine
               </Button>
               <Button
                 variant="ghost"
                 onClick={() => {
+                  if (busyRef.current) return;
                   closeActions();
                   void copyFormat("params");
                 }}
-                disabled={busy}
+                aria-disabled={busy}
               >
                 Copy with parameters
               </Button>
               <Button
                 variant="ghost"
                 onClick={() => {
+                  if (busyRef.current) return;
                   closeActions();
                   void copyFormat("markdown");
                 }}
-                disabled={busy}
+                aria-disabled={busy}
               >
                 Copy as Markdown
               </Button>
@@ -214,6 +227,9 @@ export function PromptCard({
           </details>
         </div>
       </div>
+      <p role="status" className="copy-feedback">
+        {feedback}
+      </p>
       <CommandParameters
         parameters={parameters}
         enabled={enabledParameters}
@@ -230,9 +246,6 @@ export function PromptCard({
       ) : (
         <p className="prompt-body">{prompt.prompt}</p>
       )}
-      <p role="status" className="copy-feedback">
-        {feedback}
-      </p>
       <p className="source-note">Text checked against the published study.</p>
     </section>
   );

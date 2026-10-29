@@ -1,18 +1,30 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { copyText, lightHaptic } from "@/lib/utils";
 import { parsePromptTokens } from "@/lib/promptParser";
 
 export function PromptAnatomy({ prompt }: { prompt: string }) {
   const [feedback, setFeedback] = useState("");
   const parsed = parsePromptTokens(prompt);
+  const request = useRef(0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    setFeedback("");
+    return () => {
+      request.current += 1;
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [prompt]);
   const copyPhrase = async (phrase: string) => {
+    const current = ++request.current;
+    if (timer.current) clearTimeout(timer.current);
     try {
       await copyText(phrase);
+      if (current !== request.current) return;
       lightHaptic();
       setFeedback("Copied phrase to clipboard");
-      window.setTimeout(() => setFeedback(""), 1400);
+      timer.current = setTimeout(() => setFeedback(""), 1400);
     } catch {
-      setFeedback("Copy unavailable");
+      if (current === request.current) setFeedback("Copy unavailable");
     }
   };
   return (

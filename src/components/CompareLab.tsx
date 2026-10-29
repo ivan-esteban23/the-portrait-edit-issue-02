@@ -1,4 +1,10 @@
-import { useState, useRef, useCallback, type MouseEvent } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  type MouseEvent,
+} from "react";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
 import { Button } from "./ui/button";
@@ -31,6 +37,35 @@ export function CompareLab({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [combinedCopied, setCombinedCopied] = useState(false);
   const sliderFrameRef = useRef<HTMLDivElement>(null);
+  const [copyFeedback, setCopyFeedback] = useState("");
+  const copyRequest = useRef(0);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    setCopiedId(null);
+    setCombinedCopied(false);
+    setCopyFeedback("");
+    return () => {
+      copyRequest.current += 1;
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+    };
+  }, [isOpen, studyA.id, studyB.id]);
+  const beginCopy = () => {
+    if (copyTimer.current) clearTimeout(copyTimer.current);
+    setCopiedId(null);
+    setCombinedCopied(false);
+    setCopyFeedback("");
+    return ++copyRequest.current;
+  };
+  const confirmCopy = (current: number, message: string, duration: number) => {
+    if (current !== copyRequest.current) return false;
+    setCopyFeedback(message);
+    copyTimer.current = setTimeout(() => {
+      setCopiedId(null);
+      setCombinedCopied(false);
+      setCopyFeedback("");
+    }, duration);
+    return true;
+  };
 
   const closeButton = useRef<HTMLButtonElement>(null);
 
@@ -76,13 +111,15 @@ export function CompareLab({
     e: MouseEvent,
   ) => {
     e.preventDefault();
+    const current = beginCopy();
     try {
       const text = formatPromptText(prompt, format);
       await copyText(text);
-      setCopiedId(`${prompt.id}-${format}`);
-      setTimeout(() => setCopiedId(null), 1500);
+      if (confirmCopy(current, "Prompt copied.", 1500))
+        setCopiedId(`${prompt.id}-${format}`);
     } catch {
-      /* ignore */
+      if (current === copyRequest.current)
+        setCopyFeedback("Copy unavailable. Select the prompt text to copy it.");
     }
   };
 
@@ -138,12 +175,14 @@ export function CompareLab({
         (phrase) => !normalizedA.has(phrase.toLocaleLowerCase().trim()),
       ),
     ];
+    const current = beginCopy();
     try {
       await copyText(combined.join(", "));
-      setCombinedCopied(true);
-      window.setTimeout(() => setCombinedCopied(false), 1600);
+      if (confirmCopy(current, "Combined prompt copied.", 1600))
+        setCombinedCopied(true);
     } catch {
-      /* Keep the comparison usable when clipboard access is blocked. */
+      if (current === copyRequest.current)
+        setCopyFeedback("Copy unavailable. Select the prompt text to copy it.");
     }
   };
 
@@ -329,6 +368,9 @@ export function CompareLab({
             Close ✕
           </Button>
         </div>
+        <p className="compare-copy-feedback" role="status">
+          {copyFeedback}
+        </p>
       </header>
 
       {mode === "side-by-side" ? (

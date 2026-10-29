@@ -164,11 +164,13 @@ export function PromptStudioDrawer({
 }: PromptStudioDrawerProps) {
   const returnFocus = useRef<HTMLElement | null>(null);
   const alive = useRef(true);
+  const copyRequest = useRef(0);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     alive.current = true;
     return () => {
       alive.current = false;
+      copyRequest.current += 1;
       if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     };
   }, []);
@@ -204,6 +206,7 @@ export function PromptStudioDrawer({
   ]);
 
   useEffect(() => {
+    copyRequest.current += 1;
     setCopied("");
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
   }, [
@@ -331,13 +334,20 @@ export function PromptStudioDrawer({
     setRemixes([]);
   };
 
+  useEffect(() => {
+    copyRequest.current += 1;
+    setCopied("");
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+  }, [isOpen, prompt.id]);
+
   const handleCopy = async (format: "plain" | "discord" = "plain") => {
+    const current = ++copyRequest.current;
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     const textToCopy =
       format === "discord" ? `/imagine prompt: ${commandText}` : modifiedPrompt;
     try {
       await copyText(textToCopy);
-      if (!alive.current) return;
+      if (!alive.current || current !== copyRequest.current) return;
       addRemixToHistory(textToCopy);
       setCopied(
         format === "discord"
@@ -346,7 +356,7 @@ export function PromptStudioDrawer({
       );
       feedbackTimer.current = setTimeout(() => setCopied(""), 2000);
     } catch {
-      if (alive.current)
+      if (alive.current && current === copyRequest.current)
         setCopied("Copy unavailable. Select the preview text to copy it.");
     }
   };
@@ -583,13 +593,6 @@ export function PromptStudioDrawer({
                     setCopied("");
                   }}
                 />
-                <p
-                  role="status"
-                  aria-label="Copy feedback"
-                  className="studio-copy-feedback"
-                >
-                  {copied}
-                </p>
                 {/* Live Updated Preview Box */}
                 <div className="studio-group preview-box-group">
                   <div className="preview-box-header">
@@ -689,6 +692,13 @@ export function PromptStudioDrawer({
               </div>
 
               <footer className="prompt-studio-footer">
+                <p
+                  role="status"
+                  aria-label="Copy feedback"
+                  className="studio-copy-feedback"
+                >
+                  {copied}
+                </p>
                 <Button
                   type="button"
                   variant="default"
