@@ -166,7 +166,7 @@ it("persists visits and turns while preserving other issues, then resumes after 
     screen.getByRole("link", { name: "Resume reading · Page 61 ↗" }),
   ).toHaveAttribute("href", readerPath(currentIssue.slug, 61));
   expect(
-    screen.getByRole("link", { name: "Read The Prompt Issue" }),
+    screen.getByRole("link", { name: "Issue 02 — The Prompt Issue ↗" }),
   ).toHaveAttribute("href", readerPath(currentIssue.slug, 61));
   expect(
     screen.getByRole("link", { name: "Start from beginning" }),

@@ -42,7 +42,10 @@ test("reader bookmarks synchronize and progress resumes in a fresh session", asy
     page.getByRole("link", { name: "Resume reading · Page 61 ↗", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Read The Prompt Issue", exact: true }),
+    page.getByRole("link", {
+      name: "Issue 02 — The Prompt Issue ↗",
+      exact: true,
+    }),
   ).toHaveAttribute("href", /pages\/61$/);
   await page
     .getByRole("link", { name: "Inside the issue", exact: true })

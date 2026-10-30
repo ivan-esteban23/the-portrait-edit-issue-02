@@ -304,7 +304,7 @@ test("command palette spread changes update the current reader immediately", asy
   await page.goto(reader);
   const toggle = async () => {
     await page
-      .getByRole("button", { name: "Search and command palette" })
+      .getByRole("button", { name: "Search ⌘K, open command palette" })
       .click();
     const search = page.getByPlaceholder(/Type a command/);
     await search.fill("Toggle Two-Page Spread");
