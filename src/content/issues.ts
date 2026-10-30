@@ -1,4 +1,6 @@
 import type { Issue } from "./schema";
+import { assetUrl } from "@/lib/assetUrl";
+export { assetUrl } from "@/lib/assetUrl";
 export const issues = Object.values(
   import.meta.glob<Issue>("./issues/*/issue.json", {
     eager: true,
@@ -12,7 +14,6 @@ if (!requiredIssue) {
   );
 }
 export const currentIssue = requiredIssue;
-export const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 
 /**
  * Archive cards use build-generated WebP renditions in production. The original
