@@ -216,12 +216,13 @@ export default function App() {
               </span>
               <kbd className="search-trigger-kbd">⌘K</kbd>
             </button>
-            <NavLink
+            <Link
               to={readerPath(currentIssue.slug, 1)}
-              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+              className={readerRoute ? "is-active" : undefined}
+              aria-current={readerRoute ? "location" : undefined}
             >
               {t("Reader")}
-            </NavLink>
+            </Link>
             <NavLink
               to="/prompts"
               className={({ isActive }) => (isActive ? "is-active" : undefined)}
