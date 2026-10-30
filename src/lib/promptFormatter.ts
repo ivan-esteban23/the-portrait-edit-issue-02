@@ -1,4 +1,5 @@
 import type { Prompt } from "@/content/schema";
+import { assetUrl } from "@/content/issues";
 
 export type CopyFormat = "raw" | "params" | "markdown" | "discord";
 
@@ -129,9 +130,9 @@ export async function sharePrompt(
       typeof window !== "undefined"
         ? window.location.origin
         : "https://ivan-esteban23.github.io";
-    const shareUrl = pathUrl
-      ? `${baseUrl}${pathUrl}`
-      : `${baseUrl}/the-portrait-edit-issue-02/prompts/${prompt.id}`;
+    const sharePath = pathUrl ?? `prompts/${prompt.id}`;
+    const shareUrl = new URL(assetUrl(sharePath.replace(/^\/+/, "")), baseUrl)
+      .href;
 
     await navigator.share({
       title: `${prompt.title} — The Portrait Edit`,
