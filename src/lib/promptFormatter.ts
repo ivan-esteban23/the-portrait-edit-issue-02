@@ -1,5 +1,5 @@
 import type { Prompt } from "@/content/schema";
-import { assetUrl } from "@/content/issues";
+import { assetUrl } from "@/lib/assetUrl";
 
 export type CopyFormat = "raw" | "params" | "markdown" | "discord";
 
