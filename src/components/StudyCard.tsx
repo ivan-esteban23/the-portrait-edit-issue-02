@@ -234,7 +234,11 @@ export function StudyCard({
             <Icon name="copy" className="btn-icon-svg" />
           )}
           <span className="action-tooltip">
-            {copied ? copiedFormat : "Copy prompt"}
+            {copied
+              ? copiedFormat
+              : copyErrorText !== null
+                ? "Copy unavailable"
+                : "Copy prompt"}
           </span>
         </button>
         <button
