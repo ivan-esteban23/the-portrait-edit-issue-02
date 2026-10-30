@@ -109,7 +109,7 @@ export function HomePage() {
           <Link
             className="hero-cover"
             to={readerPath(currentIssue.slug, lastReadPage)}
-            aria-label={t("Read The Prompt Issue")}
+            aria-labelledby="hero-issue-label"
           >
             <img
               src={assetUrl(currentIssue.cover)}
@@ -117,7 +117,7 @@ export function HomePage() {
               height="622"
               alt="The Portrait Edit — Issue 02 cover"
             />
-            <span>
+            <span id="hero-issue-label">
               <IconText>Issue 02 — The Prompt Issue ↗</IconText>
             </span>
           </Link>

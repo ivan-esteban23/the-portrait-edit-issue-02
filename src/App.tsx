@@ -207,14 +207,17 @@ export default function App() {
               className="masthead-search-trigger"
               onClick={() => setCommandPaletteOpen(true)}
               title={t("Search commands, pages, and prompts (⌘K / Ctrl+K)")}
-              aria-label={t("Search and command palette")}
+              aria-label={t("Search ⌘K, open command palette")}
+              aria-keyshortcuts="Control+K Meta+K"
             >
               <Icon name="search" size={15} />
               <span className="search-trigger-label">
                 <span className="search-label-long">{t("Search")}</span>
-                <span className="search-label-short">{t("Find")}</span>
+                <span className="search-label-short">{t("Search")}</span>
               </span>
-              <kbd className="search-trigger-kbd">⌘K</kbd>
+              <kbd className="search-trigger-kbd" aria-hidden="true">
+                ⌘K
+              </kbd>
             </button>
             <Link
               to={readerPath(currentIssue.slug, 1)}

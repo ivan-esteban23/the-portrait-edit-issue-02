@@ -565,6 +565,11 @@ function ReaderView({
       className={`reader ${focus ? "is-focus" : ""} ${idle ? "chrome-idle" : ""}`}
       aria-label="Magazine reader"
     >
+      {(mode === "page" || (!study && !openerChapter)) && (
+        <h1 className="sr-only">
+          Issue {issue.number} · Page {pageLabel}
+        </h1>
+      )}
       <div
         className="sr-only reader-announcer"
         aria-live="polite"

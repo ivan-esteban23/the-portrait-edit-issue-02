@@ -382,7 +382,7 @@ try {
         await go("");
         await page
           .getByRole("button", {
-            name: "Search and command palette",
+            name: "Search ⌘K, open command palette",
             exact: true,
           })
           .click();
