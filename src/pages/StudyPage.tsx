@@ -75,38 +75,39 @@ export function StudyPage() {
           <IconText>Read in the issue ↗</IconText>
         </Link>
       </div>
-      <Study key={prompt.id} prompt={prompt} />
-      <aside className="parameters">
-        <h2>Study record</h2>
-        <dl>
-          <div>
-            <dt>Model</dt>
-            <dd>{prompt.model ?? "Not recorded"}</dd>
-          </div>
-          <div>
-            <dt>Date</dt>
-            <dd>{prompt.date ?? "Not recorded"}</dd>
-          </div>
-          <div>
-            <dt>Parameters</dt>
-            <dd>
-              {Object.keys(prompt.parameters).length
-                ? Object.entries(prompt.parameters)
-                    .map(([k, v]) => `${k}: ${v}`)
-                    .join(" · ")
-                : "Not recorded"}
-            </dd>
-          </div>
-          <div>
-            <dt>Style tags</dt>
-            <dd>{prompt.tags.join(" · ")}</dd>
-          </div>
-        </dl>
-        <p>
-          Review flags describe the published record; they do not establish
-          rights or publication clearance.
-        </p>
-      </aside>
+      <Study key={prompt.id} prompt={prompt}>
+        <aside className="parameters">
+          <h2>Study record</h2>
+          <dl>
+            <div>
+              <dt>Model</dt>
+              <dd>{prompt.model ?? "Not recorded"}</dd>
+            </div>
+            <div>
+              <dt>Date</dt>
+              <dd>{prompt.date ?? "Not recorded"}</dd>
+            </div>
+            <div>
+              <dt>Parameters</dt>
+              <dd>
+                {Object.keys(prompt.parameters).length
+                  ? Object.entries(prompt.parameters)
+                      .map(([k, v]) => `${k}: ${v}`)
+                      .join(" · ")
+                  : "Not recorded"}
+              </dd>
+            </div>
+            <div>
+              <dt>Style tags</dt>
+              <dd>{prompt.tags.join(" · ")}</dd>
+            </div>
+          </dl>
+          <p>
+            Review flags describe the published record; they do not establish
+            rights or publication clearance.
+          </p>
+        </aside>
+      </Study>
       <nav className="study-sequence-nav" aria-label="Study navigation">
         {previousPrompt ? (
           <Link

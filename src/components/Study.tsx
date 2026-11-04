@@ -1,5 +1,13 @@
+import { Icon } from "@/components/ui/Icon";
 import { IconText } from "@/components/ui/IconText";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
 import { copyText } from "@/lib/utils";
@@ -254,9 +262,11 @@ export function PromptCard({
 export function Study({
   prompt,
   context = "detail",
+  children,
 }: {
   prompt: Prompt;
   context?: "detail" | "reader";
+  children?: ReactNode;
 }) {
   const { isSaved, toggleSaved } = useBookmarks();
   const saved = isSaved(prompt.id);
@@ -292,7 +302,7 @@ export function Study({
               aria-label={saved ? "Remove from saved" : "Save study"}
             >
               <span className="bookmark-icon" aria-hidden="true">
-                {saved ? "★" : "☆"}
+                <Icon name={saved ? "bookmark-filled" : "bookmark"} size={14} />
               </span>
               <span>{saved ? "Saved" : "Save study"}</span>
             </Button>
@@ -318,7 +328,7 @@ export function Study({
             decoding="async"
           />
           <span className="inspect-badge" aria-hidden="true">
-            🔍 Inspect
+            <Icon name="search" size={13} /> Inspect
           </span>
         </button>
         <figcaption>
@@ -362,6 +372,7 @@ export function Study({
         <h2>Try this</h2>
         <p className="preserve-text">{prompt.tryThis}</p>
       </section>
+      {children}
       <RelatedStudies prompt={prompt} context={context} />
     </article>
   );

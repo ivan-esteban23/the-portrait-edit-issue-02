@@ -47,14 +47,14 @@ export function Toast({ message, onUndo, onDismiss, visible }: ToastProps) {
   return (
     <div
       ref={toastRef}
-      className="pointer-events-none fixed bottom-6 left-1/2 z-[100] flex -translate-x-1/2 translate-y-0 items-center gap-4 rounded-lg bg-neutral-900 px-4 py-3 text-white opacity-100 shadow-lg transition-all duration-300"
+      className="pointer-events-none fixed bottom-6 left-1/2 z-[100] flex -translate-x-1/2 translate-y-0 items-center gap-4 border border-[var(--border)] bg-[var(--surface-raised)] px-4 py-3 text-[var(--text)] opacity-100 shadow-lg transition-all duration-300"
       role="status"
       aria-live="polite"
     >
       <span>{message}</span>
       <button
         type="button"
-        className="pointer-events-auto font-medium underline underline-offset-2 hover:text-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        className="pointer-events-auto font-medium text-[var(--accent)] underline underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();

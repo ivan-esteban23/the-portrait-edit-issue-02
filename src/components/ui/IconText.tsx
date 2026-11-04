@@ -7,13 +7,15 @@ const arrows: Record<string, IconName> = {
   "←": "arrow-left",
   "↓": "arrow-down",
   "↑": "arrow-up",
+  "⇄": "swap",
+  "🖨": "print",
 };
 
 /** Keep translated labels and their accessible names; draw arrows without fonts. */
 export function IconText({ children }: { children: ReactNode }) {
   return Children.map(children, (child) => {
     if (typeof child !== "string") return child;
-    return child.split(/([↗→←↓↑])/u).map((part, index) =>
+    return child.split(/([↗→←↓↑⇄🖨])/u).map((part, index) =>
       arrows[part] ? (
         <span className="text-icon" key={index}>
           <span className="sr-only">{part}</span>

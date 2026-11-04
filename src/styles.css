@@ -982,6 +982,12 @@ select:hover {
 .copy-feedback {
   min-height: 3.5em;
 }
+@media (min-width: 640px) {
+  .copy-feedback {
+    min-height: 1.6em;
+    margin-top: 8px;
+  }
+}
 .article-section {
   padding-top: var(--space-6);
   border-top: 1px solid var(--border);
@@ -2482,7 +2488,11 @@ select:hover {
 }
 .compare-col-header h3 {
   font-family: var(--serif);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
   margin: 4px 0 0;
 }
 .compare-meta {
@@ -2565,9 +2575,10 @@ select:hover {
   background: var(--surface-hover);
 }
 .compare-prompt-text {
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  line-height: 1.75;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 .compare-params-grid {
@@ -3635,7 +3646,7 @@ select:hover {
     input,
     select,
     summary,
-    a[href],
+    a[href]:not(.about p a, .editorial-copy p a, figcaption a),
     [role="button"],
     [role="slider"]
   ) {
@@ -4212,7 +4223,7 @@ select:hover {
   color: var(--text);
   background: var(--floating-background);
   backdrop-filter: blur(8px);
-  font: 500 0.8rem/1 var(--sans);
+  font: 500 0.8rem/1 var(--font-sans);
   opacity: 0;
   transition: opacity 180ms ease-out;
   pointer-events: none;
@@ -4713,10 +4724,10 @@ body::before {
   line-height: 1.6;
 }
 .compare-prompt-text {
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  letter-spacing: normal;
-  line-height: 1.75;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  letter-spacing: -0.01em;
+  line-height: 1.7;
 }
 .compare-section .tag-badge {
   min-height: 36px;
@@ -5696,6 +5707,11 @@ textarea {
   min-height: 3em;
   font-size: var(--type-ui);
   line-height: 1.5;
+}
+@media (min-width: 640px) {
+  .compare-copy-feedback {
+    min-height: 1.5em;
+  }
 }
 
 .prompt-card [aria-disabled="true"] {

@@ -1,3 +1,4 @@
+import { Icon } from "@/components/ui/Icon";
 import { IconText } from "@/components/ui/IconText";
 import {
   lazy,
@@ -609,9 +610,11 @@ export function ArchivePage() {
                 aria-busy={preparingPrint}
                 title="Print editorial contact sheet (@media print)"
               >
-                {preparingPrint
-                  ? t("Preparing sheet…")
-                  : t("Print Contact Sheet 🖨")}
+                <IconText>
+                  {preparingPrint
+                    ? t("Preparing sheet…")
+                    : t("Print Contact Sheet 🖨")}
+                </IconText>
               </Button>
 
               {savedCount > 0 && (
@@ -652,7 +655,8 @@ export function ArchivePage() {
           aria-pressed={savedOnly}
           onClick={() => filter("saved", savedOnly ? "" : "1")}
         >
-          ★ Saved ({savedCount})
+          <Icon name={savedOnly ? "bookmark-filled" : "bookmark"} size={14} />
+          <span>Saved ({savedCount})</span>
         </Button>
 
         {hasActiveFilters && (
@@ -902,7 +906,7 @@ export function ArchivePage() {
                 }}
                 className="dock-compare-btn"
               >
-                {t("Compare 2 studies ⇄")}
+                <IconText>{t("Compare 2 studies ⇄")}</IconText>
               </Button>
               <Button
                 type="button"
@@ -1015,13 +1019,13 @@ export function ArchivePage() {
 
       {printProgress && (
         <div
-          className="print-progress-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          className="print-progress-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="print-progress-title"
           aria-live="polite"
         >
-          <div className="w-full max-w-sm rounded-lg bg-white px-5 py-4 text-neutral-900 shadow-lg">
+          <div className="w-full max-w-sm border border-[var(--border)] bg-[var(--surface-raised)] px-5 py-4 text-[var(--text)] shadow-lg">
             <p id="print-progress-title" className="mb-3 font-medium">
               {printProgress.opening
                 ? "Opening print dialog..."

@@ -79,6 +79,17 @@ const icons = {
       <line x1="17" y1="9" x2="23" y2="15" />
     </>
   ),
+  index: <path d="M4 6h16M4 12h16M4 18h10" />,
+  focus: (
+    <>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M3 8V5a2 2 0 0 1 2-2h3m8 0h3a2 2 0 0 1 2 2v3m0 8v3a2 2 0 0 1-2 2h-3m-8 0H5a2 2 0 0 1-2-2v-3" />
+    </>
+  ),
+  ambience: <path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4" />,
+  "chevron-down": <path d="m6 9 6 6 6-6" />,
+  swap: <path d="M17 4l3 3-3 3M20 7H4m3 13-3-3 3-3M4 17h16" />,
+  close: <path d="M18 6 6 18M6 6l12 12" />,
 };
 
 export type IconName = keyof typeof icons;
