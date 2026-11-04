@@ -8,6 +8,8 @@ import {
 import type { Prompt } from "@/content/schema";
 import { assetUrl } from "@/content";
 import { Button } from "./ui/button";
+import { Icon } from "./ui/Icon";
+import { IconText } from "./ui/IconText";
 import { ModalContent, ModalTitle } from "./ui/dialog";
 import { copyText } from "@/lib/utils";
 import { formatPromptText, type CopyFormat } from "@/lib/promptFormatter";
@@ -300,7 +302,9 @@ export function CompareLab({
               alt={prompt.title}
               className="compare-image"
             />
-            <span className="compare-inspect-hint">🔍 Inspect</span>
+            <span className="compare-inspect-hint">
+              <Icon name="search" size={13} /> Inspect
+            </span>
           </button>
         </div>
         {renderPromptDetails(prompt, label)}
@@ -356,7 +360,7 @@ export function CompareLab({
             onClick={onSwap}
             title="Swap left and right studies"
           >
-            ⇄ Swap Studies
+            <IconText>⇄ Swap Studies</IconText>
           </Button>
           <Button
             variant="ghost"

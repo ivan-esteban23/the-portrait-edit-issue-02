@@ -165,7 +165,7 @@ export function ReaderToolbar({
           title={`${t("Table of contents")} (T)`}
           onClick={onOpenTableOfContents}
         >
-          <span aria-hidden="true">☷</span>
+          <Icon name="index" size={16} />
           <span className="toc-button-label">{t("Index")}</span>
         </Button>
         <div className="pager" role="group" aria-label="Page navigation">
@@ -368,7 +368,7 @@ export function ReaderToolbar({
           aria-keyshortcuts="F"
           onClick={onToggleFocus}
         >
-          {compact && <span aria-hidden="true">◉</span>}
+          {compact && <Icon name="focus" size={16} />}
           <span className={compact ? "sr-only" : undefined}>
             {focus ? "Exit Focus" : "Focus"}
           </span>
@@ -479,7 +479,7 @@ export function ReaderToolbar({
               onClick={onToggleSoundscape}
               title="Focus Soundscape"
             >
-              {soundscapeEnabled ? "◖))" : "◖"}
+              <Icon name="ambience" size={16} />
               <span className="sound-fx-label">Ambience</span>
             </Button>
             <Button
@@ -488,7 +488,7 @@ export function ReaderToolbar({
               aria-expanded={soundscapeControlsOpen}
               onClick={() => setSoundscapeControlsOpen((open) => !open)}
             >
-              ⌄
+              <Icon name="chevron-down" size={14} />
             </Button>
             {soundscapeControlsOpen && (
               <label className="soundscape-volume">
@@ -522,11 +522,7 @@ export function ReaderToolbar({
               onClick={toggleStudyBookmark}
             >
               <Icon
-                name={
-                  isSaved(study.id)
-                    ? "bookmark-straight-filled"
-                    : "bookmark-straight"
-                }
+                name={isSaved(study.id) ? "bookmark-filled" : "bookmark"}
                 size={18}
               />
             </Button>
