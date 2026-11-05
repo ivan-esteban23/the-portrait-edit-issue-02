@@ -984,7 +984,7 @@ select:hover {
 }
 @media (min-width: 640px) {
   .copy-feedback {
-    min-height: 1.6em;
+    min-height: 1.75em;
     margin-top: 8px;
   }
 }
