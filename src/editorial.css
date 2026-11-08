@@ -879,7 +879,7 @@
   .standalone-study .study-article {
     max-width: 1120px;
     padding-inline: 0;
-    gap: clamp(28px, 3.5vw, 48px);
+    gap: 32px;
   }
   .standalone-study .study-article > header {
     border-bottom: 1px solid var(--border);
@@ -951,7 +951,6 @@
   .standalone-study .study-article > .prompt-card { grid-column: 2; }
 }
 @media screen and (max-width: 767px) {
-  .standalone-study .study-article { gap: 28px; }
   .standalone-study .study-article > header { padding-bottom: 16px; }
   .standalone-study .study-figure img { max-height: 550px; }
 }
