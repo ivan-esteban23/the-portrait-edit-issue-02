@@ -801,3 +801,12 @@
   .archive .archive-grid .study-card-media { margin-bottom: 12px; }
   .archive .archive-grid .study-card h2 { font-size: clamp(1.1rem, 4vw, 1.4rem); }
 }
+@media screen and (max-width: 400px) and (max-height: 650px) {
+  .archive > header { padding-block: 0 8px; margin-bottom: 8px; }
+  .archive > header .eyebrow { margin-bottom: 4px; }
+  .archive > header h1 { margin-block: 4px; }
+  .archive .archive-results-bar { padding-bottom: 0; }
+}
+@media screen and (min-width: 768px) and (max-height: 900px) {
+  .archive > header { padding-block: 8px 20px; margin-bottom: 16px; }
+}
