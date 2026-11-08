@@ -734,3 +734,70 @@
   .home-hero .issue-stats { margin-top: 10px; padding-top: 10px; }
   .home-hero .hero-actions { margin-top: 12px; }
 }
+
+/* Archive: an editorial index with consistent, uncropped portraits. */
+@media screen {
+  .archive > header {
+    padding-block: clamp(16px, 3vw, 40px) clamp(24px, 3vw, 44px);
+    margin-bottom: clamp(20px, 3vw, 36px);
+    border-bottom: 2px solid var(--text);
+  }
+  .archive > header .eyebrow {
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .archive > header h1 {
+    max-width: none;
+    margin-block: 0 16px;
+    font-size: clamp(3rem, 6.5vw, 6.5rem);
+    letter-spacing: -0.055em;
+  }
+  .archive > header .editorial-intro {
+    max-width: 38ch;
+    margin: 0;
+    font-family: var(--serif);
+    line-height: 1.35;
+  }
+  .archive .archive-filters { margin-top: 0; }
+  .archive .archive-disclosure {
+    background: transparent;
+    border-color: var(--border);
+  }
+  .archive .archive-disclosure summary { font-weight: 600; }
+  .archive .archive-results-bar {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+  .archive .archive-grid {
+    gap: clamp(36px, 4vw, 60px) clamp(16px, 2.7vw, 36px);
+  }
+  .archive .archive-grid .study-card-media {
+    border: 0;
+    border-radius: 0;
+    background: var(--surface);
+    margin-bottom: 16px;
+  }
+  .archive .archive-grid .study-card > .eyebrow {
+    color: var(--accent);
+    margin-block: 0 8px;
+    font-size: var(--type-caption);
+  }
+  .archive .archive-grid .study-card h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.15rem, 1.75vw, 1.65rem);
+    font-weight: 500;
+    line-height: 1.16;
+    letter-spacing: -0.025em;
+  }
+  .archive .archive-grid .card-tags-list { margin-block: 8px 10px; }
+  .archive .archive-grid .card-action-btn { border-radius: 0; }
+}
+@media screen and (max-width: 767px) {
+  .archive > header { padding-block: 12px 20px; margin-bottom: 16px; }
+  .archive > header .eyebrow { margin-bottom: 8px; }
+  .archive > header h1 { margin-bottom: 8px; font-size: clamp(2.5rem, 10vw, 4rem); }
+  .archive > header .editorial-intro { font-size: 1.0625rem; }
+  .archive .archive-grid { gap: 32px 16px; }
+  .archive .archive-grid .study-card-media { margin-bottom: 12px; }
+  .archive .archive-grid .study-card h2 { font-size: clamp(1.1rem, 4vw, 1.4rem); }
+}
