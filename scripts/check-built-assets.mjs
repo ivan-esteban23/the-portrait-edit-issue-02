@@ -74,7 +74,7 @@ console.log(
 );
 const titles = new Set();
 const canonicals = new Set();
-for (const file of readdirSync("dist", { recursive: true }).filter(
+for (const file of readdirSync("dist", { recursive: true }).map((f) => f.replaceAll("\\", "/")).filter(
   (f) => f === "index.html" || f.endsWith("/index.html"),
 )) {
   const source = readFileSync(`dist/${file}`, "utf8");

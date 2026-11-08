@@ -1,0 +1,3 @@
+# These published source files are checked against byte-for-byte SHA-256 hashes.
+docs/issue.json -text
+docs/pages/*.json -text
