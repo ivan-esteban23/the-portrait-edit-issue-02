@@ -100,3 +100,22 @@ it("offers Browse studies in empty collections while preserving active filters a
   expect(screen.getByRole("status")).toHaveTextContent("14 studies");
   expect(screen.getByRole("searchbox", { name: "Search" })).toHaveFocus();
 });
+
+it("combines an editorial selection with search and removes just that selection", async () => {
+  const user = userEvent.setup();
+  renderArchive("/prompts?selection=studio&q=ponytail");
+  expect(screen.getByRole("status")).toHaveTextContent("1 study");
+  expect(
+    screen.getByRole("link", { name: "View study Studio Ponytail Portrait" }),
+  ).toBeVisible();
+  await user.click(
+    screen.getByRole("button", { name: "Remove Selection: Studio filter" }),
+  );
+  expect(screen.getByTestId("query-string")).toHaveTextContent("?q=ponytail");
+  expect(screen.getByRole("searchbox")).toHaveValue("ponytail");
+});
+
+it("keeps all studies accessible for an unknown editorial selection", () => {
+  renderArchive("/prompts?selection=unknown");
+  expect(screen.getByRole("status")).toHaveTextContent("165 studies");
+});

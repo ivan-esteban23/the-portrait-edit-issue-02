@@ -40,9 +40,11 @@ const PromptStudioDrawer = lazy(() =>
 export function PromptCard({
   prompt,
   onOpenStudio,
+  editorial = false,
 }: {
   prompt: Prompt;
   onOpenStudio?: () => void;
+  editorial?: boolean;
 }) {
   const recordedParameters = getCommandParameters(prompt);
   const parameters = recordedParameters.length
@@ -144,7 +146,13 @@ export function PromptCard({
   }
 
   return (
-    <section className="prompt-card" aria-label="Image prompt">
+    <section
+      className="prompt-card"
+      id={editorial ? `prompt-${prompt.id}` : undefined}
+      aria-label="Image prompt"
+      tabIndex={editorial ? -1 : undefined}
+    >
+      {editorial && <p className="eyebrow reading-label">02 / The language</p>}
       <div className="prompt-card-heading">
         <h2>Image Prompt</h2>
         <div className="prompt-copy-actions">
@@ -318,8 +326,44 @@ export function Study({
         <p className="study-style">{prompt.style}</p>
         {context === "detail" && headerActions}
         {navigation}
+        {context === "detail" && (
+          <nav className="study-reading-path" aria-label="Inside this study">
+            <span>Inside this study</span>
+            {[
+              ["reference", "01 Reference"],
+              ["prompt", "02 Prompt"],
+              ["notes", "03 Notes"],
+              ["experiment", "04 Try it"],
+            ].map(([part, label]) => (
+              <a
+                key={part}
+                href={`#${part}-${prompt.id}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  const target = document.getElementById(
+                    `${part}-${prompt.id}`,
+                  );
+                  target?.focus({ preventScroll: true });
+                  target?.scrollIntoView({
+                    behavior: matchMedia("(prefers-reduced-motion: reduce)")
+                      .matches
+                      ? "instant"
+                      : "smooth",
+                    block: "start",
+                  });
+                }}
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+        )}
       </header>
-      <figure className="study-figure">
+      <figure
+        className="study-figure"
+        id={context === "detail" ? `reference-${prompt.id}` : undefined}
+        tabIndex={context === "detail" ? -1 : undefined}
+      >
         <button
           type="button"
           className="image-inspect-trigger"
@@ -340,6 +384,9 @@ export function Study({
           </span>
         </button>
         <figcaption>
+          {context === "detail" && (
+            <p className="eyebrow reading-label">01 / The reference</p>
+          )}
           Source: {prompt.source}
           <span>{prompt.flags}</span>
         </figcaption>
@@ -370,14 +417,41 @@ export function Study({
       <PromptCard
         key={prompt.id}
         prompt={prompt}
+        editorial={context === "detail"}
         onOpenStudio={() => setStudioOpen(true)}
       />
-      <section className="article-section">
+      <section
+        className="article-section study-working-notes"
+        id={context === "detail" ? `notes-${prompt.id}` : undefined}
+        tabIndex={context === "detail" ? -1 : undefined}
+      >
+        {context === "detail" && (
+          <p className="eyebrow reading-label">03 / What to notice</p>
+        )}
         <h2>Working notes</h2>
-        <p className="preserve-text">{prompt.workingNotes}</p>
+        {context === "detail" ? (
+          <ul>
+            {prompt.workingNotes
+              .split(/\\n|\n/)
+              .map((note) => note.replace(/^[-•]\s*/, "").trim())
+              .filter(Boolean)
+              .map((note, index) => (
+                <li key={index}>{note}</li>
+              ))}
+          </ul>
+        ) : (
+          <p className="preserve-text">{prompt.workingNotes}</p>
+        )}
       </section>
-      <section className="article-section">
-        <h2>Try this</h2>
+      <section
+        className="article-section study-experiment"
+        id={context === "detail" ? `experiment-${prompt.id}` : undefined}
+        tabIndex={context === "detail" ? -1 : undefined}
+      >
+        {context === "detail" && (
+          <p className="eyebrow reading-label">04 / Your next experiment</p>
+        )}
+        <h2>{context === "detail" ? "Change one thing." : "Try this"}</h2>
         <p className="preserve-text">{prompt.tryThis}</p>
       </section>
       {children}

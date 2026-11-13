@@ -29,6 +29,9 @@ import { useLanguage } from "@/i18n/LanguageProvider";
 import { matchesArchiveSearch } from "@/lib/archiveSearch";
 import { readArchiveContext } from "@/lib/archiveNavigation";
 
+import { EditorialSelections } from "@/components/EditorialSelections";
+import { editorialSelections } from "@/content/editorialSelections";
+
 type ParsedParameters = ReturnType<typeof splitPromptParameters>;
 
 const CompareLab = lazy(() =>
@@ -197,8 +200,12 @@ export function ArchivePage() {
     aspectRatio = search.get("ar") ?? "",
     savedOnly = search.get("saved") === "1";
 
+  const selection = editorialSelections.find(
+    (s) => s.id === search.get("selection"),
+  );
+
   const hasActiveFilters = Boolean(
-    query || tag || model || aspectRatio || savedOnly,
+    query || tag || model || aspectRatio || savedOnly || selection,
   );
 
   const secondaryFilterCount = [tag, model, aspectRatio].filter(Boolean).length;
@@ -305,6 +312,7 @@ export function ArchivePage() {
 
   const filtered = useMemo(() => {
     return prompts.filter((p) => {
+      if (selection && !selection.numbers.includes(p.studyNumber)) return false;
       if (savedOnly && !isSaved(p.id)) return false;
       if (tag && !p.tags.includes(tag)) return false;
       if (model) {
@@ -329,7 +337,16 @@ export function ArchivePage() {
       if (!matchesArchiveSearch(p, query)) return false;
       return true;
     });
-  }, [savedOnly, isSaved, tag, model, aspectRatio, query, parsedParameters]);
+  }, [
+    savedOnly,
+    isSaved,
+    tag,
+    model,
+    aspectRatio,
+    query,
+    parsedParameters,
+    selection,
+  ]);
 
   function filter(key: string, value: string) {
     const next = new URLSearchParams(search);
@@ -422,6 +439,13 @@ export function ArchivePage() {
           />
         </label>
         <div className="archive-disclosures">
+          <details className="archive-disclosure editorial-disclosure">
+            <summary>Explore themes</summary>
+            <EditorialSelections
+              active={selection?.id}
+              search={search.toString()}
+            />
+          </details>
           <details className="archive-disclosure">
             <summary>
               More filters
@@ -674,9 +698,13 @@ export function ArchivePage() {
           </Button>
         )}
       </div>
-      {(query || tag || model || aspectRatio) && (
+      {(query || tag || model || aspectRatio || selection) && (
         <ul className="archive-active-filters" aria-label="Active filters">
           {[
+            selection && {
+              key: "selection",
+              label: `Selection: ${selection.title}`,
+            },
             query && { key: "q", label: `Search: “${query}”` },
             tag && { key: "tag", label: `Style: #${tag}` },
             model && { key: "model", label: `Model: ${model}` },

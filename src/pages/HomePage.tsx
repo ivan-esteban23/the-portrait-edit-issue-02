@@ -8,6 +8,8 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useLanguage } from "@/i18n/LanguageProvider";
 
+import { EditorialSelections } from "@/components/EditorialSelections";
+
 export function HomePage() {
   const { t } = useLanguage();
   const lastReadPage = useLastReadPage(currentIssue);
@@ -110,6 +112,23 @@ export function HomePage() {
           </Link>
         </div>
       </section>
+      <section
+        className="editorial-start"
+        aria-labelledby="editorial-start-title"
+      >
+        <p className="eyebrow">New to the publication?</p>
+        <div>
+          <h2 id="editorial-start-title">One image. A place to begin.</h2>
+          <p>
+            Open a study to see its reference, read the original prompt, and try
+            one compositional change of your own.
+          </p>
+        </div>
+        <Button asChild>
+          <Link to="/prompts/issue-02-study-004">Start with Study 004 ↗</Link>
+        </Button>
+      </section>
+      <EditorialSelections />
       <section className="selected-section">
         <div className="section-title">
           <h2>{t("Selected studies")}</h2>
