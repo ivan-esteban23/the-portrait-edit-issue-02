@@ -37,7 +37,26 @@ test("homepage routes readers into the magazine, archive, and saved collection",
     .locator(".home-hero")
     .evaluate((el) => el.getBoundingClientRect().bottom);
   expect(archiveSectionY).toBeGreaterThanOrEqual(heroBottom);
-  expect(archiveSectionY - heroBottom).toBeLessThan(128);
+  const startSection = page.locator(".editorial-start");
+  const discovery = page.getByRole("region", { name: "Editorial selections" });
+  const startY = await startSection.evaluate(
+    (el) => el.getBoundingClientRect().top,
+  );
+  const discoveryY = await discovery.evaluate(
+    (el) => el.getBoundingClientRect().top,
+  );
+  const discoveryBottom = await discovery.evaluate(
+    (el) => el.getBoundingClientRect().bottom,
+  );
+  expect(startY).toBeGreaterThanOrEqual(heroBottom);
+  expect(startY - heroBottom).toBeLessThan(128);
+  expect(discoveryY).toBeGreaterThan(startY);
+  expect(archiveSectionY).toBeGreaterThanOrEqual(discoveryBottom);
+  expect(archiveSectionY - discoveryBottom).toBeLessThan(128);
+  await expect(
+    startSection.getByRole("link", { name: "Start with Study 004 ↗" }),
+  ).toHaveAttribute("href", /prompts\/issue-02-study-004$/);
+  await expect(discovery.getByRole("link")).toHaveCount(4);
   expect(archiveSectionY).toBeLessThan(onboardingSectionY);
 
   await browseStudies.click();

@@ -761,8 +761,7 @@
 @media screen and (min-width: 900px) {
   .standalone-study .study-figure {
     grid-row: 2 / span 3;
-    position: sticky;
-    top: 24px;
+    position: static;
   }
   .standalone-study .study-article > .study-working-notes,
   .standalone-study .study-article > .study-experiment {
