@@ -1,4 +1,34 @@
 import { expect, test } from "@playwright/test";
+import hero from "../../src/content/prompts/issue-02-study-004.json" with { type: "json" };
+
+test("approved editorial homepage features Study 004 and an undistorted issue cover", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "A study inportraiture.",
+  );
+  await expect(page.locator(".hero-portrait")).toHaveAttribute(
+    "href",
+    /prompts\/issue-02-study-004$/,
+  );
+  await expect(page.locator(".hero-portrait > img")).toHaveAttribute(
+    "src",
+    new RegExp(hero.referenceImage.replaceAll(".", "\\.") + "$"),
+  );
+  const cover = page.locator(".issue-feature-cover img");
+  await cover.scrollIntoViewIfNeeded();
+  await expect
+    .poll(() => cover.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0);
+  const ratios = await cover.evaluate((image: HTMLImageElement) => ({
+    shown:
+      image.getBoundingClientRect().width /
+      image.getBoundingClientRect().height,
+    source: image.naturalWidth / image.naturalHeight,
+  }));
+  expect(Math.abs(ratios.shown - ratios.source)).toBeLessThan(0.01);
+});
 
 test("issue reading action precedes the cover and chapters remain reachable", async ({
   page,

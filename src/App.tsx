@@ -197,14 +197,22 @@ export default function App() {
   }, [navigate]);
 
   return (
-    <div className={focused ? "publication focused" : "publication"}>
+    <div
+      className={`publication${readerRoute ? " publication--reader" : " publication--editorial"}${focused ? " focused" : ""}`}
+    >
       <a className="skip-link" href="#main">
         {t("Skip to content")}
       </a>
       {!focused && (
         <header className="masthead">
+          <div className="publication-meta">
+            <span>Independent portrait studies</span>
+            <span>
+              {currentIssue.studies} studies / {currentIssue.pages} pages
+            </span>
+          </div>
           <Link className="wordmark" to="/">
-            THE PORTRAIT EDIT<span className="wordmark-issue"> / 02</span>
+            the portrait edit<span className="wordmark-issue">02</span>
             <span>{t("Independent portrait studies")}</span>
           </Link>
           <nav aria-label="Publication">

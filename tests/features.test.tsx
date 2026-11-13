@@ -37,8 +37,8 @@ describe("Theme & Bookmarks features", () => {
 
   it("manages themes and sets data-theme attribute on root element", () => {
     render(<ThemeTestComponent />);
-    expect(screen.getByTestId("current-theme")).toHaveTextContent("dark");
-    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+    expect(screen.getByTestId("current-theme")).toHaveTextContent("light");
+    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
 
     fireEvent.click(screen.getByText("Set Light"));
     expect(screen.getByTestId("current-theme")).toHaveTextContent("light");

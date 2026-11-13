@@ -85,6 +85,13 @@ Focus is stored under `portrait-edit-focus-mode`. `?focus=1` enters it; `?focus=
 
 Inter and Newsreader variable WOFF2 fonts are self-hosted from their Fontsource npm packages, including Newsreader italic. Charter/Georgia and platform sans/monospace stacks provide fallbacks. Light and dark share geometry and type scales. The theme toggle and display settings offer only Light and Dark, and the chosen theme is saved in local storage.
 
+The approved editorial preview is integrated through `src/publication.css`:
+a paper-colored light palette, large publication masthead, Study 004 homepage
+portrait, and a prominent Issue 02 cover feature. New visitors default to Light;
+existing saved theme preferences remain respected. The full reader keeps its
+compact navigation, and archive search, filters, collections, copy actions,
+comparison tools and existing deep links remain part of the React application.
+
 Every form control has a minimum 16px font across all widths, including iPads. Greyscale font smoothing applies **only** above 192dpi / 2dppx; standard-density Windows keeps its native text rendering. Focus rings, selected/disabled controls, loading and error states use shared theme tokens.
 
 ## Content and provenance

@@ -25,7 +25,7 @@ describe("homepage discovery and direct sharing", () => {
     expect(browseStudies).toHaveAttribute("href", "/prompts");
 
     const fromArchiveHeading = screen.getByRole("heading", {
-      name: "From the archive",
+      name: "Selected studies",
     });
     const onboardingHeading = screen.getByRole("heading", {
       name: "Make the issue yours",

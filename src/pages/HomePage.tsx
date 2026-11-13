@@ -42,21 +42,23 @@ export function HomePage() {
   const featured = currentIssue.featured.map((id) =>
     prompts.find((p) => p.id === id)!,
   );
+  const hero = prompts.find((p) => p.id === "issue-02-study-004")!;
   return (
     <>
       <section className="home-hero">
         <div className="hero-copy">
           <p className="eyebrow">
-            Issue {currentIssue.number} / {t("A portrait archive")}
+            Issue {currentIssue.number} / {t("The Prompt Issue")}
           </p>
           <h1>
-            <span className="hero-title-prefix">The</span>
-            <em>Prompt</em>
-            <span className="hero-title-ending">
-              Issue<span aria-hidden="true"> / 02</span>
-            </span>
+            A study in
+            <br />
+            <em>portraiture.</em>
           </h1>
-          <p className="hero-deck">{currentIssue.description}</p>
+          <p className="hero-deck">
+            Reference images, original prompts, and the creative decisions
+            behind a portrait.
+          </p>
           <p className="issue-stats">
             {currentIssue.studies} {t("studies")} <span>·</span>{" "}
             {currentIssue.pages} {t("pages")} <span>·</span>{" "}
@@ -92,42 +94,25 @@ export function HomePage() {
           </div>
         </div>
         <div className="hero-visual">
-          <Link className="hero-portrait" to={`/prompts/${featured[0].id}`}>
+          <Link className="hero-portrait" to={`/prompts/${hero.id}`}>
             <img
-              src={assetUrl(featured[0].referenceImage)}
-              alt={featured[0].title}
+              src={assetUrl(hero.referenceImage)}
+              alt={hero.title}
               fetchPriority="high"
               decoding="async"
             />
             <span className="hero-image-caption">
+              <span>Study {String(hero.studyNumber).padStart(3, "0")}</span>
               <span>
-                Study {String(featured[0].studyNumber).padStart(3, "0")}
+                <IconText>{hero.title} ↗</IconText>
               </span>
-              <span>
-                <IconText>{featured[0].title} ↗</IconText>
-              </span>
-            </span>
-          </Link>
-          <Link
-            className="hero-cover"
-            to={readerPath(currentIssue.slug, lastReadPage)}
-            aria-labelledby="hero-issue-label"
-          >
-            <img
-              src={assetUrl(currentIssue.cover)}
-              width="480"
-              height="622"
-              alt="The Portrait Edit — Issue 02 cover"
-            />
-            <span id="hero-issue-label">
-              <IconText>Issue 02 — The Prompt Issue ↗</IconText>
             </span>
           </Link>
         </div>
       </section>
       <section className="selected-section">
         <div className="section-title">
-          <h2>{t("From the archive")}</h2>
+          <h2>{t("Selected studies")}</h2>
           <Link to="/prompts">
             <IconText>{t("All studies ↗")}</IconText>
           </Link>
@@ -146,6 +131,36 @@ export function HomePage() {
               }
             />
           ))}
+        </div>
+      </section>
+      <section className="issue-feature" aria-labelledby="issue-feature-title">
+        <Link
+          className="hero-cover issue-feature-cover"
+          to={readerPath(currentIssue.slug, lastReadPage)}
+          aria-labelledby="hero-issue-label"
+        >
+          <img
+            src={assetUrl(currentIssue.cover)}
+            width="480"
+            height="621"
+            alt="The Portrait Edit — Issue 02 cover"
+          />
+          <span id="hero-issue-label">
+            <IconText>Issue 02 — The Prompt Issue ↗</IconText>
+          </span>
+        </Link>
+        <div className="issue-feature-copy">
+          <p className="eyebrow">The magazine / No. {currentIssue.number}</p>
+          <h2 id="issue-feature-title">The Prompt Issue</h2>
+          <p>
+            A working collection of images and the language that shaped them.
+            Nine chapters move through light, landscape, fantasy, and fashion.
+          </p>
+          <Button asChild variant="default">
+            <Link to={`/issues/${currentIssue.slug}`}>
+              Explore the issue <IconText>↗</IconText>
+            </Link>
+          </Button>
         </div>
       </section>
       <section className="home-start" aria-labelledby="home-start-title">

@@ -45,9 +45,9 @@ describe("shared editorial themes", () => {
         new StorageEvent("storage", { key: null, storageArea: localStorage }),
       ),
     );
-    expect(first.result.current.theme).toBe("dark");
-    expect(second.result.current.theme).toBe("dark");
-    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
+    expect(first.result.current.theme).toBe("light");
+    expect(second.result.current.theme).toBe("light");
+    expect(document.documentElement).toHaveAttribute("data-theme", "light");
   });
 
   it("ignores other storage keys and session-storage changes", () => {
@@ -71,10 +71,10 @@ describe("shared editorial themes", () => {
     expect(result.current.theme).toBe("light");
   });
 
-  it("defaults to dark for invalid preferences and rejects invalid setter values", () => {
+  it("defaults to paper light for invalid preferences and rejects invalid setter values", () => {
     localStorage.setItem("portrait-edit-theme", "invalid");
     const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe("dark");
+    expect(result.current.theme).toBe("light");
     act(() => result.current.setTheme("dark"));
     act(() => result.current.setTheme("invalid" as Theme));
     expect(result.current.theme).toBe("dark");
@@ -86,7 +86,7 @@ describe("shared editorial themes", () => {
         }),
       ),
     );
-    expect(result.current.theme).toBe("dark");
+    expect(result.current.theme).toBe("light");
   });
 
   it.each(["blocked", "full"])(
@@ -135,9 +135,9 @@ describe("browser toolbar colors", () => {
       document.head.appendChild(meta);
     }
     const { result } = renderHook(() => useTheme());
-    expect(toolbarColors()).toEqual(["#101010", "#101010"]);
+    expect(toolbarColors()).toEqual(["#f6f3ec", "#f6f3ec"]);
     for (const [theme, color] of [
-      ["light", "#f7f6f2"],
+      ["light", "#f6f3ec"],
       ["dark", "#101010"],
     ] as const) {
       act(() => result.current.setTheme(theme));
@@ -146,10 +146,10 @@ describe("browser toolbar colors", () => {
     }
   });
 
-  it("creates a dark toolbar color by default without consulting the OS", () => {
+  it("creates a paper toolbar color by default without consulting the OS", () => {
     const { unmount } = renderHook(() => useTheme());
-    expect(toolbarColors()).toEqual(["#101010"]);
+    expect(toolbarColors()).toEqual(["#f6f3ec"]);
     unmount();
-    expect(toolbarColors()).toEqual(["#101010"]);
+    expect(toolbarColors()).toEqual(["#f6f3ec"]);
   });
 });

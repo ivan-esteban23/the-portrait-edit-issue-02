@@ -4,7 +4,7 @@ export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "portrait-edit-theme";
 const THEME_COLORS: Record<Theme, string> = {
-  light: "#f7f6f2",
+  light: "#f6f3ec",
   dark: "#101010",
 };
 const THEME_EVENT = "portrait-edit-theme-change";
@@ -17,9 +17,9 @@ function readTheme(): Theme {
   if (transientTheme !== null) return transientTheme;
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return isTheme(stored) ? stored : "dark";
+    return isTheme(stored) ? stored : "light";
   } catch {
-    return "dark";
+    return "light";
   }
 }
 
@@ -55,7 +55,7 @@ export function useTheme() {
         return;
       }
       transientTheme = null;
-      setThemeState(isTheme(event.newValue) ? event.newValue : "dark");
+      setThemeState(isTheme(event.newValue) ? event.newValue : "light");
     };
     window.addEventListener(THEME_EVENT, syncLocal);
     window.addEventListener("storage", syncStorage);

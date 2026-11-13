@@ -28,7 +28,7 @@ test("homepage routes readers into the magazine, archive, and saved collection",
 
   await page.setViewportSize({ width: 390, height: 844 });
   const archiveSectionY = await page
-    .getByRole("heading", { name: "From the archive", exact: true })
+    .getByRole("heading", { name: "Selected studies", exact: true })
     .evaluate((el) => el.getBoundingClientRect().top);
   const onboardingSectionY = await page
     .getByRole("heading", { name: "Make the issue yours", exact: true })

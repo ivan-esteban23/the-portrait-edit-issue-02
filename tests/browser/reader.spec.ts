@@ -244,6 +244,9 @@ test("desktop Focus dims chrome and wakes on activity", async ({ page }) => {
 test("explicit themes ignore the OS preference and form controls retain cross-platform legibility", async ({
   page,
 }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem("portrait-edit-theme", "dark"),
+  );
   await page.goto(reader);
   await page.emulateMedia({ colorScheme: "light" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -523,6 +526,10 @@ test("mobile dock clearance follows its rendered height and resets on desktop", 
 test("theme controls, shortcuts, and browser tabs share the same preference", async ({
   page,
 }) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("portrait-edit-theme"))
+      localStorage.setItem("portrait-edit-theme", "dark");
+  });
   await page.goto(reader);
   const mastheadTheme = page.locator(".masthead-theme-toggle");
   await mastheadTheme.click();
@@ -539,7 +546,7 @@ test("theme controls, shortcuts, and browser tabs share the same preference", as
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("body")).toHaveCSS(
     "background-color",
-    "rgb(247, 246, 242)",
+    "rgb(246, 243, 236)",
   );
   await mastheadTheme.click();
   await expect(mastheadTheme).toHaveAttribute("aria-label", /dark/);
@@ -552,7 +559,7 @@ test("theme controls, shortcuts, and browser tabs share the same preference", as
     await expect(mastheadTheme).toHaveAttribute("aria-label", /light/);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await other.evaluate(() => localStorage.clear());
-    await expect(mastheadTheme).toHaveAttribute("aria-label", /dark/);
+    await expect(mastheadTheme).toHaveAttribute("aria-label", /light/);
   } finally {
     await other.close();
   }
