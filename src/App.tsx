@@ -22,6 +22,8 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Toast } from "./components/ui/Toast";
 import { BOOKMARK_REMOVED, useBookmarks } from "./hooks/useBookmarks";
 import { useLanguage } from "./i18n/LanguageProvider";
+import { useLastReadPage } from "./hooks/useReadingProgress";
+import { readArchiveContext } from "./lib/archiveNavigation";
 
 const CommandPalette = lazy(() =>
   import("./components/CommandPalette").then((m) => ({
@@ -63,6 +65,10 @@ export default function App() {
   const { theme, setTheme } = useTheme();
   const location = useLocation(),
     navigate = useNavigate();
+  const lastReadPage = useLastReadPage(currentIssue);
+  const archiveContext = location.pathname.startsWith("/prompts/")
+    ? readArchiveContext(location.state?.archiveContext)
+    : null;
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [bookmarkToast, setBookmarkToast] = useState<{
@@ -202,6 +208,54 @@ export default function App() {
             <span>{t("Independent portrait studies")}</span>
           </Link>
           <nav aria-label="Publication">
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+            >
+              {t("Home")}
+            </NavLink>
+            <Link
+              to={
+                readerRoute
+                  ? location.pathname + location.search
+                  : readerPath(currentIssue.slug, lastReadPage)
+              }
+              className={readerRoute ? "is-active" : undefined}
+              aria-current={readerRoute ? "location" : undefined}
+              title={t("Continue reading · Page {page}", {
+                page: lastReadPage,
+              })}
+            >
+              {t("Reader")}
+            </Link>
+            <NavLink
+              to={`/issues/${currentIssue.slug}#issue-chapters`}
+              end
+              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+            >
+              {t("Contents")}
+            </NavLink>
+            <NavLink
+              to={{
+                pathname: "/prompts",
+                search: archiveContext?.search ?? "",
+              }}
+              state={
+                archiveContext ? { archiveReturn: archiveContext } : undefined
+              }
+              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+            >
+              {t("Archive")}
+            </NavLink>
+            <NavLink
+              to="/about"
+              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+            >
+              {t("About")}
+            </NavLink>
+          </nav>
+          <div className="masthead-utilities">
             <button
               type="button"
               className="masthead-search-trigger"
@@ -219,25 +273,6 @@ export default function App() {
                 ⌘K
               </kbd>
             </button>
-            <Link
-              to={readerPath(currentIssue.slug, 1)}
-              className={readerRoute ? "is-active" : undefined}
-              aria-current={readerRoute ? "location" : undefined}
-            >
-              {t("Reader")}
-            </Link>
-            <NavLink
-              to="/prompts"
-              className={({ isActive }) => (isActive ? "is-active" : undefined)}
-            >
-              {t("Archive")}
-            </NavLink>
-            <NavLink
-              to="/about"
-              className={({ isActive }) => (isActive ? "is-active" : undefined)}
-            >
-              {t("About")}
-            </NavLink>
             <div className="masthead-theme">
               <button
                 type="button"
@@ -249,7 +284,7 @@ export default function App() {
                 <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
               </button>
             </div>
-          </nav>
+          </div>
         </header>
       )}
       <main id="main" tabIndex={-1}>

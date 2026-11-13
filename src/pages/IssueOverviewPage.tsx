@@ -12,7 +12,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 export function IssueOverviewPage() {
   const { slug } = useParams();
-  const { hash } = useLocation();
+  const { hash, key: navigationKey } = useLocation();
   const chapterHeading = useRef<HTMLHeadingElement>(null);
   const browseChapters = useCallback(() => {
     const heading = chapterHeading.current;
@@ -42,7 +42,7 @@ export function IssueOverviewPage() {
     if (hash !== "#issue-chapters") return;
     const frame = requestAnimationFrame(browseChapters);
     return () => cancelAnimationFrame(frame);
-  }, [hash, issue?.slug, browseChapters]);
+  }, [hash, issue?.slug, browseChapters, navigationKey]);
   if (!issue) return <NotFoundPage />;
   const issueStudies = prompts.filter((p) => p.issueSlug === issue.slug);
 

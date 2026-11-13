@@ -49,6 +49,15 @@ All routes live beneath `/the-portrait-edit-issue-02/`. Existing `#page=60` and 
 
 ## Reader interaction
 
+The publication header links to Home, Reader, Contents, Archive and About.
+Reader resumes the last page read; activating it within the reader keeps the
+current page and query settings. Contents opens and focuses the chapter directory.
+On smaller screens, publication links have their own row beneath the wordmark,
+with search and theme controls alongside the wordmark. From a study opened in the
+archive, the header's Archive link restores the search, filters, scroll and card
+focus. Study pages also offer previous/next shortcuts and their archive position
+above the study, in addition to the detailed navigation below it.
+
 The homepage offers Read, Explore, and Collect entry points. Read resumes the
 last page; Collect opens the active collection's saved studies and shows its
 current count. Progress and collections stay in the current browser; the archive
