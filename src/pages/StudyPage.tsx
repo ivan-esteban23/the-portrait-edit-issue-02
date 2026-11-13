@@ -75,34 +75,39 @@ export function StudyPage() {
           <IconText>Read in the issue ↗</IconText>
         </Link>
       </div>
-      <nav className="study-quick-nav" aria-label="Study shortcuts">
-        {previousPrompt ? (
-          <Link
-            to={`/prompts/${previousPrompt.id}`}
-            state={studyState}
-            aria-label={`Previous: ${previousPrompt.title}`}
-          >
-            <IconText>← Previous</IconText>
-          </Link>
-        ) : (
-          <span />
-        )}
-        <span className="study-position">
-          Study {promptIndex + 1} of {prompts.length}
-        </span>
-        {nextPrompt ? (
-          <Link
-            to={`/prompts/${nextPrompt.id}`}
-            state={studyState}
-            aria-label={`Next: ${nextPrompt.title}`}
-          >
-            <IconText>Next →</IconText>
-          </Link>
-        ) : (
-          <span />
-        )}
-      </nav>
-      <Study key={prompt.id} prompt={prompt}>
+      <Study
+        key={prompt.id}
+        prompt={prompt}
+        navigation={
+          <nav className="study-quick-nav" aria-label="Study shortcuts">
+            {previousPrompt ? (
+              <Link
+                to={`/prompts/${previousPrompt.id}`}
+                state={studyState}
+                aria-label={`Previous: ${previousPrompt.title}`}
+              >
+                <IconText>← Previous</IconText>
+              </Link>
+            ) : (
+              <span />
+            )}
+            <span className="study-position">
+              Study {promptIndex + 1} of {prompts.length}
+            </span>
+            {nextPrompt ? (
+              <Link
+                to={`/prompts/${nextPrompt.id}`}
+                state={studyState}
+                aria-label={`Next: ${nextPrompt.title}`}
+              >
+                <IconText>Next →</IconText>
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        }
+      >
         <aside className="parameters">
           <h2>Study record</h2>
           <dl>

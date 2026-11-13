@@ -56,7 +56,10 @@ On smaller screens, publication links have their own row beneath the wordmark,
 with search and theme controls alongside the wordmark. From a study opened in the
 archive, the header's Archive link restores the search, filters, scroll and card
 focus. Study pages also offer previous/next shortcuts and their archive position
-above the study, in addition to the detailed navigation below it.
+below the study title, in addition to the detailed navigation below the content.
+Page titles and section headings use a consistent scale. Accent-filled buttons
+identify primary actions; reading/chapter actions precede the issue's print and
+download tools, and study sharing controls follow its title and description.
 
 The homepage offers Read, Explore, and Collect entry points. Read resumes the
 last page; Collect opens the active collection's saved studies and shows its

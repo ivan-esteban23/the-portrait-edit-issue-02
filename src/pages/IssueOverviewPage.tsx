@@ -51,57 +51,59 @@ export function IssueOverviewPage() {
       <header>
         <p className="eyebrow">Issue {issue.number}</p>
         <h1>{issue.title}</h1>
-        <Button asChild variant="outline" className="overview-chapter-link">
-          <Link
-            to="#issue-chapters"
-            onClick={(event) => {
-              if (
-                !event.metaKey &&
-                !event.ctrlKey &&
-                !event.altKey &&
-                !event.shiftKey
-              )
-                browseChapters();
-            }}
-          >
-            <IconText>Browse chapters ↓</IconText>
-          </Link>
-        </Button>
         <p className="editorial-intro">{issue.description}</p>
+        <div className="overview-primary-actions">
+          <Button asChild variant="default">
+            <Link to={readerPath(issue.slug, lastReadPage)}>
+              <IconText>
+                {lastReadPage > 1
+                  ? `Resume reading (Page ${lastReadPage}) ↗`
+                  : "Start reading"}
+              </IconText>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="overview-chapter-link">
+            <Link
+              to="#issue-chapters"
+              onClick={(event) => {
+                if (
+                  !event.metaKey &&
+                  !event.ctrlKey &&
+                  !event.altKey &&
+                  !event.shiftKey
+                )
+                  browseChapters();
+              }}
+            >
+              <IconText>Browse chapters ↓</IconText>
+            </Link>
+          </Button>
+        </div>
+        <div className="overview-secondary-actions">
+          {lastReadPage > 1 && (
+            <Button asChild variant="ghost">
+              <Link to={readerPath(issue.slug)}>Start from beginning</Link>
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="ghost"
+            className="print-contact-sheet-btn"
+            onClick={() => window.print()}
+            title="Print editorial contact sheet"
+          >
+            <Icon name="print" />
+            Print contact sheet
+          </Button>
+          <a href={issue.pdfUrl}>
+            <IconText>
+              Download PDF · {(issue.pdfBytes / 1e6).toFixed(1)} MB ↗
+            </IconText>
+          </a>
+        </div>
       </header>
       <div className="overview-grid">
         <div>
-          <div className="hero-actions">
-            <Button asChild variant="default">
-              <Link to={readerPath(issue.slug, lastReadPage)}>
-                <IconText>
-                  {lastReadPage > 1
-                    ? `Resume reading (Page ${lastReadPage}) ↗`
-                    : "Start reading"}
-                </IconText>
-              </Link>
-            </Button>
-            {lastReadPage > 1 && (
-              <Button asChild variant="outline">
-                <Link to={readerPath(issue.slug)}>Start from beginning</Link>
-              </Button>
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              className="print-contact-sheet-btn"
-              onClick={() => window.print()}
-              title="Print editorial contact sheet"
-            >
-              <Icon name="print" />
-              Print contact sheet
-            </Button>
-            <a href={issue.pdfUrl}>
-              <IconText>
-                Download PDF · {(issue.pdfBytes / 1e6).toFixed(1)} MB ↗
-              </IconText>
-            </a>
-          </div>
           <img
             className="overview-cover"
             src={assetUrl(issue.cover)}

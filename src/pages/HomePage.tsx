@@ -77,8 +77,10 @@ export function HomePage() {
             <Button asChild variant="outline">
               <Link to="/prompts">{t("Browse studies")}</Link>
             </Button>
+          </div>
+          <div className="hero-secondary-actions">
             {lastReadPage > 1 && (
-              <Button asChild variant="outline">
+              <Button asChild variant="ghost">
                 <Link to={readerPath(currentIssue.slug)}>
                   {t("Start from beginning")}
                 </Link>

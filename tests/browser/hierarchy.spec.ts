@@ -13,6 +13,9 @@ test("issue reading action precedes the cover and chapters remain reachable", as
     "href",
     /issues\/the-prompt-issue\/pages\/1$/,
   );
+  await expect(
+    page.locator(".overview-primary-actions .button-primary"),
+  ).toHaveCount(1);
   expect(
     await reading.evaluate((el) =>
       Boolean(
@@ -44,6 +47,15 @@ test("study identity and prompt precede navigation while archive return is retai
     page.getByRole("heading", { name: "Image Prompt", level: 2 }),
   ).toBeVisible();
   const nav = page.getByRole("navigation", { name: "Study navigation" });
+  expect(
+    await title.evaluate((el) =>
+      Boolean(
+        el.compareDocumentPosition(
+          document.querySelector(".study-quick-nav")!,
+        ) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+    ),
+  ).toBe(true);
   expect(
     await title.evaluate((el) =>
       Boolean(

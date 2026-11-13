@@ -263,15 +263,46 @@ export function Study({
   prompt,
   context = "detail",
   children,
+  navigation,
 }: {
   prompt: Prompt;
   context?: "detail" | "reader";
   children?: ReactNode;
+  navigation?: ReactNode;
 }) {
   const { isSaved, toggleSaved } = useBookmarks();
   const saved = isSaved(prompt.id);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [studioOpen, setStudioOpen] = useState(false);
+
+  const headerActions = (
+    <div className="study-header-actions">
+      <CopyLinkButton path={`/prompts/${prompt.id}`} />
+      {canShare() && (
+        <Button
+          variant="ghost"
+          className="study-share-btn"
+          onClick={() => sharePrompt(prompt)}
+          aria-label="Share study"
+          title="Share study"
+        >
+          <IconText>Share ↗</IconText>
+        </Button>
+      )}
+      <Button
+        variant="ghost"
+        className={`study-bookmark-toggle ${saved ? "is-saved" : ""}`}
+        aria-pressed={saved}
+        onClick={() => toggleSaved(prompt.id)}
+        aria-label={saved ? "Remove from saved" : "Save study"}
+      >
+        <span className="bookmark-icon" aria-hidden="true">
+          <Icon name={saved ? "bookmark-filled" : "bookmark"} size={14} />
+        </span>
+        <span>{saved ? "Saved" : "Save study"}</span>
+      </Button>
+    </div>
+  );
 
   return (
     <article className="study-article">
@@ -281,35 +312,12 @@ export function Study({
             Study {String(prompt.studyNumber).padStart(3, "0")}{" "}
             <span> / Page {prompt.page}</span>
           </p>
-          <div className="study-header-actions">
-            <CopyLinkButton path={`/prompts/${prompt.id}`} />
-            {canShare() && (
-              <Button
-                variant="ghost"
-                className="study-share-btn"
-                onClick={() => sharePrompt(prompt)}
-                aria-label="Share study"
-                title="Share study"
-              >
-                <IconText>Share ↗</IconText>
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              className={`study-bookmark-toggle ${saved ? "is-saved" : ""}`}
-              aria-pressed={saved}
-              onClick={() => toggleSaved(prompt.id)}
-              aria-label={saved ? "Remove from saved" : "Save study"}
-            >
-              <span className="bookmark-icon" aria-hidden="true">
-                <Icon name={saved ? "bookmark-filled" : "bookmark"} size={14} />
-              </span>
-              <span>{saved ? "Saved" : "Save study"}</span>
-            </Button>
-          </div>
+          {context === "reader" && headerActions}
         </div>
         <h1>{prompt.title}</h1>
         <p className="study-style">{prompt.style}</p>
+        {context === "detail" && headerActions}
+        {navigation}
       </header>
       <figure className="study-figure">
         <button
