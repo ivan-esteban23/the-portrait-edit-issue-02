@@ -895,7 +895,7 @@
     font-variant-numeric: tabular-nums;
   }
   .study-card > .eyebrow {
-    font-size: 11px;
+    font-size: 0.75rem;
     letter-spacing: 0.08em;
     line-height: 1.5;
   }
@@ -907,7 +907,7 @@
     border-top: 1px solid var(--border);
     margin-top: 14px;
     padding-top: 12px;
-    font-size: 11px;
+    font-size: 0.75rem;
     letter-spacing: 0.015em;
     line-height: 1.6;
     align-items: baseline;
@@ -918,7 +918,7 @@
     border-top: 1px solid var(--border);
   }
   .issue-feature .eyebrow {
-    font-size: 11px;
+    font-size: 0.75rem;
     letter-spacing: 0.11em;
   }
   .standalone-study .study-figure figcaption {
@@ -929,7 +929,7 @@
     border-top: 1px solid var(--border);
     padding-top: 16px;
     margin-top: 16px;
-    font-size: 12px;
+    font-size: 0.75rem;
     line-height: 1.6;
     align-items: flex-start;
   }
@@ -951,7 +951,7 @@
     border-bottom: 1px solid var(--border);
   }
   .standalone-study .prompt-card .source-note {
-    font-size: 12px;
+    font-size: 0.75rem;
     line-height: 1.6;
     margin-top: 24px;
     padding-block: 16px 24px;
@@ -982,14 +982,14 @@
     margin-bottom: 10px;
   }
   .hero-image-caption {
-    font-size: 11px;
+    font-size: 0.75rem;
     gap: 4px 16px;
   }
   .standalone-study .study-figure figcaption {
     gap: 12px;
   }
   .standalone-study .study-figure figcaption > a {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
   .standalone-study .study-working-notes {
     padding-top: 24px;
