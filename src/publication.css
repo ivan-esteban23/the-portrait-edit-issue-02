@@ -583,3 +583,22 @@
     margin-block: 8px 12px;
   }
 }
+@media screen and (min-width: 768px) and (max-height: 800px) {
+  .publication--editorial:has(.archive) .publication-meta {
+    display: none;
+  }
+  .publication--editorial:has(.archive) .masthead {
+    padding-top: 12px;
+  }
+  .publication--editorial:has(.archive) .masthead .wordmark {
+    font-size: 48px;
+    margin-block: 8px;
+  }
+  .archive > header h1 {
+    font-size: 42px;
+  }
+  .archive > header .editorial-intro {
+    font-size: 18px;
+    line-height: 1.35;
+  }
+}
