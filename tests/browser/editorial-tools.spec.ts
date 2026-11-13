@@ -67,12 +67,16 @@ test("related cards navigate through detail pages and magazine Reading View", as
     name: "Related Studies",
     exact: true,
   });
-  await expect(related.getByRole("link")).toHaveCount(4);
+  await expect(related.getByRole("link")).toHaveCount(3);
   const first = related.getByRole("link").first();
   const href = await first.getAttribute("href");
   expect(href).toMatch(/\/prompts\/issue-/);
   await first.click();
-  await expect(page).toHaveURL(new RegExp(href!.split("/prompts/")[1] + "$"));
+  await expect(page).toHaveURL(
+    (url) =>
+      url.pathname.endsWith(href!.split("/prompts/")[1].split("?")[0]) &&
+      url.searchParams.get("from") === "issue-02-study-005",
+  );
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await page.goto("issues/the-prompt-issue/pages/60");
   await page.getByRole("button", { name: "Display", exact: true }).click();

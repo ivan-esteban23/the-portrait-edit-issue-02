@@ -10,7 +10,8 @@ import {
   getCommandParameters,
 } from "../src/lib/promptFormatter";
 import { getRelatedStudies } from "../src/lib/relatedStudies";
-import { prompts, readerPath } from "../src/content";
+import { getStudyConnections } from "../src/lib/studyConnections";
+import { currentIssue, prompts, readerPath } from "../src/content";
 import type { Prompt } from "../src/content/schema";
 const original = prompts.find((prompt) => prompt.studyNumber === 5)!;
 const flagged: Prompt = {
@@ -176,7 +177,12 @@ it.each(["detail", "reader"] as const)(
       </MemoryRouter>,
     );
     const region = screen.getByRole("region", { name: "Related Studies" });
-    const related = getRelatedStudies(original, prompts);
+    const related =
+      context === "reader"
+        ? getRelatedStudies(original, prompts)
+        : getStudyConnections(original, prompts, currentIssue).map(
+            (connection) => connection.target,
+          );
     const links = within(region).getAllByRole("link");
     expect(links).toHaveLength(related.length);
     related.forEach((prompt, index) =>
@@ -184,7 +190,7 @@ it.each(["detail", "reader"] as const)(
         "href",
         context === "reader"
           ? readerPath(prompt.issueSlug, prompt.page)
-          : `/prompts/${prompt.id}`,
+          : `/prompts/${prompt.id}?from=${original.id}`,
       ),
     );
   },

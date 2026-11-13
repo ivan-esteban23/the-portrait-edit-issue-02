@@ -61,6 +61,18 @@ export function StudyPage() {
     image: assetUrl(prompt?.referenceImage ?? currentIssue.cover),
     path: prompt ? `/prompts/${prompt.id}` : undefined,
   });
+  const params = new URLSearchParams(location.search);
+  const from = prompts.find((p) => p.id === params.get("from") && p.id !== id);
+  const section = params.get("section");
+  useEffect(() => {
+    if (section !== "connections" || !prompt) return;
+    const frame = requestAnimationFrame(() => {
+      const target = document.getElementById(`connections-${prompt.id}`);
+      target?.focus({ preventScroll: true });
+      target?.scrollIntoView({ block: "start", behavior: "instant" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [id, section, prompt]);
   if (!prompt) return <NotFoundPage />;
   return (
     <section className="standalone-study">
@@ -75,6 +87,22 @@ export function StudyPage() {
           <IconText>Read in the issue ↗</IconText>
         </Link>
       </div>
+      {from && (
+        <aside className="connection-arrival" aria-label="Visual thread">
+          <div>
+            <p className="eyebrow">Following a visual thread</p>
+            <p>
+              From <strong>{from.title}</strong>
+            </p>
+          </div>
+          <Link
+            to={`/prompts/${from.id}?section=connections`}
+            state={studyState}
+          >
+            ← Back to the starting study
+          </Link>
+        </aside>
+      )}
       <Study
         key={prompt.id}
         prompt={prompt}

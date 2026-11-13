@@ -1,3 +1,4 @@
+import { StudyConnections } from "./StudyConnections";
 import { responsiveImageProps } from "@/lib/responsiveImages";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
@@ -16,6 +17,7 @@ export function RelatedStudies({
     () => getRelatedStudies(prompt, prompts),
     [prompt.id],
   );
+  if (context === "detail") return <StudyConnections prompt={prompt} />;
   if (!related.length) return null;
   const tags = new Set(prompt.tags.map((tag) => tag.trim().toLowerCase()));
   return (

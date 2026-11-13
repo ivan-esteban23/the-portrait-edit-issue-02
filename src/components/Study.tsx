@@ -335,6 +335,7 @@ export function Study({
               ["prompt", "02 Prompt"],
               ["notes", "03 Notes"],
               ["experiment", "04 Try it"],
+              ["connections", "05 Connections"],
             ].map(([part, label]) => (
               <a
                 key={part}

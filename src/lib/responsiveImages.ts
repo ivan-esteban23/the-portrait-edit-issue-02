@@ -8,8 +8,11 @@ type ImageKind =
   | "selection"
   | "detail"
   | "reader"
-  | "related";
+  | "related"
+  | "connection";
 const sizes: Record<ImageKind, string> = {
+  connection:
+    "(max-width: 767px) calc(100vw - 40px), (max-width: 1320px) calc((100vw - 128px) / 3), 400px",
   hero: "(max-width: 767px) calc(100vw - 40px), (max-width: 1320px) calc((100vw - 136px) * .524), 620px",
   archive:
     "(max-width: 359px) calc(100vw - 40px), (max-width: 767px) calc((100vw - 56px) / 2), (max-width: 1320px) calc((100vw - 120px) / 3), 400px",

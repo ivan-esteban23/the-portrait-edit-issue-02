@@ -166,3 +166,5 @@ These tests need internet access. The production-notes repository remains
 review, approved corrections and rebuild instructions for the publication.
 
 Portraits use build-generated responsive WebP renditions with layout-specific size hints and intrinsic dimensions. Modern browsers choose a size for their viewport and pixel density; the original references remain available in the image inspector and through study-page source links. The image build records source dimensions before bundling and never enlarges a source. Hero and study images load eagerly; discovery, archive, and related-study images load lazily.
+
+Study pages explain their suggested connections and allow side-by-side reading of excerpts from the published prompts. Study 004 has curated comparisons of framing, color, and lighting; other studies use shared tags or their published chapter. Following a connection retains the archive context and a link back to the starting study. The magazine reader keeps its compact related-study navigation.

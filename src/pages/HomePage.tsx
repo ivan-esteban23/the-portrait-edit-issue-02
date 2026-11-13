@@ -126,9 +126,14 @@ export function HomePage() {
             one compositional change of your own.
           </p>
         </div>
-        <Button asChild>
-          <Link to="/prompts/issue-02-study-004">Start with Study 004 ↗</Link>
-        </Button>
+        <div className="editorial-start-actions">
+          <Button asChild>
+            <Link to="/prompts/issue-02-study-004">Start with Study 004 ↗</Link>
+          </Button>
+          <Link to="/prompts/issue-02-study-004?section=connections">
+            Follow a visual thread ↗
+          </Link>
+        </div>
       </section>
       <EditorialSelections />
       <section className="selected-section">
