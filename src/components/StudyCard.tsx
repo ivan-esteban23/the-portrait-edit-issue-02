@@ -1,3 +1,4 @@
+import { responsiveImageProps } from "@/lib/responsiveImages";
 import { Icon } from "@/components/ui/Icon";
 import { useState, useRef, useEffect, useId, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
@@ -163,8 +164,13 @@ export function StudyCard({
         )}
         <img
           src={cardImageUrl(prompt.referenceImage)}
+          {...responsiveImageProps(
+            prompt.referenceImage,
+            headingLevel === "h3" ? "selected" : "archive",
+          )}
           alt={prompt.title}
           loading="lazy"
+          decoding="async"
         />
       </div>
       <p className="eyebrow">

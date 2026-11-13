@@ -164,3 +164,5 @@ to three bounded retries; persistent limits and other non-200 responses fail.
 These tests need internet access. The production-notes repository remains
 `ivan-esteban23/the-portrait-edit`: its README links the source prompts, editorial
 review, approved corrections and rebuild instructions for the publication.
+
+Portraits use build-generated responsive WebP renditions with layout-specific size hints and intrinsic dimensions. Modern browsers choose a size for their viewport and pixel density; the original references remain available in the image inspector and through study-page source links. The image build records source dimensions before bundling and never enlarges a source. Hero and study images load eagerly; discovery, archive, and related-study images load lazily.

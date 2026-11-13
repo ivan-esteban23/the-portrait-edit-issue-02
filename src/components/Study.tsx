@@ -1,3 +1,4 @@
+import { responsiveImageProps } from "@/lib/responsiveImages";
 import { Icon } from "@/components/ui/Icon";
 import { IconText } from "@/components/ui/IconText";
 import {
@@ -376,6 +377,12 @@ export function Study({
         >
           <img
             src={assetUrl(prompt.referenceImage)}
+            {...responsiveImageProps(
+              prompt.referenceImage,
+              context === "reader" ? "reader" : "detail",
+            )}
+            loading="eager"
+            fetchPriority={context === "detail" ? "high" : undefined}
             alt={`Reference for ${prompt.title}`}
             decoding="async"
           />
@@ -387,8 +394,19 @@ export function Study({
           {context === "detail" && (
             <p className="eyebrow reading-label">01 / The reference</p>
           )}
-          Source: {prompt.source}
-          <span>{prompt.flags}</span>
+          <span className="reference-source">
+            Source: {prompt.source}
+            <span>{prompt.flags}</span>
+          </span>
+          {context === "detail" && (
+            <a
+              href={assetUrl(prompt.referenceImage)}
+              target="_blank"
+              rel="noopener"
+            >
+              Open original ↗
+            </a>
+          )}
         </figcaption>
       </figure>
 

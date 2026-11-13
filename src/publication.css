@@ -862,3 +862,142 @@
     display: none !important;
   }
 }
+
+/* Editorial refinements: a repeated spacing scale and consistent source captions. */
+@media screen {
+  .publication--editorial {
+    --section-space: clamp(40px, 5vw, 72px);
+  }
+  .home-hero {
+    padding-bottom: var(--section-space);
+  }
+  .editorial-start {
+    border-bottom-color: var(--border);
+  }
+  .editorial-discovery,
+  .selected-section {
+    padding-block: var(--section-space);
+  }
+  .selected-section {
+    border-bottom: 1px solid var(--border);
+  }
+  .section-kicker {
+    margin: 0 0 14px;
+    color: var(--accent);
+  }
+  .editorial-discovery .section-title h2 {
+    margin-top: 14px;
+  }
+  .study-card > .eyebrow,
+  .selection-count,
+  .hero-image-caption,
+  .study-figure figcaption {
+    font-variant-numeric: tabular-nums;
+  }
+  .study-card > .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+  }
+  .study-card h2,
+  .study-card h3 {
+    line-height: 1.15;
+  }
+  .hero-image-caption {
+    border-top: 1px solid var(--border);
+    margin-top: 14px;
+    padding-top: 12px;
+    font-size: 11px;
+    letter-spacing: 0.015em;
+    line-height: 1.6;
+    align-items: baseline;
+  }
+  .issue-feature {
+    margin-top: var(--section-space);
+    padding-block: var(--section-space);
+    border-top: 1px solid var(--border);
+  }
+  .issue-feature .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.11em;
+  }
+  .standalone-study .study-figure figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px 20px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    margin-top: 16px;
+    font-size: 12px;
+    line-height: 1.6;
+    align-items: flex-start;
+  }
+  .standalone-study .study-figure figcaption > .reading-label {
+    flex-basis: 100%;
+    margin: 0;
+  }
+  .reference-source {
+    overflow-wrap: anywhere;
+  }
+  .reference-source > span {
+    display: block;
+  }
+  .standalone-study .study-figure figcaption > a {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    border-bottom: 1px solid var(--border);
+  }
+  .standalone-study .prompt-card .source-note {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 24px;
+    padding-block: 16px 24px;
+  }
+  .standalone-study .study-working-notes {
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+  .standalone-study .article-section h2 {
+    font-size: 30px;
+    margin-bottom: 18px;
+  }
+  .standalone-study .study-experiment {
+    padding: 28px;
+  }
+  .standalone-study .study-sequence-nav {
+    margin-top: var(--section-space);
+  }
+  .site-footer {
+    line-height: 1.6;
+  }
+}
+@media screen and (max-width: 767px) {
+  .publication--editorial {
+    --section-space: 36px;
+  }
+  .section-kicker {
+    margin-bottom: 10px;
+  }
+  .hero-image-caption {
+    font-size: 11px;
+    gap: 4px 16px;
+  }
+  .standalone-study .study-figure figcaption {
+    gap: 12px;
+  }
+  .standalone-study .study-figure figcaption > a {
+    font-size: 12px;
+  }
+  .standalone-study .study-working-notes {
+    padding-top: 24px;
+  }
+  .standalone-study .article-section h2 {
+    font-size: 29px;
+  }
+  .standalone-study .study-experiment {
+    padding: 24px 20px;
+  }
+}

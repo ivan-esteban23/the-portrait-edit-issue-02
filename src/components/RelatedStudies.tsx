@@ -1,3 +1,4 @@
+import { responsiveImageProps } from "@/lib/responsiveImages";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { assetUrl, prompts, readerPath } from "@/content";
@@ -36,10 +37,10 @@ export function RelatedStudies({
               {/* The visible study title names the link; the thumbnail is decorative. */}
               <img
                 src={assetUrl(study.referenceImage)}
+                {...responsiveImageProps(study.referenceImage, "related")}
                 alt=""
                 loading="lazy"
-                width="360"
-                height="440"
+                decoding="async"
               />
               <p className="eyebrow">
                 Study {String(study.studyNumber).padStart(3, "0")}

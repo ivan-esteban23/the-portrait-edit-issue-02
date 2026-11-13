@@ -1,3 +1,4 @@
+import { responsiveImageProps } from "@/lib/responsiveImages";
 import { Link } from "react-router-dom";
 import { cardImageUrl, prompts } from "@/content";
 import { editorialSelections } from "@/content/editorialSelections";
@@ -13,7 +14,7 @@ export function EditorialSelections({
     <section className="editorial-discovery" aria-label="Editorial selections">
       <div className="section-title">
         <div>
-          <p className="eyebrow">Four ways into the collection</p>
+          <p className="eyebrow">01 / Four ways into the collection</p>
           <h2>Follow your curiosity.</h2>
         </div>
       </div>
@@ -32,9 +33,8 @@ export function EditorialSelections({
               <div className="editorial-selection-image">
                 <img
                   src={cardImageUrl(hero.referenceImage)}
+                  {...responsiveImageProps(hero.referenceImage, "selection")}
                   alt=""
-                  width="480"
-                  height="600"
                   loading="lazy"
                   decoding="async"
                 />

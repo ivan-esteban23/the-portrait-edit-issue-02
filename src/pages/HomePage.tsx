@@ -1,3 +1,4 @@
+import { responsiveImageProps } from "@/lib/responsiveImages";
 import { IconText } from "@/components/ui/IconText";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { assetUrl, currentIssue, prompts, readerPath } from "@/content";
@@ -99,6 +100,7 @@ export function HomePage() {
           <Link className="hero-portrait" to={`/prompts/${hero.id}`}>
             <img
               src={assetUrl(hero.referenceImage)}
+              {...responsiveImageProps(hero.referenceImage, "hero")}
               alt={hero.title}
               fetchPriority="high"
               decoding="async"
@@ -131,7 +133,10 @@ export function HomePage() {
       <EditorialSelections />
       <section className="selected-section">
         <div className="section-title">
-          <h2>{t("Selected studies")}</h2>
+          <div>
+            <p className="eyebrow section-kicker">02 / From the archive</p>
+            <h2>{t("Selected studies")}</h2>
+          </div>
           <Link to="/prompts">
             <IconText>{t("All studies ↗")}</IconText>
           </Link>
@@ -169,7 +174,9 @@ export function HomePage() {
           </span>
         </Link>
         <div className="issue-feature-copy">
-          <p className="eyebrow">The magazine / No. {currentIssue.number}</p>
+          <p className="eyebrow">
+            03 / The magazine · No. {currentIssue.number}
+          </p>
           <h2 id="issue-feature-title">The Prompt Issue</h2>
           <p>
             A working collection of images and the language that shaped them.

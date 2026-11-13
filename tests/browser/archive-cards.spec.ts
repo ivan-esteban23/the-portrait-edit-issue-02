@@ -256,3 +256,50 @@ test("More actions supports keyboard entry, Escape at the trigger, and natural T
   await expect(more).toBeFocused();
   await expect(more).toHaveAttribute("aria-expanded", "false");
 });
+
+test("phones select responsive WebP portraits without downloading the original hero", async ({
+  browser,
+}) => {
+  for (const deviceScaleFactor of [1, 2]) {
+    const context = await browser.newContext({
+      viewport: { width: 320, height: 740 },
+      deviceScaleFactor,
+    });
+    const page = await context.newPage();
+    const requested: string[] = [];
+    page.on("request", (request) => requested.push(request.url()));
+    await page.goto("http://127.0.0.1:4173/the-portrait-edit-issue-02/", {
+      waitUntil: "networkidle",
+    });
+    const image = page.locator(".hero-portrait > img");
+    await expect
+      .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
+      .toBeGreaterThan(0);
+    const current = await image.evaluate((img: HTMLImageElement) => ({
+      src: img.currentSrc,
+      fallback: img.src,
+      width: img.getAttribute("width"),
+      height: img.getAttribute("height"),
+    }));
+    expect(current.src).toMatch(/\/references\/responsive\/[^/]+-\d+\.webp$/);
+    expect(current.width).toBe("736");
+    expect(current.height).toBe("981");
+    expect(requested).not.toContain(current.fallback);
+    if (deviceScaleFactor === 1) expect(current.src).toMatch(/-320\.webp$/);
+    else expect(current.src).toMatch(/-(640|736)\.webp$/);
+    const optimized = await page.request.get(current.src);
+    const original = await page.request.get(current.fallback);
+    expect(optimized.ok()).toBe(true);
+    expect(optimized.headers()["content-type"]).toContain("image/webp");
+    expect((await optimized.body()).length).toBeLessThan(
+      (await original.body()).length,
+    );
+    await page.goto(
+      "http://127.0.0.1:4173/the-portrait-edit-issue-02/prompts/issue-02-study-004",
+    );
+    await expect(
+      page.getByRole("link", { name: "Open original ↗", exact: true }),
+    ).toHaveAttribute("href", /references\/[^/]+\.jpeg$/);
+    await context.close();
+  }
+});
