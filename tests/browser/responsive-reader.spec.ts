@@ -211,7 +211,7 @@ test("masthead theme button stays reachable across phone, tablet, and desktop wi
     { width: 1280, height: 900 },
     { width: 1440, height: 1000 },
   ];
-  const themes = ["light", "dark", "light", "dark", "light", "dark", "light"];
+  const themes = ["dark", "light", "dark", "light", "dark", "light", "dark"];
   for (const [index, viewport] of viewports.entries()) {
     await page.setViewportSize(viewport);
     await expect(theme).toBeVisible();
