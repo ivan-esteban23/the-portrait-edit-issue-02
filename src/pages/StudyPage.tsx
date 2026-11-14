@@ -1,8 +1,10 @@
+import { FocusedPrompt } from "@/components/FocusedPrompt";
+import { ShareStudyDialog } from "@/components/ShareStudyDialog";
 import { IconText } from "@/components/ui/IconText";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { assetUrl, currentIssue, prompts, readerPath } from "@/content";
 import { Study } from "@/components/Study";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NotFoundPage } from "./NotFoundPage";
 import { usePageMeta, truncateMetaDescription } from "@/hooks/usePageMeta";
 import { modalOpen } from "@/lib/utils";
@@ -42,6 +44,7 @@ export function StudyPage() {
           target.closest("input, textarea, select, [contenteditable='true']"))
       )
         return;
+      if (new URLSearchParams(location.search).get("reading") === "1") return;
       if (event.key === "ArrowLeft" && previousPrompt) {
         event.preventDefault();
         navigate(`/prompts/${previousPrompt.id}`, { state: studyState });
@@ -52,15 +55,25 @@ export function StudyPage() {
     };
     window.addEventListener("keydown", handleStudyNavigation);
     return () => window.removeEventListener("keydown", handleStudyNavigation);
-  }, [navigate, nextPrompt, previousPrompt, prompt, studyState]);
+  }, [
+    navigate,
+    nextPrompt,
+    previousPrompt,
+    prompt,
+    studyState,
+    location.search,
+  ]);
   usePageMeta({
     title: prompt
       ? `Study #${prompt.studyNumber}: ${prompt.title} | The Portrait Edit`
       : "Page not found | The Portrait Edit",
     description: prompt ? truncateMetaDescription(prompt.prompt) : undefined,
-    image: assetUrl(prompt?.referenceImage ?? currentIssue.cover),
+    image: assetUrl(
+      prompt ? `social/studies/${prompt.id}.jpg` : currentIssue.cover,
+    ),
     path: prompt ? `/prompts/${prompt.id}` : undefined,
   });
+  const [shareOpen, setShareOpen] = useState(false);
   const params = new URLSearchParams(location.search);
   const from = prompts.find((p) => p.id === params.get("from") && p.id !== id);
   const section = params.get("section");
@@ -74,9 +87,28 @@ export function StudyPage() {
     return () => cancelAnimationFrame(frame);
   }, [id, section, prompt]);
   if (!prompt) return <NotFoundPage />;
+  if (params.get("reading") === "1")
+    return <FocusedPrompt key={prompt.id} prompt={prompt} />;
+  const readingParams = new URLSearchParams(location.search);
+  readingParams.set("reading", "1");
   return (
     <section className="standalone-study">
       <div className="study-links">
+        <Link
+          to={`${location.pathname}?${readingParams}`}
+          state={location.state}
+        >
+          <IconText>Focused reading ↗</IconText>
+        </Link>
+        <button onClick={() => setShareOpen(true)}>
+          <IconText>Preview sharing card ↗</IconText>
+        </button>
+        {shareOpen && (
+          <ShareStudyDialog
+            prompt={prompt}
+            onClose={() => setShareOpen(false)}
+          />
+        )}
         <Link
           to={{ pathname: "/prompts", search: archiveContext?.search ?? "" }}
           state={archiveContext ? { archiveReturn: archiveContext } : undefined}

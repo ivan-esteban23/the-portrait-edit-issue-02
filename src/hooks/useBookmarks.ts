@@ -7,7 +7,11 @@ const STORAGE_KEY = "portrait-edit-saved";
 const COLLECTIONS_KEY = "portrait-edit-collections";
 const ACTIVE_COLLECTION_KEY = "portrait-edit-active-collection";
 
-export const DEFAULT_COLLECTIONS = ["Default", "Studio Lighting", "Noir & Grain"];
+export const DEFAULT_COLLECTIONS = [
+  "Default",
+  "Studio Lighting",
+  "Noir & Grain",
+];
 
 export function useBookmarks() {
   const [activeCollection, setActiveCollectionState] = useState<string>(() => {
@@ -18,37 +22,39 @@ export function useBookmarks() {
     }
   });
 
-  const [collections, setCollections] = useState<Record<string, string[]>>(() => {
-    try {
-      const stored = localStorage.getItem(COLLECTIONS_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          return parsed;
+  const [collections, setCollections] = useState<Record<string, string[]>>(
+    () => {
+      try {
+        const stored = localStorage.getItem(COLLECTIONS_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+            return parsed;
+          }
         }
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
-    }
 
-    // Initialize from portrait-edit-saved if available
-    let initialSaved: string[] = [];
-    try {
-      const legacy = localStorage.getItem(STORAGE_KEY);
-      if (legacy) {
-        const parsed = JSON.parse(legacy);
-        if (Array.isArray(parsed)) initialSaved = parsed;
+      // Initialize from portrait-edit-saved if available
+      let initialSaved: string[] = [];
+      try {
+        const legacy = localStorage.getItem(STORAGE_KEY);
+        if (legacy) {
+          const parsed = JSON.parse(legacy);
+          if (Array.isArray(parsed)) initialSaved = parsed;
+        }
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
-    }
 
-    return {
-      Default: initialSaved,
-      "Studio Lighting": [],
-      "Noir & Grain": [],
-    };
-  });
+      return {
+        Default: initialSaved,
+        "Studio Lighting": [],
+        "Noir & Grain": [],
+      };
+    },
+  );
 
   const collectionsRef = useRef(collections);
   collectionsRef.current = collections;
@@ -63,9 +69,11 @@ export function useBookmarks() {
     (nextCols: Record<string, string[]>, nextActive: string) => {
       collectionsRef.current = nextCols;
       setCollections(nextCols);
-      window.dispatchEvent(new CustomEvent(BOOKMARKS_CHANGED, {
-        detail: { collections: nextCols, activeCollection: nextActive },
-      }));
+      window.dispatchEvent(
+        new CustomEvent(BOOKMARKS_CHANGED, {
+          detail: { collections: nextCols, activeCollection: nextActive },
+        }),
+      );
       try {
         localStorage.setItem(COLLECTIONS_KEY, JSON.stringify(nextCols));
         localStorage.setItem(ACTIVE_COLLECTION_KEY, nextActive);
@@ -84,9 +92,11 @@ export function useBookmarks() {
   const setActiveCollection = useCallback(
     (name: string) => {
       setActiveCollectionState(name);
-      window.dispatchEvent(new CustomEvent(BOOKMARKS_CHANGED, {
-        detail: { collections, activeCollection: name },
-      }));
+      window.dispatchEvent(
+        new CustomEvent(BOOKMARKS_CHANGED, {
+          detail: { collections, activeCollection: name },
+        }),
+      );
       try {
         localStorage.setItem(ACTIVE_COLLECTION_KEY, name);
         localStorage.setItem(
@@ -132,7 +142,10 @@ export function useBookmarks() {
       const nextList = removing
         ? currentList.filter((item) => item !== id)
         : [...currentList, id];
-      persistCollections({ ...latest, [activeCollection]: nextList }, activeCollection);
+      persistCollections(
+        { ...latest, [activeCollection]: nextList },
+        activeCollection,
+      );
       if (removing) {
         window.dispatchEvent(
           new CustomEvent(BOOKMARK_REMOVED, {
@@ -195,7 +208,9 @@ export function useBookmarks() {
         .map(([k, v]) => `${k} ${v}`)
         .join(" ");
 
-      lines.push(`## ${String(idx + 1).padStart(2, "0")}. ${p.title} (Study #${p.studyNumber})`);
+      lines.push(
+        `## ${String(idx + 1).padStart(2, "0")}. ${p.title} (Study #${p.studyNumber})`,
+      );
       lines.push(`- **Issue:** Issue 02 · Page ${p.page}`);
       lines.push(`- **Model:** ${p.model || "Midjourney"}`);
       lines.push(`- **Tags:** ${p.tags.map((t) => `#${t}`).join(" ")}`);
@@ -221,7 +236,9 @@ export function useBookmarks() {
       lines.push(``);
     });
 
-    const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+    const blob = new Blob([lines.join("\n")], {
+      type: "text/markdown;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", url);
@@ -251,7 +268,12 @@ export function useBookmarks() {
       }
     };
     const syncLocal = (event: Event) => {
-      const detail = (event as CustomEvent<{ collections: Record<string, string[]>; activeCollection: string }>).detail;
+      const detail = (
+        event as CustomEvent<{
+          collections: Record<string, string[]>;
+          activeCollection: string;
+        }>
+      ).detail;
       collectionsRef.current = detail.collections;
       setCollections(detail.collections);
       setActiveCollectionState(detail.activeCollection);
@@ -264,7 +286,24 @@ export function useBookmarks() {
     };
   }, []);
 
+  const replaceCollections = useCallback(
+    (next: Record<string, string[]>, active = activeCollection) => {
+      const safeActive = Object.hasOwn(next, active) ? active : "Default";
+      try {
+        localStorage.setItem(COLLECTIONS_KEY, JSON.stringify(next));
+      } catch {
+        return false;
+      }
+      setActiveCollectionState(safeActive);
+      persistCollections(next, safeActive);
+      return true;
+    },
+    [activeCollection, persistCollections],
+  );
+
   return {
+    collectionData: collections,
+    replaceCollections,
     savedIds,
     isSaved,
     toggleSaved,

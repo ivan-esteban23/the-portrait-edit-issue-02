@@ -252,11 +252,11 @@ describe("useBookmarks", () => {
       "Studio Lighting": ["study-c"],
       "Noir & Grain": [],
     };
+    storageMock._store.set("portrait-edit-collections", JSON.stringify(data));
     storageMock._store.set(
-      "portrait-edit-collections",
-      JSON.stringify(data),
+      "portrait-edit-active-collection",
+      "Studio Lighting",
     );
-    storageMock._store.set("portrait-edit-active-collection", "Studio Lighting");
 
     const { result } = renderHook(() => useBookmarks());
 
@@ -283,13 +283,14 @@ describe("useBookmarks", () => {
   });
 
   it("ignores legacy data when collections key already exists", () => {
-    storageMock._store.set(
-      "portrait-edit-saved",
-      JSON.stringify(["study-a"]),
-    );
+    storageMock._store.set("portrait-edit-saved", JSON.stringify(["study-a"]));
     storageMock._store.set(
       "portrait-edit-collections",
-      JSON.stringify({ Default: ["study-b"], "Studio Lighting": [] , "Noir & Grain": [] }),
+      JSON.stringify({
+        Default: ["study-b"],
+        "Studio Lighting": [],
+        "Noir & Grain": [],
+      }),
     );
 
     const { result } = renderHook(() => useBookmarks());
@@ -322,5 +323,50 @@ describe("useBookmarks", () => {
     });
 
     expect(result.current.savedIds).toEqual(["study-a", "study-b"]);
+  });
+});
+
+describe("saved workspace compatibility", () => {
+  it("replaces and restores collections while keeping existing consumers synchronized", () => {
+    localStorage.setItem(
+      "portrait-edit-collections",
+      JSON.stringify({ Default: ["study-a"], Existing: ["study-b"] }),
+    );
+    localStorage.setItem("portrait-edit-active-collection", "Existing");
+    const first = renderHook(() => useBookmarks()),
+      second = renderHook(() => useBookmarks());
+    const snapshot = first.result.current.collectionData;
+    act(() => {
+      expect(
+        first.result.current.replaceCollections({
+          ...snapshot,
+          New: ["study-a", "study-c"],
+        }),
+      ).toBe(true);
+    });
+    expect(second.result.current.collectionData.New).toEqual([
+      "study-a",
+      "study-c",
+    ]);
+    expect(second.result.current.savedIds).toEqual(["study-b"]);
+    act(() => {
+      first.result.current.replaceCollections(snapshot);
+    });
+    expect(second.result.current.collectionData).toEqual(snapshot);
+    expect(
+      JSON.parse(localStorage.getItem("portrait-edit-collections")!),
+    ).toEqual(snapshot);
+  });
+  it("reports failed storage without changing the current collection", () => {
+    const { result } = renderHook(() => useBookmarks());
+    storageMock.setItem.mockImplementation(() => {
+      throw new Error("Quota exceeded");
+    });
+    act(() => {
+      expect(result.current.replaceCollections({ Default: ["study-a"] })).toBe(
+        false,
+      );
+    });
+    expect(result.current.savedIds).toEqual([]);
   });
 });

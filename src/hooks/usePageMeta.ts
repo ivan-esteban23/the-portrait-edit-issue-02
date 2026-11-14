@@ -101,6 +101,8 @@ export function usePageMeta({
     const pageUrl = absolutePageUrl(path, siteUrl);
 
     document.title = title;
+    metaElement("name", "robots").content =
+      path === "/saved" ? "noindex,follow" : "index,follow";
     descriptionMeta.content = pageDescription;
     ogTitleMeta.content = title;
     ogDescriptionMeta.content = pageDescription;
@@ -109,6 +111,8 @@ export function usePageMeta({
         ? absoluteImageUrl(image)
         : new URL("social-card.png", siteUrl).href;
     ogImageMeta.content = shareImage;
+    metaElement("property", "og:image:alt").content = title;
+    metaElement("name", "twitter:image:alt").content = title;
     metaElement("name", "twitter:title").content = title;
     metaElement("name", "twitter:description").content = pageDescription;
     metaElement("name", "twitter:image").content = shareImage;
@@ -117,7 +121,11 @@ export function usePageMeta({
       height: "630",
     })) {
       const element = metaElement("property", `og:image:${key}`);
-      if (shareImage.endsWith("/social-card.png")) element.content = value;
+      if (
+        shareImage.endsWith("/social-card.png") ||
+        /\/social\/studies\/[^/]+\.jpg$/.test(shareImage)
+      )
+        element.content = value;
       else element.remove();
     }
     let jsonLd = document.querySelector<HTMLScriptElement>(

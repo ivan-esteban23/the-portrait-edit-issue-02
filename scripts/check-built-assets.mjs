@@ -74,9 +74,9 @@ console.log(
 );
 const titles = new Set();
 const canonicals = new Set();
-for (const file of readdirSync("dist", { recursive: true }).map((f) => f.replaceAll("\\", "/")).filter(
-  (f) => f === "index.html" || f.endsWith("/index.html"),
-)) {
+for (const file of readdirSync("dist", { recursive: true })
+  .map((f) => f.replaceAll("\\", "/"))
+  .filter((f) => f === "index.html" || f.endsWith("/index.html"))) {
   const source = readFileSync(`dist/${file}`, "utf8");
   assert.ok(!source.includes("%BASE_URL%"), `${file}: unresolved base`);
   const page = new JSDOM(source, { url: site.href });
@@ -96,7 +96,8 @@ for (const file of readdirSync("dist", { recursive: true }).map((f) => f.replace
   );
   assert.ok(!titles.has(doc.title), `${file}: duplicate title`);
   titles.add(doc.title);
-  canonicals.add(canonical);
+  if (!doc.querySelector('meta[name="robots"]')?.content.includes("noindex"))
+    canonicals.add(canonical);
   const description = doc.querySelector('meta[name="description"]').content;
   const image = doc.querySelector('meta[property="og:image"]').content;
   for (const [key, value] of Object.entries({

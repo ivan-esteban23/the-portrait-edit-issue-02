@@ -57,6 +57,9 @@ for (const [route, meta] of routeMetadata) {
     node.content = value;
   };
   setMeta("name", "description", meta.description);
+  if (meta.noindex) setMeta("name", "robots", "noindex,follow");
+  setMeta("property", "og:image:alt", meta.title);
+  setMeta("name", "twitter:image:alt", meta.title);
   doc.querySelector('link[rel="canonical"]').href = url;
   for (const [key, value] of Object.entries({
     title: meta.title,
@@ -85,6 +88,8 @@ for (const [route, meta] of routeMetadata) {
   else if (meta.issue) fallback = staticReader(meta.issue, base, meta.page);
   else if (route === "prompts")
     fallback = `<noscript><main class="noscript-main"><h1>${meta.title}</h1><p>${meta.description}</p><ul>${studies.map((s) => `<li><a href="${base}prompts/${s.id}/">Study #${s.studyNumber}: ${escapeHtml(s.title)}</a></li>`).join("")}</ul></main></noscript>`;
+  else if (route === "saved")
+    fallback = `<noscript><main class="noscript-main"><h1>Saved collections</h1><p>Saved collections are stored in this browser and require JavaScript.</p><a href="${base}prompts/">Browse the portrait archive</a></main></noscript>`;
   else if (route === "about")
     fallback = `<noscript><main class="noscript-main"><h1>${meta.title}</h1><p>${meta.description}</p><p>The Portrait Edit is an independent editorial magazine and working archive of AI portrait prompts. Each study preserves its published prompt, reference, and notes.</p><a href="${base}prompts/">Explore the prompt archive</a></main></noscript>`;
   if (fallback) doc.querySelector("noscript").outerHTML = fallback;

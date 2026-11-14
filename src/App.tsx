@@ -56,6 +56,9 @@ const Archive = lazy(() =>
 const StudyPage = lazy(() =>
   import("./pages/StudyPage").then((m) => ({ default: m.StudyPage })),
 );
+const Saved = lazy(() =>
+  import("./pages/SavedPage").then((m) => ({ default: m.SavedPage })),
+);
 const About = lazy(() =>
   import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })),
 );
@@ -151,7 +154,10 @@ export default function App() {
   const readerRoute = /^\/issues\/[^/]+\/pages\/\d+\/?$/.test(
     location.pathname,
   );
-  const focused = readerRoute && focus;
+  const promptReading =
+    /^\/prompts\/[^/]+\/?$/.test(location.pathname) &&
+    new URLSearchParams(location.search).get("reading") === "1";
+  const focused = (readerRoute && focus) || promptReading;
 
   // Global Cmd+K / Ctrl+K listener
   useEffect(() => {
@@ -282,6 +288,13 @@ export default function App() {
               {t("Archive")}
             </NavLink>
             <NavLink
+              to="/saved"
+              className={({ isActive }) => (isActive ? "is-active" : undefined)}
+            >
+              Saved
+            </NavLink>
+            <NavLink
+              data-navigation-about
               to="/about"
               className={({ isActive }) => (isActive ? "is-active" : undefined)}
             >
@@ -347,6 +360,7 @@ export default function App() {
                 element={<Reader focus={focus} setFocus={setFocus} />}
               />
               <Route path="/prompts" element={<Archive />} />
+              <Route path="/saved" element={<Saved />} />
               <Route path="/prompts/:id" element={<StudyPage />} />
               <Route path="/about" element={<About />} />
               <Route path="*" element={<NotFound />} />

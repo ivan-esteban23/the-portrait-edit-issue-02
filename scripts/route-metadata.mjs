@@ -12,6 +12,16 @@ const current = issues.find((i) => i.slug === "the-prompt-issue");
 const card = "social-card.png";
 export const routeMetadata = new Map([
   [
+    "saved",
+    {
+      title: "Saved collections | The Portrait Edit",
+      description:
+        "Revisit, organize and compare your saved portrait studies. Collections stay in this browser.",
+      image: card,
+      noindex: true,
+    },
+  ],
+  [
     "",
     {
       title: "The Portrait Edit — Issue 02",
@@ -66,7 +76,7 @@ for (const study of studies)
   routeMetadata.set(`prompts/${study.id}`, {
     title: `Study #${study.studyNumber}: ${study.title} | The Portrait Edit`,
     description: truncateMetaDescription(study.prompt),
-    image: study.referenceImage,
+    image: `social/studies/${study.id}.jpg`,
     study,
     issue: issues.find((i) => i.slug === study.issueSlug),
   });
