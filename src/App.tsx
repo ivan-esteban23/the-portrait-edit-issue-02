@@ -25,6 +25,12 @@ import { useLanguage } from "./i18n/LanguageProvider";
 import { useLastReadPage } from "./hooks/useReadingProgress";
 import { readArchiveContext } from "./lib/archiveNavigation";
 
+const StudySearch = lazy(() =>
+  import("./components/StudySearch").then((module) => ({
+    default: module.StudySearch,
+  })),
+);
+
 const CommandPalette = lazy(() =>
   import("./components/CommandPalette").then((m) => ({
     default: m.CommandPalette,
@@ -70,6 +76,9 @@ export default function App() {
     ? readArchiveContext(location.state?.archiveContext)
     : null;
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [studySearch, setStudySearch] = useState<{
+    initialQuery?: string;
+  } | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [bookmarkToast, setBookmarkToast] = useState<{
     id: string;
@@ -149,12 +158,28 @@ export default function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
         e.preventDefault();
-        setCommandPaletteOpen((prev) => !prev);
+        if (readerRoute) {
+          setStudySearch(null);
+          setCommandPaletteOpen((prev) => !prev);
+        } else {
+          setCommandPaletteOpen(false);
+          setStudySearch((previous) => (previous ? null : {}));
+        }
       }
     };
+    const openStudySearch = (event: Event) => {
+      setCommandPaletteOpen(false);
+      setStudySearch({
+        initialQuery: (event as CustomEvent<{ query?: string }>).detail?.query,
+      });
+    };
+    window.addEventListener("portrait:search-studies", openStudySearch);
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("portrait:search-studies", openStudySearch);
+    };
+  }, [readerRoute]);
 
   const cycleTheme = useCallback(() => {
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
@@ -267,9 +292,19 @@ export default function App() {
             <button
               type="button"
               className="masthead-search-trigger"
-              onClick={() => setCommandPaletteOpen(true)}
-              title={t("Search commands, pages, and prompts (⌘K / Ctrl+K)")}
-              aria-label={t("Search ⌘K, open command palette")}
+              onClick={() =>
+                readerRoute ? setCommandPaletteOpen(true) : setStudySearch({})
+              }
+              title={
+                readerRoute
+                  ? t("Search commands, pages, and prompts (⌘K / Ctrl+K)")
+                  : "Search studies (⌘K / Ctrl+K)"
+              }
+              aria-label={
+                readerRoute
+                  ? t("Search ⌘K, open command palette")
+                  : "Search ⌘K, find studies"
+              }
               aria-keyshortcuts="Control+K Meta+K"
             >
               <Icon name="search" size={15} />
@@ -354,10 +389,27 @@ export default function App() {
         onDismiss={dismissBookmarkToast}
       />
 
+      {studySearch && (
+        <Suspense fallback={null}>
+          <StudySearch
+            initialQuery={studySearch.initialQuery}
+            onClose={() => setStudySearch(null)}
+            onOpenCommands={() => {
+              setStudySearch(null);
+              setCommandPaletteOpen(true);
+            }}
+          />
+        </Suspense>
+      )}
+
       {/* Global Command Palette */}
       {commandPaletteOpen && (
         <Suspense fallback={null}>
           <CommandPalette
+            onOpenStudySearch={() => {
+              setCommandPaletteOpen(false);
+              setStudySearch({});
+            }}
             isOpen={commandPaletteOpen}
             onClose={() => setCommandPaletteOpen(false)}
             currentTheme={theme}

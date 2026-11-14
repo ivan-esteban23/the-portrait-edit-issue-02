@@ -9,8 +9,10 @@ type ImageKind =
   | "detail"
   | "reader"
   | "related"
-  | "connection";
+  | "connection"
+  | "search";
 const sizes: Record<ImageKind, string> = {
+  search: "64px",
   connection:
     "(max-width: 767px) calc(100vw - 40px), (max-width: 1320px) calc((100vw - 128px) / 3), 400px",
   hero: "(max-width: 767px) calc(100vw - 40px), (max-width: 1320px) calc((100vw - 136px) * .524), 620px",

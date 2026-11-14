@@ -12,6 +12,7 @@ import {
 } from "@/lib/soundscape";
 
 export interface CommandPaletteProps {
+  onOpenStudySearch?: () => void;
   isOpen: boolean;
   onClose: () => void;
   currentTheme?: Theme;
@@ -34,6 +35,7 @@ interface PaletteItem {
 
 export function CommandPalette({
   isOpen,
+  onOpenStudySearch,
   onClose,
   onToggleTheme,
   onToggleSpread,
@@ -409,6 +411,7 @@ export function CommandPalette({
             }}
           >
             <Dialog.Title className="sr-only">Command palette</Dialog.Title>
+            {onOpenStudySearch && <button type="button" className="palette-portrait-search" onKeyDown={(event) => { if (event.key === "Enter") event.stopPropagation(); }} onClick={onOpenStudySearch}>Search portraits ↗</button>}
         <div className="palette-input-wrap">
           <Icon name="search" size={20} className="palette-search-icon" />
           <input

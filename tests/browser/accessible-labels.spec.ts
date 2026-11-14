@@ -11,7 +11,7 @@ test("homepage controls expose names matching their visible labels", async ({
     await expect(cover).toHaveAccessibleName("Issue 02 — The Prompt Issue ↗");
     await expect(cover).toHaveAttribute("href", /pages\/1$/);
     const search = page.getByRole("button", {
-      name: "Search ⌘K, open command palette",
+      name: "Search ⌘K, find studies",
     });
     await expect(search).toHaveAttribute(
       "aria-keyshortcuts",

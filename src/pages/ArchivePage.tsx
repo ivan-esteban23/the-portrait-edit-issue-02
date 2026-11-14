@@ -26,7 +26,7 @@ import { generateMarkdownDossier, downloadFile } from "@/lib/dossier";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { useMedia } from "@/hooks/useReader";
 import { useLanguage } from "@/i18n/LanguageProvider";
-import { matchesArchiveSearch } from "@/lib/archiveSearch";
+import { matchesArchiveSearch, matchesArchiveScope } from "@/lib/archiveSearch";
 import { readArchiveContext } from "@/lib/archiveNavigation";
 
 import { EditorialSelections } from "@/components/EditorialSelections";
@@ -312,28 +312,15 @@ export function ArchivePage() {
 
   const filtered = useMemo(() => {
     return prompts.filter((p) => {
-      if (selection && !selection.numbers.includes(p.studyNumber)) return false;
-      if (savedOnly && !isSaved(p.id)) return false;
-      if (tag && !p.tags.includes(tag)) return false;
-      if (model) {
-        const normalizedModel = p.model?.trim();
-        const recordedModel =
-          normalizedModel && normalizedModel !== "Unspecified"
-            ? normalizedModel
-            : "Unspecified";
-        if (recordedModel !== model) return false;
-      }
-      if (aspectRatio) {
-        const pAr =
-          p.parameters?.["ar"] ||
-          p.parameters?.["--ar"] ||
-          parsedParameters.get(p.id)?.parameters.get("ar");
-        const recorded =
-          pAr && String(pAr).trim() !== "Unspecified"
-            ? String(pAr).trim()
-            : NOT_RECORDED;
-        if (recorded !== aspectRatio) return false;
-      }
+      if (
+        !matchesArchiveScope(
+          p,
+          search,
+          isSaved,
+          parsedParameters.get(p.id)?.parameters.get("ar"),
+        )
+      )
+        return false;
       if (!matchesArchiveSearch(p, query)) return false;
       return true;
     });
@@ -346,6 +333,7 @@ export function ArchivePage() {
     query,
     parsedParameters,
     selection,
+    search,
   ]);
 
   function filter(key: string, value: string) {
@@ -428,16 +416,32 @@ export function ArchivePage() {
         </p>
       </header>
       <form className="archive-filters" onSubmit={(e) => e.preventDefault()}>
-        <label>
-          Search
-          <input
-            ref={searchInput}
-            type="search"
-            placeholder={t("Light, texture, study number…")}
-            value={query}
-            onChange={(e) => filter("q", e.target.value)}
-          />
-        </label>
+        <div className="archive-search-entry">
+          <label>
+            Search
+            <input
+              ref={searchInput}
+              type="search"
+              placeholder={t("Light, texture, study number…")}
+              value={query}
+              onChange={(e) => filter("q", e.target.value)}
+            />
+          </label>
+          <button
+            type="button"
+            className="archive-search-suggestions"
+            aria-haspopup="dialog"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("portrait:search-studies", {
+                  detail: { query },
+                }),
+              )
+            }
+          >
+            Suggestions ↗
+          </button>
+        </div>
         <div className="archive-disclosures">
           <details className="archive-disclosure editorial-disclosure">
             <summary>Explore themes</summary>

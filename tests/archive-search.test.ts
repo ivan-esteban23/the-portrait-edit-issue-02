@@ -75,3 +75,24 @@ describe("archive navigation state", () => {
     }
   });
 });
+
+describe("suggestion search syntax", () => {
+  it("matches all words across a record, supports quoted phrases, and recognizes padded study numbers", () => {
+    const study = prompts.find((p) => p.studyNumber === 4)!;
+    for (const query of [
+      "004",
+      "study #4",
+      "  SOFT   LIGHT  ",
+      '"soft, even"',
+      "graphic ponytail",
+    ])
+      expect(matchesArchiveSearch(study, query)).toBe(true);
+    expect(
+      prompts
+        .filter((p) => matchesArchiveSearch(p, "004"))
+        .map((p) => p.studyNumber),
+    ).toEqual([4]);
+    expect(matchesArchiveSearch(study, '"sharp, even"')).toBe(false);
+    expect(matchesArchiveSearch(study, "ponytail nonexistent")).toBe(false);
+  });
+});
